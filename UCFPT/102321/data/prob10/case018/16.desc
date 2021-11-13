@@ -1,0 +1,6 @@
+
++ := target position where a church is already placed
+
+ 0|   M
+ 1|   C
+ 2|MCC+

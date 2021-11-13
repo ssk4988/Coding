@@ -1,0 +1,29 @@
+14
+{Apple,Grape,Orange,Banana,Pear}
+{ORANGE,GRAPE}
+{Apple, Grape, Pear, Orange, GrapeFruit, Apple}
+{ORANGE, BANANA, GRAPE, Grape, Grape, Grape, grape}
+{ Grapefruit }
+{Grape}
+{Door,Shelf,Knob,Window}
+{Door,Shelf,Knob,Window}
+{}
+{ EMPTY}
+{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,28,19,20}
+{21, 24}
+{Apple, Grape, Pear, Orange, GrapeFruit, Apple}
+{ORANGE, GrapeFruit, GRAPE, Grape, Grape, Grape, grape}
+{1Apple,1Grape,1Orange,1Banana,1Pear}
+{1Orange      }
+{2Apple,  2Grape,  2Orange,  2Banana,  2Pear}
+{2Orange,  2Grape}
+{3Apple,  3Grape, 3Orange, 3Banana, 3Grape}
+{3ORANGE, 3GRAPE}
+{4Apple,  4Grape, 4Orange, 4Banana, 4Pear}
+{4ORANGE, 4GRAPE, 4Grape, 4Grape,4Grape}
+{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,28,19,20}
+{1, 4}
+{a,b,c,a,b,c}
+{c,a}
+{1,2,3,4}
+{1,2,3,1,2,3}
