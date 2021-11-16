@@ -1,3 +1,5 @@
+package solutions.prob4;
+
 // Arup Guha
 // 2/21/2015
 // Solution to 2015 Mercer Problem #4: Find Your Easter Bunny Name
@@ -14,15 +16,15 @@ public class prob4 {
 		String[] last = new String[26];
 
 		// Read in all the code names.
-		for (int i=0; i<26; i++)
+		for (int i = 0; i < 26; i++)
 			first[i] = stdin.nextLine().substring(2);
-		for (int i=0; i<26; i++)
+		for (int i = 0; i < 26; i++)
 			last[i] = stdin.nextLine().substring(2);
 
 		int numCases = Integer.parseInt(stdin.nextLine());
 
 		// Go through each case.
-		for (int loop=0; loop<numCases; loop++) {
+		for (int loop = 0; loop < numCases; loop++) {
 
 			// Get this case.
 			String name = stdin.nextLine();
@@ -31,8 +33,8 @@ public class prob4 {
 			String origLast = tok.nextToken();
 
 			// This is what they want - just sub in.
-			System.out.println(name+" = "+first[origFirst.charAt(0)-'A']+" "+last[origLast.charAt(0)-'A']);
+			System.out.println(name + " = " + first[origFirst.charAt(0) - 'A'] + " " + last[origLast.charAt(0) - 'A']);
 		}
-
+		stdin.close();
 	}
 }

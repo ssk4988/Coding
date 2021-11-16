@@ -1,3 +1,5 @@
+package solutions.prob5;
+
 // Arup Guha
 // 1/19/2015
 // Solution for 2015 Mercer Programming Contest Problem #5: Triathlon
@@ -12,7 +14,7 @@ public class prob5 {
 		int numCases = stdin.nextInt();
 
 		// Go through each case.
-		for (int loop=1; loop<=numCases; loop++) {
+		for (int loop = 1; loop <= numCases; loop++) {
 
 			// Read data for this race.
 			int n = stdin.nextInt();
@@ -22,7 +24,7 @@ public class prob5 {
 
 			// Read in each racer.
 			athlete[] racers = new athlete[n];
-			for (int i=0; i<n; i++) {
+			for (int i = 0; i < n; i++) {
 				String name = stdin.next();
 				double swimSpeed = stdin.nextDouble();
 				double bikeSpeed = stdin.nextDouble();
@@ -35,10 +37,11 @@ public class prob5 {
 			Arrays.sort(racers);
 
 			// Print them.
-			System.out.println("Triathlon #"+loop);
-			for (int i=0; i<n; i++)
+			System.out.println("Triathlon #" + loop);
+			for (int i = 0; i < n; i++)
 				System.out.println(racers[i].display());
 		}
+		stdin.close();
 	}
 }
 
@@ -60,29 +63,33 @@ class athlete implements Comparable<athlete> {
 
 	// Just add up the times and use distance = rate x time.
 	public void setSeconds(int swimLength, int bikeLength, int runLength) {
-		seconds = swimLength/swimSpeed + bikeLength/bikeSpeed + runLength/runSpeed;
+		seconds = swimLength / swimSpeed + bikeLength / bikeSpeed + runLength / runSpeed;
 
-		// Check to make sure spec is followed - fractional part must be greater than .01.
-		if (seconds - (int)seconds <= .01) System.out.println("ERROR - too close to second boundary!!!");
+		// Check to make sure spec is followed - fractional part must be greater than
+		// .01.
+		if (seconds - (int) seconds <= .01)
+			System.out.println("ERROR - too close to second boundary!!!");
 	}
 
-	// We can get away with this since no two competitors will have the same time when their
+	// We can get away with this since no two competitors will have the same time
+	// when their
 	// race times in seconds are truncated.
 	public int compareTo(athlete other) {
 
 		// Check to make sure spec is followed - no identical finish times when rounded.
-		if (((int)this.seconds) - ((int)other.seconds) == 0) System.out.println("ERROR - two racers round to same time.");
+		if (((int) this.seconds) - ((int) other.seconds) == 0)
+			System.out.println("ERROR - two racers round to same time.");
 
-		return ((int)this.seconds) - ((int)other.seconds);
+		return ((int) this.seconds) - ((int) other.seconds);
 	}
 
 	// Returns a string storing the line to be displayed for this competitor.
 	public String display() {
-		int wholeSeconds = (int)seconds;
-		int sec = wholeSeconds%60;
+		int wholeSeconds = (int) seconds;
+		int sec = wholeSeconds % 60;
 		wholeSeconds /= 60;
-		int min = wholeSeconds%60;
-		int hr = wholeSeconds/60;
-		return name + " " + hr + " hour(s) "+ min + " minute(s) "+sec+" second(s)";
+		int min = wholeSeconds % 60;
+		int hr = wholeSeconds / 60;
+		return name + " " + hr + " hour(s) " + min + " minute(s) " + sec + " second(s)";
 	}
 }

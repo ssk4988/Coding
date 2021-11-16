@@ -17,14 +17,14 @@ public class prob4 {
             StringTokenizer tokenizer = new StringTokenizer(in.readLine());
             int m = Integer.parseInt(tokenizer.nextToken());
             int n = Integer.parseInt(tokenizer.nextToken());
-            long[][] canals = new long[m][n];
+            double[][] canals = new double[m][n];
             for (int i = 0; i < m; i++) {
                 tokenizer = new StringTokenizer(in.readLine());
                 for (int j = 0; j < n; j++) {
-                    canals[i][j] = Integer.parseInt(tokenizer.nextToken()) * 2097152;
+                    canals[i][j] = Integer.parseInt(tokenizer.nextToken());
                 }
             }
-            long minTime = -1;
+            double minTime = -1;
             LinkedList<Path> queue = new LinkedList<>();
             queue.addFirst(new Path(0, 0, canals[0][0], 0));
             while (!queue.isEmpty()) {
@@ -47,7 +47,7 @@ public class prob4 {
                     queue.add(c);
                 }
             }
-            System.out.printf("Canal %d: %.3f\n", (count + 1), (float) minTime / 2097152);
+            System.out.printf("Canal %d: %.3f\n", (count + 1), minTime);
         }
 
         in.close();
@@ -57,10 +57,10 @@ public class prob4 {
     public static class Path {
         int x;
         int y;
-        long currentHeight;
-        long time;
+        double currentHeight;
+        double time;
 
-        public Path(int x, int y, long currentHeight, long time) {
+        public Path(int x, int y, double currentHeight, double time) {
             this.x = x;
             this.y = y;
             this.currentHeight = currentHeight;

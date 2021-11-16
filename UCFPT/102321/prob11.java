@@ -26,7 +26,7 @@ public class prob11 {
 
         String ansstr = "";
         for (int i = 0; i < n; i++) {
-            answer[i] += (i + 1);
+            answer[i] += String.format("%03d", (i + 1));
         }
         for (int i = 0; i < n; i++) {
             // place[reverse[i]]

@@ -125,8 +125,8 @@ public class prob8 {
                 c.depth = depth + 1;
                 for (int i = sLen - 1; i > 0; i--) {
                     c.coords[i] = c.coords[i - 1];
-                    int x3 = c.coords[i] / n;
-                    int y3 = c.coords[i] % n;
+                    // int x3 = c.coords[i] / n;
+                    // int y3 = c.coords[i] % n;
                     // System.out.println("insert " + i + " at " + x3 + " " + y3 + " " +
                     // Arrays.toString(c.coords));
                 }

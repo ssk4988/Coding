@@ -1,3 +1,5 @@
+package solutions.prob2;
+
 // Arup Guha
 // 2/21/2015
 // Solution to 2015 Mercer Problem #2: Snowpocalypse
@@ -12,13 +14,15 @@ public class prob2 {
 		int numCases = stdin.nextInt();
 
 		// Go through each case.
-		for (int loop=0; loop<numCases; loop++) {
+		for (int loop = 0; loop < numCases; loop++) {
 
 			// Read input.
 			int inches = stdin.nextInt();
 
 			// Output result, using int div and mod, as stated in the problem.
-			System.out.println((inches/12)+" feet, "+(inches%12)+" inches of snow is the equivalent of "+(inches/10)+" inches of rain");
+			System.out.println((inches / 12) + " feet, " + (inches % 12) + " inches of snow is the equivalent of "
+					+ (inches / 10) + " inches of rain");
 		}
+		stdin.close();
 	}
 }

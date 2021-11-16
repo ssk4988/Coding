@@ -15,7 +15,12 @@ public class prob2 {
         for (int count = 0; count < numTournaments; count++) {
             boolean possible = true;
             int numTeams = Integer.parseInt(in.readLine());
-            int depth = (int) (Math.log(numTeams) / Math.log(2)) + 1;
+            int depth = 1;
+            int tclone = numTeams;
+            while(tclone > 1){
+                tclone /= 2;
+                depth++;
+            }
             int[] places = new int[numTeams * 2 - 1];
             Team[] teams = new Team[numTeams];
             Arrays.fill(places, -1);
@@ -50,12 +55,16 @@ public class prob2 {
             for (int i = 0; i < places.length - 1 && possible; i += 2) {
                 Team team1 = teams[places[i]];
                 Team team2 = teams[places[i + 1]];
+                if (team1.matchwins != 0 && team2.matchwins != 0)
+                    possible = false;
                 Team winner = team1.matchwins == 0 ? team2 : team1;
                 Team loser = team1.matchwins == 0 ? team1 : team2;
                 winner.matchwins--;
                 loser.matchlosses--;
                 winner.wins -= 4;
                 loser.losses -= 4;
+                if (loser.wins >= 4)
+                    possible = false;
                 winner.losses -= loser.wins;
                 loser.wins -= loser.wins;
             }
@@ -64,7 +73,7 @@ public class prob2 {
                     possible = false;
                 }
             }
-            System.out.println("Tournament #" + (count + 1) + ": " + (possible ? "Possible" : "Impossible"));
+            System.out.println("Tournament #" + (count + 1) + ": " + (possible ? "Possible" : "Impossible") + "\n");
             // System.out.println(numTeams + " depth " + depth);
         }
         in.close();

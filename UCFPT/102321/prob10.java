@@ -22,30 +22,30 @@ public class prob10 {
         int[] my = new int[m];
         int[] cx = new int[c];
         int[] cy = new int[c];
-        for(int i = 0; i < m; i++){
+        for (int i = 0; i < m; i++) {
             tokenizer = new StringTokenizer(in.readLine());
             int x = Integer.parseInt(tokenizer.nextToken());
             int y = Integer.parseInt(tokenizer.nextToken());
-            if(!xmap.containsKey(x)){
+            if (!xmap.containsKey(x)) {
                 xmap.put(x, numx);
                 numx++;
             }
-            if(!ymap.containsKey(y)){
+            if (!ymap.containsKey(y)) {
                 ymap.put(y, numy);
                 numy++;
             }
             mx[i] = xmap.get(x);
             my[i] = ymap.get(y);
         }
-        for(int i = 0; i < c; i++){
+        for (int i = 0; i < c; i++) {
             tokenizer = new StringTokenizer(in.readLine());
             int x = Integer.parseInt(tokenizer.nextToken());
             int y = Integer.parseInt(tokenizer.nextToken());
-            if(!xmap.containsKey(x)){
+            if (!xmap.containsKey(x)) {
                 xmap.put(x, numx);
                 numx++;
             }
-            if(!ymap.containsKey(y)){
+            if (!ymap.containsKey(y)) {
                 ymap.put(y, numy);
                 numy++;
             }
@@ -56,42 +56,47 @@ public class prob10 {
         int[] mnumy = new int[numy];
         int[] cnumx = new int[numx];
         int[] cnumy = new int[numy];
-        for(int i =0; i < mx.length; i++){
+        for (int i = 0; i < mx.length; i++) {
             mnumx[mx[i]]++;
-        }
-        for(int i = 0; i < my.length; i++){
             mnumy[my[i]]++;
         }
-        int[] cindexes = new int[c];
-        for(int i = 0; i < c; i++){
-            if(mnumx[cx[i]] + mnumy[cy[i]] == 1){
+        Set<Integer> cindices = new HashSet<>();
+        for (int i = 0; i < c; i++) {
+            if (mnumx[cx[i]] < 2 && mnumy[cy[i]] < 2) {
                 cnumx[cx[i]]++;
                 cnumy[cy[i]]++;
             }
-            cindexes[i] = 2000 * cx[i] + cy[i];
+
+            cindices.add((cx[i] << 6) + cy[i]);
         }
-        Arrays.sort(cindexes);
         int max = -1;
         int besti = -1;
         int bestj = -1;
         Map<Integer, Integer> reversexmap = new HashMap<>();
         Map<Integer, Integer> reverseymap = new HashMap<>();
-        for(Map.Entry<Integer, Integer> entry : xmap.entrySet()){
+        for (Map.Entry<Integer, Integer> entry : xmap.entrySet()) {
             reversexmap.put(entry.getValue(), entry.getKey());
         }
-        for(Map.Entry<Integer, Integer> entry : ymap.entrySet()){
+        for (Map.Entry<Integer, Integer> entry : ymap.entrySet()) {
             reverseymap.put(entry.getValue(), entry.getKey());
         }
-        for(int i = 0; i < cnumx.length; i++){
-            for(int j = 0; j < cnumy.length; j++){
-                int t = cnumx[i] + cnumy[j];
-                int cindex = i * 2000 + j;
-                int index = Arrays.binarySearch(cindexes, cindex);
-                if(index >= 0){
-                    t--;
+        for (int i = 0; i < cnumx.length; i++) {
+            for (int j = 0; j < cnumy.length; j++) {
+                int t = 0;
+                if (mnumx[i] == 1) {
+                    t += cnumx[i];
                 }
-                //System.out.println(reversexmap.get(i) + " " + reverseymap.get(j) + " " + t);
-                if(t > max){
+                if (mnumy[j] == 1) {
+                    t += cnumy[j];
+                }
+                if (mnumx[i] == 1 && mnumy[j] == 1) {
+                    if (cindices.contains((i << 6) + j)) {
+                        t--;
+                    }
+                }
+
+                // System.out.println(reversexmap.get(i) + " " + reverseymap.get(j) + " " + t);
+                if (t > max) {
                     max = t;
                     besti = i;
                     bestj = j;

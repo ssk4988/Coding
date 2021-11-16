@@ -10,37 +10,37 @@ public class prob9 {
             StringTokenizer tokenizer = new StringTokenizer(in.readLine());
             int numRows = Integer.parseInt(tokenizer.nextToken());
             int numTrees = Integer.parseInt(tokenizer.nextToken());
-            long[] widths = new long[numRows];
+            double[] widths = new double[numRows];
             tokenizer = new StringTokenizer(in.readLine());
             for (int i = 0; i < numRows; i++) {
-                widths[i] = (long) (Double.parseDouble(tokenizer.nextToken()) * 10000);
+                widths[i] = Double.parseDouble(tokenizer.nextToken());
             }
             // System.out.println(Arrays.toString(widths));
-            long low = -1;
-            long high = 1000000 * 10000;
+            double low = 0;
+            double high = 1000000;
             // low = high;
-            while (low < high) {
-                long mid = low + (high - low + 1) / 2;
+            while ((high - low) > 1e-8) {
+                double mid = (low + high) / 2;
                 boolean solve = solve(widths, mid, numTrees);
                 // System.out.println(low + " " + mid + " " + high + " " + solve);
                 if (solve) {
                     low = mid;
                 } else {
-                    high = mid - 1;
+                    high = mid;
                 }
             }
             // System.out.println(low + " " + high);
             // System.out.println(solve(widths, 1200, numTrees));
-            System.out.printf("%.3f\n", (double) (low / 10) / 1000);
+            System.out.printf("%.3f\n", low);
         }
         in.close();
         // out.close();
     }
 
-    public static boolean solve(long[] widths, long val, int trees) {
+    public static boolean solve(double[] widths, double val, int trees) {
         int left = trees;
         for (int i = 0; i < widths.length; i++) {
-            left -= widths[i] / val - 1;
+            left -= Math.max(0, (int) (widths[i] / val) - 1);
         }
         return left <= 0;
     }
