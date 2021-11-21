@@ -1,5 +1,7 @@
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class d19p2 {
     public static void main(String[] args) throws Exception {
@@ -19,60 +21,47 @@ public class d19p2 {
             }
         }
         Map<Integer, Boolean> defined = new HashMap<>();
-        Map<Integer, ArrayList<String>> rules = new HashMap<>();
+        Map<Integer, String> rulegex = new HashMap<>();
         for (int key : txtRules.keySet()) {
-            rules.put(key, new ArrayList<>());
+            rulegex.put(key, "");
             defined.put(key, false);
         }
         defined.put(aind, true);
         defined.put(bind, true);
-        rules.get(aind).add("a");
-        rules.get(bind).add("b");
+        rulegex.put(aind, "a");
+        rulegex.put(bind, "b");
         for (int key : txtRules.keySet()) {
-            solve(txtRules, defined, rules, key);
+            solve(txtRules, defined, key, rulegex);
         }
         for (int key : defined.keySet()) {
             if (defined.get(key) && (key == 8 || key == 11 || key == 31 || key == 42)) {
-                System.out.println(key + " " + rules.get(key).size());
+                //System.out.println(key + " " + rulegex.get(key));
             }
-            Collections.sort(rules.get(key));
         }
+        String regStr31 = rulegex.get(31);
+        String regStr42 = rulegex.get(42);
+
+        String regStr = "^" + regStr42 + "+" + regStr31 + "+$";
+        System.out.println(regStr);
         System.out.println(defined.keySet().size() + " " + txtRules.keySet().size());
         int numValid = 0;
+        Pattern p42 = Pattern.compile(regStr42);
+        Pattern p31 = Pattern.compile(regStr31);
         while ((line = in.readLine()) != null) {
-            int c42 = 0;
-            int c31 = 0;
-            boolean in42 = true;
-            while (8 * (c42 + c31) < line.length()) {
-                String substr = line.substring(8 * (c42 + c31), 8 * (c42 + c31 + 1));
-                if (in42) {
-                    if (Collections.binarySearch(rules.get(42), substr) >= 0) {
-                        c42++;
-                    } else {
-                        in42 = false;
-                    }
-                }
-                if (!in42) {
-                    if (Collections.binarySearch(rules.get(31), substr) >= 0) {
-                        c31++;
-                    } else {
-                        break;
-                    }
-                }
-            }
-            int use8 = c42 - c31;
-            if (c31 > 0 && use8 > 0 && c42 > 0) {
+            long c42 = p42.matcher(line).results().count();
+            long c31 = p31.matcher(line).results().count();
+            if (Pattern.matches(regStr, line)) {
                 numValid++;
-                // System.out.println(c42 + " " + c31 + " " + use8);
             }
+
         }
         System.out.println(numValid);
 
         in.close();
     }
 
-    public static void solve(Map<Integer, String> txtRules, Map<Integer, Boolean> defined,
-            Map<Integer, ArrayList<String>> rules, int key) {
+    public static void solve(Map<Integer, String> txtRules, Map<Integer, Boolean> defined, int key,
+            Map<Integer, String> rulegex) {
         if (defined.get(key)) {
             return;
         }
@@ -80,7 +69,7 @@ public class d19p2 {
         String rule = txtRules.get(key);
         for (String s : rule.replace(pipe, " ").split(" ")) {
             if (!defined.get(Integer.parseInt(s))) {
-                solve(txtRules, defined, rules, Integer.parseInt(s));
+                solve(txtRules, defined, Integer.parseInt(s), rulegex);
             }
         }
         ArrayList<String> subrules = new ArrayList<>();
@@ -92,25 +81,26 @@ public class d19p2 {
         } else {
             subrules.add(rule);
         }
-        for (String subrule : subrules) {
+        String newRegex = "(";
+        for (int j = 0; j < subrules.size(); j++) {
+            String subrule = subrules.get(j);
             String[] components = subrule.split(" ");
+            if (subrules.size() > 1 && components.length > 1)
+                newRegex += "(";
             int[] componentRules = new int[components.length];
             for (int i = 0; i < components.length; i++) {
                 componentRules[i] = Integer.parseInt(components[i]);
             }
-            ArrayList<String> candidates = new ArrayList<>();
-            candidates.add("");
             for (int i = 0; i < componentRules.length; i++) {
-                ArrayList<String> newCandidates = new ArrayList<>();
-                for (String s : candidates) {
-                    for (String l : rules.get(componentRules[i])) {
-                        newCandidates.add(s + l);
-                    }
-                }
-                candidates = newCandidates;
+                newRegex += rulegex.get(componentRules[i]);
             }
-            rules.get(key).addAll(candidates);
+            if (subrules.size() > 1 && components.length > 1)
+                newRegex += ")";
+            if (subrules.size() > 1 && j < subrules.size() - 1)
+                newRegex += "|";
             defined.put(key, true);
         }
+        newRegex += ")";
+        rulegex.put(key, newRegex);
     }
 }
