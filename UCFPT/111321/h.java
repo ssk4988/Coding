@@ -26,54 +26,56 @@ public class h {
         // System.out.println(primes.size());
         for (int i = 0; i < n; i++) {
             StringTokenizer tokenizer = new StringTokenizer(in.readLine());
-            double f = Double.parseDouble(tokenizer.nextToken());
-            double s = Double.parseDouble(tokenizer.nextToken());
-            int mult = 1000000;
-            long first = Math.round(mult * f);
-            long second = Math.round(mult * s);
-            double aspect = f / s;
-            // System.out.println(first + " " + second);
-            long first2 = first;
-            long second2 = second;
-            int div = 1;
-            for (int p : primes) {
-                while (first % p == 0 && second % p == 0) {
-                    first /= p;
-                    second /= p;
-                    div *= p;
-                }
-            }
-
-            pcycle: for(int p : primes){
-                int n2 = (int)Math.round(p * aspect);
-                int index = Collections.binarySearch(primes, n2);
-                if(index < 0){
-                    index = -index - 1;
-                }
-                ArrayList<Integer> candidates = new ArrayList<>();
-                candidates.add(index);
-                if(index > 0){
-                    candidates.add(index - 1);
-                }
-                if(index < candidates.size() - 1){
-                    candidates.add(index + 1);
-                }
-                
-                for(int c : candidates){
-                    if(Math.abs(f - s * c / p) < 5e-6){
-                        System.out.println(i + " " + c + " " + p + " " + s * c / p + " " + f);
-                    }
-                }
-            }
-
-            if (composite[(int) first] || composite[(int) second]) {
-                System.out.println("impossible");
+            String f = tokenizer.nextToken();
+            String s = tokenizer.nextToken();
+            int mult10 = Math.max(f.split("\\.").length == 1 ? 0 : f.split("\\.")[1].length(),
+                    s.split("\\.").length == 1 ? 0 : s.split("\\.")[1].length());
+            // System.out.println(mult10);
+            if (s.contains(".")) {
+                s = s.replaceFirst("\\.", "");
             } else {
-                System.out.println(first + " " + second);
+                for (int j = 0; j < mult10; j++) {
+                    s += "0";
+                }
             }
+            if (f.contains(".")) {
+                f = f.replaceFirst("\\.", "");
+            } else {
+                for (int j = 0; j < mult10; j++) {
+                    f += "0";
+                }
+            }
+            // System.out.println(f + " " + s);
+            int first = Integer.parseInt(f);
+            int second = Integer.parseInt(s);
+            // System.out.println(first + " " + second);
+            solve(primes, composite, first, second);
         }
 
         in.close();
         out.close();
+    }
+
+    public static void solve(ArrayList<Integer> primes, boolean[] composite, int first, int second) {
+        int f1 = first;
+        int s1 = second;
+        int div = 1;
+        for (int p : primes) {
+            while (f1 % p == 0 && s1 % p == 0) {
+                f1 /= p;
+                s1 /= p;
+                div *= p;
+            }
+        }
+        if (first == second) {
+            System.out.println("2 2");
+            return;
+        }
+        if (!composite[(int) f1] && !composite[(int) s1] && f1 != s1) {
+            System.out.println(f1 + " " + s1);
+        } else {
+            System.out.println("impossible");
+            return;
+        }
     }
 }
