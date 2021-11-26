@@ -15,6 +15,7 @@ public class h {
         int maxNum = 10000000;
         ArrayList<Integer> primes = new ArrayList<>();
         boolean[] composite = new boolean[maxNum + 1];
+        composite[1] = composite[0] = true;
         for (int i = 2; i <= maxNum; i++) {
             if (composite[i])
                 continue;
@@ -48,34 +49,32 @@ public class h {
             // System.out.println(f + " " + s);
             int first = Integer.parseInt(f);
             int second = Integer.parseInt(s);
+            int gcd = gcd(first, second);
+            int f2 = first / gcd;
+            int s2 = second / gcd;
+            if(f2 == s2){
+                System.out.println("2 2");
+            }
+            else if(composite[f2] || composite[s2]){
+                System.out.println("impossible");
+            }
+            else{
+                System.out.println(f2 + " " + s2);
+            }
             // System.out.println(first + " " + second);
-            solve(primes, composite, first, second);
+            //solve(primes, composite, first, second);
         }
 
         in.close();
         out.close();
     }
-
-    public static void solve(ArrayList<Integer> primes, boolean[] composite, int first, int second) {
-        int f1 = first;
-        int s1 = second;
-        int div = 1;
-        for (int p : primes) {
-            while (f1 % p == 0 && s1 % p == 0) {
-                f1 /= p;
-                s1 /= p;
-                div *= p;
-            }
+    public static int gcd(int first, int second){
+        if(first < second){
+            int tmp = first;
+            first = second;
+            second = tmp;
         }
-        if (first == second) {
-            System.out.println("2 2");
-            return;
-        }
-        if (!composite[(int) f1] && !composite[(int) s1] && f1 != s1) {
-            System.out.println(f1 + " " + s1);
-        } else {
-            System.out.println("impossible");
-            return;
-        }
+        if(second == 0) return first;
+        return gcd(second, first % second);
     }
 }
