@@ -1,6 +1,6 @@
 import java.io.*;
 import java.util.*;
- 
+
 public class coincomb2 {
     public static void main(String[] args) throws Exception {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -13,28 +13,18 @@ public class coincomb2 {
             coins[i] = Integer.parseInt(tokenizer.nextToken());
         }
         Arrays.sort(coins);
-        int[][] ways = new int[start + 1][numCoins];
-        Arrays.fill(ways[0], 1);
-        for (int i = 1; i < ways.length; i++) {
-            for (int j = 0; j < numCoins; j++) {
-                int c = coins[j];
-                /*if(j > 0){
-                    ways[i][j] += ways[i][j - 1];
+        long[] ways = new long[start + 1];
+        ways[0] = 1;
+        for (int c : coins) {
+            for (int i = 0; i < ways.length; i++) {
+                if (i - c >= 0) {
+                    ways[i] += ways[i - c];
                 }
-                ways[i][j] += ways[i - c][j];*/
-                //for (int k = 0; k <= j; k++) {
-                //    ways[i][j] += ways[i - c][k];
-                //}
-                if(i - c >= 0){
-                    ways[i][j] += ways[i - c][j];
-                }
-                if(j > 0){
-                    ways[i][j] += ways[i][j - 1];
-                }
-                ways[i][j] %= 1000000007;
+                ways[i] %= 1000000007;
             }
+
         }
-        System.out.println(ways[start][numCoins - 1]);
+        System.out.println(ways[start]);
         in.close();
     }
 }

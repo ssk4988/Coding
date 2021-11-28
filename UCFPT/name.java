@@ -1,9 +1,3 @@
-/*
-ID: ssk49881
-LANG: JAVA
-TASK: name
-*/
-
 import java.io.*;
 import java.util.*;
 
