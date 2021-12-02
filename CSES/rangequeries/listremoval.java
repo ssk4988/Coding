@@ -6,49 +6,72 @@ public class listremoval {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         PrintWriter out = new PrintWriter(System.out);
         int size = Integer.parseInt(in.readLine());
-        int size2 = size + (size & -size);
-        StringTokenizer tokenizer = new StringTokenizer(in.readLine());
+        int size2 = size;
+        while ((size2 & -size2) != size2)
+            size2 += size2 & -size2;
         int[] arr = new int[size];
-        int[] tree = new int[size2 * 2];
-        for(int i = 0; i < size; i++){
+        int[] tree = new int[2 * size2];
+        StringTokenizer tokenizer = new StringTokenizer(in.readLine());
+        for (int i = 0; i < size; i++) {
             arr[i] = Integer.parseInt(tokenizer.nextToken());
+            update(tree, i, 1);
         }
         tokenizer = new StringTokenizer(in.readLine());
         StringBuilder b = new StringBuilder();
-        for(int i = 0; i < size; i++){
-            int ind = Integer.parseInt(tokenizer.nextToken())-1;
-            int before = val(tree, 0, ind);
-
-            System.out.println(ind + " " + before);
-            b.append(arr[ind + before]);
-            if(i < size - 1) b.append(" ");
-            update(tree, ind + before);
+        for (int i = 0; i < size; i++) {
+            int index = Integer.parseInt(tokenizer.nextToken());
+            int low = 0;
+            int high = size - 1;
+            int mid, curr;
+            do {
+                mid = (low + high) / 2;
+                curr = range(tree, 0, mid);
+                System.out.println(curr + " " + index);
+                if(curr < index){
+                    low = mid + 1;
+                }
+                else if(curr > index){
+                    high = mid - 1;
+                }
+                else if(tree[size2 + mid] == 0){
+                    high = mid - 1;
+                }
+                else{
+                    low = high = mid;
+                }
+            } while (low < high);
+            System.out.println(mid);
+            b.append(arr[mid] + " ");
+            update(tree, mid, 0);
         }
-        System.out.println(b);
-
+        System.out.print(b);
 
         in.close();
         out.close();
     }
-    public static int val(int[] tree, int index1, int index2){
-        int size = tree.length / 2;
-        int val = 0;
-        index1 += size;
-        index2 += size;
-        while(index1 <= index2){
-            if(index1 % 2 == 1) val += tree[index1++];
-            if(index2 % 2 == 0) val += tree[index2--];
-            index1 /= 2;
-            index2 /= 2;
-        }
-        return val;
-    }
-    public static void update(int[] tree, int index){
+
+    public static void update(int[] tree, int index, int value) {
         int size = tree.length / 2;
         index += size;
-        tree[index]++;
-        for(index/=2; index>=1;index/=2){
-            tree[index] = tree[2*index] + tree[2*index+1];
+        tree[index] = value;
+        for (index /= 2; index >= 1; index /= 2) {
+            tree[index] = tree[2 * index] + tree[2 * index + 1];
         }
+    }
+
+    public static int range(int[] tree, int i1, int i2) {
+        int size = tree.length / 2;
+        i1 += size;
+        i2 += size;
+        int sum = 0;
+        while (i1 <= i2) {
+            if (i1 / 2 * 2 != i1)
+                sum += tree[i1++];
+            if (i2 / 2 * 2 == i2)
+                sum += tree[i2--];
+            i1 /= 2;
+            i2 /= 2;
+        }
+        return sum;
     }
 }

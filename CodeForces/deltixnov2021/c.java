@@ -6,55 +6,44 @@ public class c {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         PrintWriter out = new PrintWriter(System.out);
         int numcases = Integer.parseInt(in.readLine());
+        StringBuilder b = new StringBuilder();
         for (int casenum = 0; casenum < numcases; casenum++) {
             StringTokenizer tokenizer = new StringTokenizer(in.readLine());
-            int n = Integer.parseInt(tokenizer.nextToken());
+            int size = Integer.parseInt(tokenizer.nextToken());
             int e = Integer.parseInt(tokenizer.nextToken());
-            int[] arr = new int[n];
-            boolean[] isPrime = new boolean[n];
-            boolean[] isOne = new boolean[n];
+            int[][] arr = new int[e][size / e + 1];
+            boolean[][] prime = new boolean[e][size / e + 1];
+            boolean[][] one = new boolean[e][size / e + 1];
+            int[][] left1 = new int[e][size / e + 1];
+            int[][] right1 = new int[e][size / e + 1];
             tokenizer = new StringTokenizer(in.readLine());
-            for (int i = 0; i < n; i++) {
-                arr[i] = Integer.parseInt(tokenizer.nextToken());
-                isPrime[i] = isPrime(arr[i]);
-                isOne[i] = arr[i] == 1;
+            for (int i = 0; i < size; i++) {
+                arr[i % e][i / e] = Integer.parseInt(tokenizer.nextToken());
+                prime[i % e][i / e] = isPrime(arr[i % e][i / e]);
+                one[i % e][i / e] = arr[i % e][i / e] == 1;
             }
-            int answer = 0;
-            int p1 = 0;
-            int p2 = 0;
-            int numPrimes = 0;
-            int pindex = -1;
-            while (p1 < n) {
-                numPrimes = 0;
-                while(p1 + 1 < n && !(isPrime[p1]||isOne[p1])){
-                    p1++;
+            for (int i = 0; i < e; i++) {
+                for (int j = 1; j < arr[i].length; j++) {
+                    left1[i][j] = one[i][j - 1] ? left1[i][j - 1] + 1 : 0;
                 }
-                if(!(isPrime[p1]||isOne[p1])){
-                    break;
+            }
+            for (int i = 0; i < arr.length; i++) {
+                for (int j = arr[i].length - 2; j >= 0; j--) {
+                    right1[i][j] = one[i][j + 1] ? right1[i][j + 1] + 1 : 0;
                 }
-                p2 = p1;
-                while (p2 + 1 < n && numPrimes == 0 && (isPrime[p2 + 1] || isOne[p2 + 1])) {
-                    p2++;
-                    if (isPrime[p2]) {
-                        pindex = p2;
-                        numPrimes++;
+            }
+            long answer = 0;
+            for (int i = 0; i < arr.length; i++) {
+                for (int j = 0; j < arr[i].length; j++) {
+                    if (prime[i][j] && 1 + right1[i][j] + left1[i][j] >= 2) {
+                        answer += (long) (right1[i][j] + 1) * (left1[i][j] + 1) - 1;
                     }
                 }
-                if(!isPrime[p2]){
-                    p1 = p2+1;
-                    continue;
-                }
-                for (int i = pindex; i <= p2; i++) {
-
-                }
-                if (isPrime[p1]) {
-                    pindex = -1;
-                    numPrimes--;
-                }
-                p1++;
             }
-        }
 
+            b.append(answer + "\n");
+        }
+        System.out.print(b);
         in.close();
         out.close();
     }
@@ -62,8 +51,10 @@ public class c {
     public static boolean isPrime(int k) {
         if (k < 2)
             return false;
-        if (k == 2 || k == 3)
+        if (k <= 3)
             return true;
+        if (k % 2 == 0)
+            return false;
         for (int i = 3; i * i <= k; i += 2) {
             if (k % i == 0)
                 return false;
