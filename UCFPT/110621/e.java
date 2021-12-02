@@ -1,9 +1,3 @@
-/*
-ID: ssk49881
-LANG: JAVA
-TASK: e
-*/
-
 import java.io.*;
 import java.util.*;
 
@@ -19,7 +13,6 @@ public class e {
             String[] fracnum = frac.split("/");
             int numerator = Integer.parseInt(fracnum[0]);
             int denominator = Integer.parseInt(fracnum[1]);
-            //System.out.printf("%d %d%n", numerator, denominator);
             ArrayList<Boolean> operations = new ArrayList<>(); // true == went left
             int n2 = numerator;
             int d2 = denominator;
@@ -34,14 +27,12 @@ public class e {
             }
             int add = 0;
             int base = 1;
-            int depth = 0;
             for(int i = operations.size() - 1; i >= 0; i--){
                 add *= 2;
                 if(!operations.get(i)){
                     add++;
                 }
                 base*=2;
-                depth++;
             }
             System.out.printf("%d %d%n", casenum, base+add);
         }

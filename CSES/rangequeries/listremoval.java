@@ -23,25 +23,24 @@ public class listremoval {
             int low = 0;
             int high = size - 1;
             int mid, curr;
+            //System.out.println("Index: " + index);
             do {
-                mid = (low + high) / 2;
+                mid = low + (high - low) / 2;
                 curr = range(tree, 0, mid);
-                System.out.println(curr + " " + index);
-                if(curr < index){
-                    low = mid + 1;
-                }
-                else if(curr > index){
-                    high = mid - 1;
-                }
-                else if(tree[size2 + mid] == 0){
-                    high = mid - 1;
-                }
-                else{
+                //System.out.println("Low: " + low + " mid: " + mid + " High: " + high + " curr: " + curr);
+                if (curr < index) {
+                    low = Math.min(high, mid + 1);
+                } else if (curr > index) {
+                    high = Math.max(mid - 1, low);
+                } else if (tree[size2 + mid] == 0) {
+                    high = Math.max(mid - 1, low);
+                } else {
                     low = high = mid;
+                    break;
                 }
-            } while (low < high);
-            System.out.println(mid);
-            b.append(arr[mid] + " ");
+            } while (low <= high);
+            //System.out.println(mid);
+            b.append(arr[mid] + (i < size - 1 ? " " : "\n"));
             update(tree, mid, 0);
         }
         System.out.print(b);
