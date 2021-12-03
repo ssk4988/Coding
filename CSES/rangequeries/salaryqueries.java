@@ -16,12 +16,12 @@ public class salaryqueries {
         int numQueries = Integer.parseInt(tokenizer.nextToken());
         int[] inputArr = new int[size + 1];
         tokenizer = new StringTokenizer(in.readLine());
-        Set<Integer> nums = new HashSet<>();
+        TreeSet<Integer> nums = new TreeSet<>();
         for (int i = 0; i < size; i++) {
             inputArr[i + 1] = Integer.parseInt(tokenizer.nextToken());
             nums.add(inputArr[i + 1]);
         }
-        int[] inputQueries = new int[numQueries*3];
+        int[] inputQueries = new int[numQueries * 3];
         int ind = 0;
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < numQueries; i++) {
@@ -37,21 +37,15 @@ public class salaryqueries {
                 nums.add(i1);
             }
         }
-        int[] lnum = new int[nums.size()];
-        Map<Integer, Integer> compress = new HashMap<>();
+        int[] lnum = new int[nums.size() + 1];
         ind = 0;
-        for(int i : nums){
+        lnum[ind++] = -500;
+        for (int i : nums) {
             lnum[ind++] = i;
-        } 
-        Arrays.sort(lnum);
-        for (int i = 0; i < lnum.length; i++) {
-            compress.put(lnum[i], i + 1);
-            // System.out.println("Mapping: " + lnum.get(i) + " to " +
-            // compress.get(lnum.get(i)));
         }
-        long[] tree = new long[lnum.length + 1];
+        int[] tree = new int[lnum.length + 1];
         for (int i = 1; i < inputArr.length; i++) {
-            inputArr[i] = compress.get(inputArr[i]);
+            inputArr[i] = Arrays.binarySearch(lnum, inputArr[i]);
             update(inputArr[i], 1, tree);
         }
         for (int i = 0; i < inputQueries.length; i += 3) {
@@ -60,10 +54,10 @@ public class salaryqueries {
             int i2 = inputQueries[i + 2];
             if (t == 0) {
                 update(inputArr[i1], -1, tree);
-                inputArr[i1] = compress.get(i2);
+                inputArr[i1] = Arrays.binarySearch(lnum, i2);
                 update(inputArr[i1], 1, tree);
             } else {
-                long answer = sum(compress.get(i2), tree) - sum(compress.get(i1) - 1, tree);
+                long answer = sum(Arrays.binarySearch(lnum, i2), tree) - sum(Arrays.binarySearch(lnum, i1) - 1, tree);
                 b.append(answer + "\n");
             }
         }
@@ -73,7 +67,7 @@ public class salaryqueries {
         out.close();
     }
 
-    public static long sum(int index, long[] tree) {
+    public static long sum(int index, int[] tree) {
         long sum = 0;
         while (index > 0) {
             sum += tree[index];
@@ -82,7 +76,7 @@ public class salaryqueries {
         return sum;
     }
 
-    public static void update(int index, long change, long[] tree) {
+    public static void update(int index, int change, int[] tree) {
         int size = tree.length - 1;
         while (index <= size) {
             tree[index] += change;

@@ -45,12 +45,12 @@ public class dynamicminimum {
         i2 += size;
         long min = Long.MAX_VALUE;
         while (i1 <= i2) {
-            if (i1 / 2 * 2 != i1)
+            if ((i1 & 1) == 1)
                 min = Math.min(min, tree[i1++]);
-            if (i2 / 2 * 2 == i2)
+            if ((i2 & 1) == 0)
                 min = Math.min(min, tree[i2--]);
-            i1 /= 2;
-            i2 /= 2;
+            i1 >>= 1;
+            i2 >>= 1;
         }
         return min;
     }
@@ -58,7 +58,7 @@ public class dynamicminimum {
     public static void update(long[] tree, int index, long value, int size) {
         index += size;
         tree[index] = value;
-        for (index /= 2; index >= 1; index /= 2) {
+        for (index >>= 1; index >= 1; index >>= 1) {
             tree[index] = Math.min(tree[2 * index], tree[2 * index + 1]);
         }
     }
