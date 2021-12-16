@@ -25,51 +25,53 @@ public class d3p1 {
                 gamma |= bit;
             }
         }
-        int com = 0;
+        int epsilon = 0;
         for (int i = 0; i < size; i++) {
             int bit = 1 << (size - 1 - i);
-            if (common[i] * 2 >= inputs.size()) {
-                com |= bit;
+            if (common[i] * 2 <= inputs.size()) {
+                epsilon |= bit;
             }
         }
-        int oxyrating = 0;
-        int oxymax = 0;
-        for (int j = 0; j < inputs.size(); j++) {
-            int curr = 0;
-            for (int i = 0; i < size; i++) {
-                int bit = 1 << (size - 1 - i);
-                if ((bit & com) == (bit & inputs.get(j))) {
-                    curr++;
-                } else {
-                    break;
-                }
+        ArrayList<Integer> inputscl = new ArrayList<>();
+        inputscl.addAll(inputs);
+        for (int i = 0; i < size; i++) {
+            ArrayList<Integer> newList = new ArrayList<>();
+            int bit = 1 << (size - 1 - i);
+            int val = 0;
+            for (int s1 : inputscl) {
+                if ((s1 & bit) == bit)
+                    val++;
             }
-            if (curr > oxymax) {
-                oxymax = curr;
-                oxyrating = inputs.get(j);
+            int bit2 = (2 * val >= inputscl.size() ? 1 : 0) << (size - 1 - i);
+            for (int j = 0; j < inputscl.size(); j++) {
+                if (bit2 == (bit & inputscl.get(j)))
+                    newList.add(inputscl.get(j));
             }
+            inputscl = newList;
+            if (inputscl.size() == 1)
+                break;
         }
-        int co2rating = 0;
-        int co2max = 0;
-        for (int j = 0; j < inputs.size(); j++) {
-            int curr = 0;
-            for (int i = 0; i < size; i++) {
-                int bit = 1 << (size - 1 - i);
-                if ((bit & inputs.get(j)) == (common[i] * 2 > inputs.size() ? 1 : 0) << (size - i - 1)) {
-                    curr++;
-                } else {
-                    break;
-                }
+        int oxyrating = inputscl.get(0);
+        inputscl = new ArrayList<>();
+        inputscl.addAll(inputs);
+        for (int i = 0; i < size; i++) {
+            ArrayList<Integer> newList = new ArrayList<>();
+            int bit = 1 << (size - 1 - i);
+            int val = 0;
+            for (int s1 : inputscl) {
+                if ((s1 & bit) == bit)
+                    val++;
             }
-            if (curr > co2max) {
-                co2max = curr;
-                co2rating = inputs.get(j);
+            int bit2 = (2 * val >= inputscl.size() ? 0 : 1) << (size - 1 - i);
+            for (int j = 0; j < inputscl.size(); j++) {
+                if (bit2 == (bit & inputscl.get(j)))
+                    newList.add(inputscl.get(j));
             }
+            inputscl = newList;
+            if (inputscl.size() == 1)
+                break;
         }
-
-        int mask = 1 << size;
-        mask--;
-        int epsilon = ~gamma & mask;
+        int co2rating = inputscl.get(0);
         System.out.println("oxygen: " + oxyrating);
         System.out.println("co2 " + co2rating);
         System.out.println("prod: " + (oxyrating * co2rating));

@@ -13,12 +13,15 @@ public class prefixsum {
             size += size & -size;
         long[] arr = new long[originalSize];
         long[] sumtree = new long[2 * size];
-        long[] maxtree = new long[2 * size];
+        long[] preftree = new long[2 * size];
+        Arrays.fill(preftree, Long.MIN_VALUE);
         tokenizer = new StringTokenizer(in.readLine());
         for (int i = 0; i < originalSize; i++) {
             arr[i] = Integer.parseInt(tokenizer.nextToken());
-            sumupdate(maxtree, sumtree, i, arr[i], size);
+            sumupdate(sumtree, preftree, i, arr[i], size);
         }
+        // printTree(sumtree);
+        // printTree(maxtree);
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < numQueries; i++) {
             tokenizer = new StringTokenizer(in.readLine());
@@ -27,15 +30,13 @@ public class prefixsum {
             int i2 = Integer.parseInt(tokenizer.nextToken());
             if (t == 1) {
                 arr[i1] = i2;
-                sumupdate(maxtree, sumtree, i1, i2, size);
+                sumupdate(sumtree, preftree, i1, i2, size);
             } else {
                 i2--;
-                int maxIndex = max(maxtree, sumtree, i1, i2, size);
-                long s = sum(sumtree, i1, maxIndex, size);
-                b.append(s + "\n");
-                System.out.println("Max: " + maxIndex + " sum: " + s);
-                printTree(sumtree);
-                printTree(maxtree);
+                b.append(max(preftree, sumtree, i1, i2, size) + "\n");
+                // System.out.println("Max: " + maxIndex + " sum: " + s);
+                // printTree(sumtree);
+                // printTree(maxtree);
             }
         }
         System.out.print(b);
@@ -45,6 +46,7 @@ public class prefixsum {
     }
 
     public static void printTree(long[] tree) {
+        System.out.println("Tree:");
         for (int i = 1; i < tree.length; i *= 2) {
             for (int j = 0; j < i; j++) {
                 System.out.print(tree[i + j] + " ");
@@ -68,56 +70,33 @@ public class prefixsum {
         return sum;
     }
 
-    public static int max(long[] maxtree, long[] sumtree, int i1, int i2, int size) {
+    public static long max(long[] preftree, long[] sumtree, int i1, int i2, int size) {
+        long lsum = 0;
+        long rsum = sum(sumtree, i1, i2, size);
+        long max = Math.max(lsum, rsum);
         i1 += size;
         i2 += size;
-        long max = Long.MIN_VALUE;
-        int maxIndex = 0;
         while (i1 <= i2) {
             if ((i1 & 1) == 1) {
-                long s = sum(sumtree, 0, i1, size);
-                if (s > max) {
-                    max = s;
-                    maxIndex = i1;
-                }
-                i1++;
+                max = Math.max(max, lsum + preftree[i1]);
+                lsum += sumtree[i1++];
             }
             if ((i2 & 1) == 0) {
-                long s = sum(sumtree, 0, i2, size);
-                if (s > max) {
-                    max = s;
-                    maxIndex = i2;
-                }
-                i2--;
+                rsum -= sumtree[i2];
+                max = Math.max(max, rsum + preftree[i2--]);
             }
             i1 >>= 1;
             i2 >>= 1;
         }
-        return maxIndex - size;
+        return max;
     }
 
-    public static void sumupdate(long[] maxtree, long[] sumtree, int index, long value, int size) {
-        int index2 = index;
+    public static void sumupdate(long[] sumtree, long[] preftree, int index, long value, int size) {
         index += size;
-        sumtree[index] = value;
+        preftree[index] = sumtree[index] = value;
         for (index >>= 1; index >= 1; index >>= 1) {
             sumtree[index] = sumtree[2 * index] + sumtree[2 * index + 1];
-        }
-        maxupdate(maxtree, sumtree, index2, size);
-    }
-
-    public static void maxupdate(long[] maxtree, long[] sumtree, int index, int size) {
-        index += size;
-        for (index >>= 1; index >= 1; index >>= 1) {
-            long prev = maxtree[index];
-            if (sumtree[2 * index] > sumtree[2 * index] + sumtree[2 * index + 1]) {
-                maxtree[index] = maxtree[2 * index];
-            } else {
-                maxtree[index] = maxtree[2 * index + 1];
-            }
-            if(prev != maxtree[index]){
-                System.out.println("changed " + prev + " to " + maxtree[index]);
-            }
+            preftree[index] = Math.max(preftree[2 * index], sumtree[2 * index] + preftree[2 * index + 1]);
         }
     }
 }

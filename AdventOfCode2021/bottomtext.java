@@ -1,10 +1,10 @@
 import java.io.*;
 import java.util.*;
 
-public class dxp1 {
+public class bottomtext {
     public static void main(String[] args) throws Exception {
-        BufferedReader in = new BufferedReader(new FileReader("dxp1.in"));
-        
+        BufferedReader in = new BufferedReader(new FileReader("d10p1.in"));
+
         in.close();
     }
 
