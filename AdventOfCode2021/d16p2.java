@@ -82,12 +82,12 @@ public class d16p2 {
                     System.out.println("bruh moment");
                 }
             }
-        } else if (type == 2) {
+        } else if (type == 3) {
             b.l = Long.MIN_VALUE;
             for (long val : vals) {
                 b.l = Math.max(b.l, val);
             }
-        } else if (type == 3) {
+        } else if (type == 2) {
             b.l = Long.MAX_VALUE;
             for (long val : vals) {
                 b.l = Math.min(b.l, val);

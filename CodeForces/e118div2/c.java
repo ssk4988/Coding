@@ -17,21 +17,21 @@ public class c {
             for (int i = 0; i < size; i++) {
                 arr[i] = Long.parseLong(tokenizer.nextToken());
             }
-            Arrays.sort(diff);
-            for (int i = 0; i < size - 1; i++) {
+            for (int i = 0; i + 1 < size; i++) {
                 diff[i] = arr[i + 1] - arr[i];
             }
-            Arrays.sort(diff);
+
             diff[diff.length - 1] = Long.MAX_VALUE;
+            Arrays.sort(diff);
             // System.out.println(Arrays.toString(diff));
             long k = 0;
-            for (int i = 0; i < diff.length - 1; i++) {
-                long e = Math.min((h2 + size - i - 1) / (size - i), diff[i + 1] - diff[i]);
+            long sum = 0;
+            for (int i = 0; i < diff.length; i++) {
+                long e = Math.min((h - sum + (size - i) - 1) / (size - i), diff[i] - k);
                 k += e;
-                h2 -= e * (size - i);
-                // System.out.println("x" + h2 + " " + e + " " + d + " " + diff[i + 1] + " " +
-                // diff[i]);
-                if (h2 <= 0)
+                sum += e * (size - i);
+                // System.out.println(i + " " + sum + " " + k + " " + e);
+                if (sum >= h)
                     break;
             }
             b.append(k + "\n");

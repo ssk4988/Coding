@@ -10,34 +10,29 @@ public class d {
             int len =Integer.parseInt(in.readLine());
             int[] arr = new int[len];
             StringTokenizer tokenizer =new StringTokenizer(in.readLine());
+            Set<Integer> el = new HashSet<>();
             for(int i = 0; i < len; i++){
-                arr[i] = Integer.parseInt(tokenizer.nextToken());
+                arr[i] = Integer.parseInt(tokenizer.nextToken())-1;
+                el.add(arr[i]);
             }
-            boolean possible = true;
-            if(len == 1){
-                possible = true;
+            if(el.size() < len){
+                System.out.println("YES");
+                continue;
             }
-            else if(len == 2){
-                possible = arr[0] <= arr[1];
-            }
-            else if(len == 3){
-                int[] newArr = new int[len];
-                for(int i= 0; i < len; i++){
-                    newArr[i] = arr[i];
+            boolean[] visited = new boolean[len];
+            int inv = 0;
+            for(int i = 0; i < len; i++){
+                if(visited[i]) continue;
+                int cycleLen = 0;
+                int cur = i;
+                while(!visited[cur]){
+                    visited[cur] = true;
+                    cycleLen++;
+                    cur = arr[cur];
                 }
-                int numFix = 0;
-                Arrays.sort(newArr);
-                for(int i = 0; i < len; i++){
-                    if(newArr[i] == arr[i]){
-                        numFix++;
-                    }
-                }
-                possible = (numFix % len == 0);
+                inv += cycleLen - 1;
             }
-            else{
-                possible = true;
-            }
-            System.out.println(possible ? "YES" : "NO");
+            System.out.println(inv % 2 == 0 ? "YES" : "NO");
         }
 
         in.close();
