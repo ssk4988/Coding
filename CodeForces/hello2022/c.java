@@ -17,15 +17,17 @@ public class c {
                     continue;
                 ArrayList<Integer> cycle = new ArrayList<>();
                 cycle.add(query(i));
-                while (cycle.size() == 1 || cycle.get(0) != cycle.get(cycle.size() - 1)) {
-                    cycle.add(query(i));
+                while (true) {
+                    int q = query(i);
+                    if (cycle.get(0) == q)
+                        break;
+                    cycle.add(q);
                 }
-                cycle.remove(cycle.size() - 1);
-                for(int j = 0; j < cycle.size() - 1; j++){
+                for (int j = 0; j < cycle.size() - 1; j++) {
                     p[cycle.get(j)] = cycle.get(j + 1);
                 }
                 p[cycle.get(cycle.size() - 1)] = cycle.get(0);
-                //System.out.println(Arrays.toString(p));
+                // System.out.println(Arrays.toString(p));
             }
             StringBuilder b = new StringBuilder();
             b.append("! ");
