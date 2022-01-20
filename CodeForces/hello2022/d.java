@@ -32,46 +32,6 @@ public class d {
                     b[i][j].cost = 0;
                 }
             }
-            //PriorityQueue<sq> queue = new PriorityQueue<>(new comp());
-            /*
-             * for(int i = n; i < b.length; i++){
-             * for(int j = n; j < b[i].length; j++){
-             * if(b[i][j].cost == 0){
-             * b[i][j].dist = 0;
-             * }
-             * }
-             * }
-             */
-            /*for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-                    b[i][j].dist = 0;
-                    queue.add(b[i][j]);
-                }
-            }
-
-            int numConnected = 0;
-            int numElements = 2 * n * 2 * n;
-            while (numConnected < numElements) {
-                sq s = queue.poll();
-                if (s.connected)
-                    continue;
-                s.connected = true;
-                numConnected++;
-                for (sq c : s.ns) {
-                    if (c.connected || s.dist == Long.MAX_VALUE)
-                        continue;
-                    if (c.dist > s.dist + c.cost) {
-                        c.dist = s.dist + c.cost;
-                        queue.add(c);
-                    }
-                }
-            }
-            long min = Long.MAX_VALUE;
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-                    min = Math.min(b[i + n][j + n].dist, min);
-                }
-            }*/
             long min = Math.min(Math.min(Math.min(b[0][n].cost, b[0][2*n-1].cost), Math.min(b[n-1][n].cost, b[n-1][2*n-1].cost)), Math.min(Math.min(b[n][0].cost, b[n][n-1].cost), Math.min(b[2*n-1][0].cost,b[2*n-1][n-1].cost)));
             System.out.println(min + cost);
         }

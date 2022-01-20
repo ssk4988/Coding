@@ -58,6 +58,29 @@ public class e {
                 }
                 if (inv == -1 && gp[i] - 1 == tp[i]) {
                     inv = i;
+            boolean[][] w = new boolean[3][n];
+            int dif = n - m;
+            int[][] pre = new int[3][n];
+            for (int j = -1; j < 2; j++) {
+                for (int i = 0; i < g.length; i++) {
+                    if (i + j < 0) {
+                        w[j + 1][i] = true;
+                    }
+                    else if(i + j >= g.length){
+                        w[j+1][i] = false;
+                    } 
+                    else {
+                        w[j + 1][i] = g[i].mean <= t[dif + i + j];
+                    }
+                    if (!w[j + 1][i]) {
+                        pre[j + 1][i]++;
+                    }
+                }
+            }
+            int a = 1;
+            for (int i = 0; i < pre.length; i++) {
+                for (int j = 1; j < pre[i].length; j++) {
+                    pre[i][j] += pre[i][j - 1];
                 }
             }
             for (int i = 0; i < g.length; i++) {
@@ -68,6 +91,26 @@ public class e {
                         b.append('1');
                     } else {
                         b.append('0');
+                    }
+                    boolean works = true;
+                    int index = findFirst(g, mean);
+                    //redo
+                    int left = Math.min(index, i) > 0 ? pre[1][Math.min(index, i) - 1] : 0;
+                    //redo
+                    int right = pre[1][pre[1].length - 1] - pre[1][Math.min(Math.max(index, i), pre[1].length - 1)];
+                    int mid = 0;
+                    if(index < i){
+                        mid = pre[2][i-1] - (index > 0 ? pre[2][index - 1] : 0);
+                    }
+                    if(i < index){
+                        mid = pre[0][index - 1] - (i > 0 ? pre[0][i-1] : 0);
+                    }
+                    if(mean > t[t.length - 1]) mid++;
+                    if(left + right + mid > 0){
+                        b.append('0');
+                    }
+                    else{
+                        b.append('1');
                     }
                 }
             }
@@ -95,5 +138,20 @@ public class e {
         public int compareTo(e.group o) {
             return this.mean - o.mean;
         }
+    }
+
+    public static int findFirst(group[] arr, int mean) {
+        int low = 0;
+        int high = arr.length;
+
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (mean - arr[mid].mean <= 0) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return low;
     }
 }
