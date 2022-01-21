@@ -36,40 +36,31 @@ public class d {
                 freq[a[i]]++;
                 prefix[a[i]]++;
             }
+            int leftsum = 0;
+            int rightsum = 0;
+            int l2 = 0;
+            int r2 = 0;
+            for(int i = 0; i < k; i++){
+                leftsum += freq[i];
+                rightsum += freq[k - 1 - i];
+                while(powers[l2] < leftsum){
+                    l2++;
+                }
+                while(powers[r2] < rightsum){
+                    r2++;
+                }
+                left[l2] = leftsum;
+                right[r2] = rightsum;
+            }
             for (int i = 0; i + 1 < prefix.length; i++) {
                 prefix[i + 1] += prefix[i];
             }
             int c = Integer.MAX_VALUE;
-            for (int i = 0; i <= prefix.length; i++) {
-                int cost = 0;
-                int left = i == 0 ? 0 : (i == prefix.length ? n : prefix[i - 1]);
-                cost += lowest2(left) - left;
-                int right = n - left;
-                int max2 = lowest2(right);
-                int minOther = max2 - right + 1;
-                for (int inc = 1; inc < max2; inc <<= 1) {
-                    int search = left + inc;
-                    int index = Arrays.binarySearch(prefix, search);
-                    if (index < 0) {
-                        index = -index - 1;
-                    }
-                    int l1 = index > prefix.length - 1 ? right : prefix[index] - left;
-                    int l2 = right - l1;
-                    minOther = Math.min(minOther, lowest2(l1) + lowest2(l2) - l1 - l2);
-                    search = n - inc;
-                    index = Arrays.binarySearch(prefix, search);
-                    if (index < 0) {
-                        index = -index - 1;
-                        if (index < prefix.length) {
-                            index++;
-                        }
-                    }
-                    l1 = index > prefix.length - 1 ? right : prefix[index] - left;
-                    l2 = right - l1;
-                    minOther = Math.min(minOther, lowest2(l1) + lowest2(l2) - l1 - l2);
+            for(int i = 0; i < left.length; i++){
+                for(int j = 0; j < right.length; j++){
+                    int mid = n - left[i] - right[j];
+                    c = Math.min(c, powers[i] - left[i] + powers[j] - right[j] + lowest2(mid) - mid);
                 }
-                cost += minOther;
-                c = Math.min(c, cost);
             }
             System.out.println(c);
         }
