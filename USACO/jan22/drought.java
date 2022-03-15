@@ -24,6 +24,7 @@ public class drought {
                 prefix[k] %= mod;
             }
             for (int i = 1; i < n; i++) {
+                dp = new long[max + 1];
                 for (int j = 0; j <= h[i]; j++) {
                     dp[j] = prefix[h[i] - j];
                     dp[j] %= mod;

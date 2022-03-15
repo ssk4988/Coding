@@ -10,6 +10,7 @@ public class e {
         boolean valid = true;
         Map<Integer, pair> map = new HashMap<>();
         Map<Integer, Integer> freq = new HashMap<>();
+        StringBuilder b = new StringBuilder();
         for (int i = 0; i < arrays; i++) {
             int n = Integer.parseInt(in.readLine());
             StringTokenizer tokenizer = new StringTokenizer(in.readLine());
@@ -46,13 +47,19 @@ public class e {
         for (int i : freq.keySet()) {
             if (freq.get(i) % 2 == 1) {
                 valid = false;
-                return;
+                break;
             }
         }
-        for (int i = 0; i < as.length; i++) {
+        boolean l = true;
+        for (int i = 0; i < as.length && valid; i++) {
             while (as[i].unused.size() > 0) {
-                pair cur = as[i].p[as[i].unused.first()];
-                boolean l = as[i].lcnt > as[i].rcnt ? false : true;
+                int first = 0;
+                for (int k : as[i].unused) {
+                    first = k;
+                    break;
+                }
+                pair cur = as[i].p[first];
+                // boolean l = as[i].lcnt <= as[i].rcnt ? false : true;
                 cur.a.unused.remove(cur.index);
                 cur.a.left[cur.index] = l;
                 if (l)
@@ -69,7 +76,11 @@ public class e {
                     cur.a.rcnt++;
                 l = !l;
                 while (cur.a.unused.size() > 0) {
-                    cur = cur.a.p[as[i].unused.first()];
+                    for (int k : cur.a.unused) {
+                        first = k;
+                        break;
+                    }
+                    cur = cur.a.p[first];
                     cur.a.unused.remove(cur.index);
                     cur.a.left[cur.index] = l;
                     if (l)
@@ -88,26 +99,27 @@ public class e {
                 }
             }
         }
-        for(array a : as){
-            if(a.lcnt != a.rcnt){
+        for (array a : as) {
+            if (a.lcnt != a.rcnt) {
                 valid = false;
             }
         }
         if (!valid) {
-            System.out.println("NO");
+            b.append("NO\n");
         } else {
-            System.out.println("YES");
+            b.append("YES\n");
             for (array a : as) {
                 for (int i = 0; i < a.a.length; i++) {
                     if (a.unused.contains(i)) {
-                        System.out.print("_");
+                        b.append("_");
                     } else {
-                        System.out.print(a.left[i] ? "L" : "R");
+                        b.append(a.left[i] ? "L" : "R");
                     }
                 }
-                System.out.println();
+                b.append("\n");
             }
         }
+        System.out.print(b);
 
         in.close();
         out.close();
@@ -118,7 +130,7 @@ public class e {
         int[] a;
         pair[] p;
         boolean[] left;
-        TreeSet<Integer> unused = new TreeSet<>();
+        HashSet<Integer> unused = new HashSet<>();
         Map<Integer, Integer> freq = new HashMap<>();
         boolean valid = true;
         int lcnt = 0;
@@ -149,13 +161,15 @@ public class e {
                 if (!used.containsKey(a[i])) {
                     used.put(a[i], 0);
                 }
-                if (freq.get(a[i]) - used.get(a[i]) <= 1 && freq.get(a[i]) % 2 == 1) {
+                int frq = freq.get(a[i]);
+                int us = used.get(a[i]);
+                if (frq - us <= 1 && frq % 2 == 1) {
                     continue;
                 }
-                if (freq.get(a[i]) % 2 == 0) {
-                    left[i] = (freq.get(a[i]) - used.get(a[i])) % 2 == 0;
+                if (frq % 2 == 0) {
+                    left[i] = (frq - us) % 2 == 0;
                 } else {
-                    left[i] = (freq.get(a[i]) - used.get(a[i])) % 2 == 1;
+                    left[i] = (frq - us) % 2 == 1;
                 }
                 if (left[i])
                     lcnt++;
