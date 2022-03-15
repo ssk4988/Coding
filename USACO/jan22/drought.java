@@ -21,20 +21,26 @@ public class drought {
             long[] prefix = new long[max + 1];
             for (int k = 0; k < prefix.length; k++) {
                 prefix[k] = k <= h[0] ? k + 1 : h[0] + 1;
-                prefix[k] %= mod;
+                if(prefix[k] >= mod){
+                    prefix[k] %= mod;
+                }
             }
             for (int i = 1; i < n; i++) {
                 dp = new long[max + 1];
                 for (int j = 0; j <= h[i]; j++) {
                     dp[j] = prefix[h[i] - j];
-                    dp[j] %= mod;
+                    if(dp[j]  >= mod){
+                        dp[j] %= mod;
+                    }
                 }
                 for (int k = 0; k < prefix.length; k++) {
                     prefix[k] = dp[k];
                     if (k > 0) {
                         prefix[k] += prefix[k - 1];
                     }
-                    prefix[k] %= mod;
+                    if(prefix[k] >= mod){
+                        prefix[k] %= mod;
+                    }
                 }
             }
             answer += dp[0];

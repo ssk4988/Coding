@@ -11,117 +11,126 @@ public class farm {
         node[] nodes = new node[n];
         ArrayList<Integer> u1 = new ArrayList<>();
         ArrayList<Integer> v1 = new ArrayList<>();
+        ArrayList<Boolean> droad = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             nodes[i] = new node(i);
+            nodes[i].lastRelevant = q;
             components[i] = new component(i);
-            components[i].set.add(nodes[i]);
-            components[i].numActive = 1;
+            components[i].stuff.add(nodes[i]);
+            components[i].size = 1;
             nodes[i].c = components[i];
         }
+        boolean[] deactivated = new boolean[n];
+        ArrayList<String> input = new ArrayList<>();
+        ArrayList<Integer> dq = new ArrayList<>();
         // what if 2 roads added between same locations
         // what if disconnect but both sides are not relevant
         for (int i = 0; i < q; i++) {
-            tokenizer = new StringTokenizer(in.readLine());
+            String s1 = in.readLine();
+            input.add(s1);
+            tokenizer = new StringTokenizer(s1);
             String s = tokenizer.nextToken();
             if (s.equals("A")) {
                 int u = Integer.parseInt(tokenizer.nextToken()) - 1;
                 int v = Integer.parseInt(tokenizer.nextToken()) - 1;
-                nodes[u].neighbors.add(nodes[v]);
-                nodes[v].neighbors.add(nodes[u]);
                 u1.add(u);
                 v1.add(v);
-                if (nodes[u].c != nodes[v].c) {
-                    if (nodes[v].c.set.size() < nodes[u].c.set.size()) {
-                        int temp = u;
-                        u = v;
-                        v = temp;
-                    }
-                    nodes[u].c.set.addAll(nodes[v].c.set);
-                    nodes[u].c.numActive += nodes[v].c.numActive;
-                    for (node n2 : nodes[v].c.set) {
-                        n2.c = nodes[u].c;
-                    }
-                }
+                droad.add(false);
             } else if (s.equals("D")) {
                 int v = Integer.parseInt(tokenizer.nextToken()) - 1;
-                if (nodes[v].active) {
-                    nodes[v].active = false;
-                    nodes[v].c.numActive--;
-                    if (nodes[v].c.numActive <= 0) {
-                        for (node n2 : nodes[v].c.set) {
-                            if (n2.lastRelevant == -1) {
-                                n2.lastRelevant = i;
-                            }
-                        }
+                deactivated[v] = true;
+                dq.add(v);
+            } else {
+                // s == R
+                int k = Integer.parseInt(tokenizer.nextToken()) - 1;
+                droad.set(k, true);
+
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            if (!deactivated[i]) {
+                nodes[i].lastRelevant = 0;
+                nodes[i].c.numActive++;
+            }
+        }
+        for (int i = 0; i < droad.size(); i++) {
+            if (!droad.get(i)) {
+                unite(0, nodes[u1.get(i)], nodes[v1.get(i)]);
+            }
+        }
+        for (int i = 0; i < input.size(); i++) {
+            tokenizer = new StringTokenizer(input.get(input.size() - 1 - i));
+            String s = tokenizer.nextToken();
+            if (s.equals("A")) {
+            } else if (s.equals("D")) {
+                int v = Integer.parseInt(tokenizer.nextToken()) - 1;
+                if (nodes[v].c.numActive <= 0) {
+                    for (node c : nodes[v].c.stuff) {
+                        c.lastRelevant = Math.min(c.lastRelevant, i + 1);
                     }
+                    nodes[v].c.stuff = new ArrayList<>();
                 }
+                nodes[v].c.numActive++;
+
             } else {
                 // s == R
                 int k = Integer.parseInt(tokenizer.nextToken()) - 1;
                 int u = u1.get(k);
                 int v = v1.get(k);
-                nodes[u].neighbors.remove(nodes[v]);
-                nodes[v].neighbors.remove(nodes[u]);
-                if(nodes[u].c.numActive <= 0) continue;
-                if(nodes[u].c.id == nodes[u].id){
-                    int temp = u;
-                    u = v;
-                    v = temp;
-                }
-                component c = nodes[v].c;
-                components[u] = new component(u);
-                boolean[] visited = new boolean[n];
-                ArrayDeque<node> qu = new ArrayDeque<>();
-                qu.add(nodes[u]);
-                while(!qu.isEmpty()){
-                    node n2 = qu.poll();
-                    if(visited[n2.id]) continue;
-                    visited[n2.id] = true;
-                    components[u].set.add(n2);
-                    n2.c = components[u];
-                    c.set.remove(n2);
-                    if(n2.active){
-                        components[u].numActive++;
-                        c.numActive--;
-                    }
-                    for(node n3 : n2.neighbors){
-                        if(!visited[n3.id]){
-                            qu.add(n3);
-                        }
-                    }
-                }
-                if(nodes[u].c.numActive <= 0){
-                    for (node n2 : nodes[u].c.set) {
-                        if (n2.lastRelevant == -1) {
-                            n2.lastRelevant = i;
-                        }
-                    }
-                }
-                if(nodes[v].c.numActive <= 0){
-                    for (node n2 : nodes[v].c.set) {
-                        if (n2.lastRelevant == -1) {
-                            n2.lastRelevant = i;
-                        }
-                    }
-                }
+                unite(i + 1, nodes[u], nodes[v]);
+
             }
         }
-        for(int i = 0; i < n; i++){
-            if(nodes[i].lastRelevant == -1){
-                nodes[i].lastRelevant = q;
-            }
-            System.out.println(nodes[i].lastRelevant);
+        
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            nodes[i].lastRelevant = Math.min(nodes[i].lastRelevant, q);
+            b.append((q - nodes[i].lastRelevant)+"\n");
         }
+        System.out.print(b);
 
         in.close();
     }
 
+    public static void unite(int turn, node n1, node n2) {
+        if (n1.c == n2.c)
+            return;
+        component c1 = null;
+        component c2 = null;
+        if (n1.c.stuff.size() >= n2.c.stuff.size()) {
+            c1 = n1.c;
+            c2 = n2.c;
+        } else {
+            c1 = n2.c;
+            c2 = n1.c;
+        }
+        if (c1.numActive <= 0 && c2.numActive > 0) {
+            for (node n : c1.stuff) {
+                n.lastRelevant = Math.min(turn, n.lastRelevant);
+            }
+        }
+        if (c1.numActive > 0 && c2.numActive <= 0) {
+            for (node n : c2.stuff) {
+                n.lastRelevant = Math.min(turn, n.lastRelevant);
+            }
+        }
+        for (node n : c2.stuff) {
+            n.c = c1;
+            c1.stuff.add(n);
+        }
+        if (c1.numActive > 0 || c2.numActive > 0) {
+            c1.stuff = new ArrayList<>();
+        }
+        c1.numActive += c2.numActive;
+        c1.size += c2.size;
+        //c2.numActive = 0;
+        c2.stuff = new ArrayList<>();
+    }
+
     public static class node {
         int id;
-        boolean active = true;
-        int lastRelevant = -1;
+        int lastRelevant = Integer.MAX_VALUE;
         component c = null;
-        ArrayList<node> neighbors = new ArrayList<>();
 
         public node(int id) {
             this.id = id;
@@ -131,7 +140,8 @@ public class farm {
     public static class component {
         int id;
         int numActive = 0;
-        Set<node> set = new HashSet<>();
+        int size = 0;
+        ArrayList<node> stuff = new ArrayList<>();
 
         public component(int id) {
             this.id = id;
