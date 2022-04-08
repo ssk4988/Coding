@@ -6,6 +6,7 @@ public class b {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         PrintWriter out = new PrintWriter(System.out);
         StringTokenizer tokenizer = new StringTokenizer(in.readLine());
+        StringBuilder b = new StringBuilder();
         int numWords = Integer.parseInt(tokenizer.nextToken());
         int numQueries = Integer.parseInt(tokenizer.nextToken());
         let root = new let(' ', null, "");
@@ -38,8 +39,9 @@ public class b {
                 dp[ndepth] = Math.min(dp[ndepth], dp[j] + 1 + (curr.target.length() - ndepth));
                 curr = curr.getChild(word.charAt(j));
             }
-            System.out.println(dp[dp.length - 1]);
+            b.append(dp[dp.length - 1]+"\n");
         }
+        System.out.print(b);
         in.close();
         out.close();
     }
