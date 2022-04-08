@@ -9,26 +9,27 @@ public class b {
         StringBuilder b = new StringBuilder();
         int numWords = Integer.parseInt(tokenizer.nextToken());
         int numQueries = Integer.parseInt(tokenizer.nextToken());
-        let root = new let(' ', null, "");
+        tri root = new tri(' ', 0, "");
         for (int i = 0; i < numWords; i++) {
             String word = in.readLine();
-            let curr = root;
+            tri curr = root;
             for (int j = 0; j < word.length(); j++) {
-                let next = curr.getChild(word.charAt(j));
+                tri next = curr.getChild(word.charAt(j));
                 if (next == null) {
-                    next = new let(word.charAt(j), curr, word);
+                    next = new tri(word.charAt(j), curr.depth + 1, word);
                     curr.children[word.charAt(j) - 'a'] = next;
                 }
                 curr = next;
             }
         }
+        StringBuilder b = new StringBuilder();
         for (int i = 0; i < numQueries; i++) {
             String word = in.readLine();
             int[] dp = new int[word.length() + 1];
             for (int j = 0; j < dp.length; j++) {
                 dp[j] = j;
             }
-            let curr = root.getChild(word.charAt(0));
+            tri curr = root.getChild(word.charAt(0));
             for (int j = 1; j < word.length(); j++) {
                 dp[j] = Math.min(dp[j - 1] + 1, dp[j]);
                 if (curr == null) {
@@ -59,23 +60,19 @@ public class b {
         return sim;
     }
 
-    public static class let {
+    public static class tri {
         char val;
-        let parent;
-        let[] children = new let[26];
+        tri[] children = new tri[26];
         int depth = 0;
         String target;
 
-        public let(char c, let parent, String target) {
+        public tri(char c,int depth, String target) {
             val = c;
-            this.parent = parent;
-            if (parent != null) {
-                depth = parent.depth + 1;
-            }
+            this.depth = depth;
             this.target = target;
         }
 
-        public let getChild(char c) {
+        public tri getChild(char c) {
             return children[c - 'a'];
         }
     }
