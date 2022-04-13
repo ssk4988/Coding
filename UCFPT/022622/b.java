@@ -6,6 +6,7 @@ public class b {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         PrintWriter out = new PrintWriter(System.out);
         StringTokenizer tokenizer = new StringTokenizer(in.readLine());
+        StringBuilder b = new StringBuilder();
         int numWords = Integer.parseInt(tokenizer.nextToken());
         int numQueries = Integer.parseInt(tokenizer.nextToken());
         tri root = new tri(' ', 0, "");
