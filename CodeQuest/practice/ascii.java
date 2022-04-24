@@ -35,16 +35,26 @@ public class ascii {
             }
             for(int i = 0; i < prefV.length; i++){
                 for(int j = 1; j < prefV[i].length; j++){
-                    prefH[i][j] += prefV[i][j-1];
+                    prefV[i][j] += prefV[i][j-1];
                 }
             }
             int ans = 0;
             int nCellV = n / 2;
-            for(int i = 0; i < nCellV; i++){
+            for(int i = 0; i < n-1; i++){
                 for(int j = 0; j < numH; j++){
-
+                    for(int k = 1; i + k-1 < prefV[0].length && j + k-1 < prefH[0].length; k++){
+                        int top = prefH[i][j + k-1] - (j>0 ? prefH[i][j-1] : 0);
+                        int bottom = prefH[i+k][j + k-1] - (j>0 ? prefH[i+k][j-1] : 0);
+                        int left = prefV[j][i + k-1] - (i>0 ? prefV[j][i-1] : 0);
+                        int right = prefV[j+k][i + k-1] - (i>0 ? prefV[j+k][i-1] : 0);
+                        if(top == k && bottom == k && left == k && right == k){
+                            ans++;
+                            //System.out.println(i + " " + j + " " + k);
+                        }
+                    }
                 }
             }
+            System.out.println(ans);
         }
         in.close();
         out.close();
