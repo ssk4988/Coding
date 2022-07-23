@@ -63,32 +63,29 @@ public class split {
     }
 
     public static long[] solve(Tuple[] cows) {
-        ArrayList<Tuple> lower = new ArrayList<>();
-        ArrayList<Tuple> upper = new ArrayList<>();
+        TreeSet<Tuple> lower = new TreeSet<>(new TupleComp());
+        TreeSet<Tuple> upper = new TreeSet<>(new TupleComp());
         long[] areas = new long[numCows];
         Arrays.fill(areas, Long.MAX_VALUE);
         for (int i = 0; i < numCows; i++) {
             upper.add(cows[i]);
         }
-        Collections.sort(upper, new TupleComp());
         long[][][] bounds = new long[2][2][2];
         bounds[0][0][0] = cows[0].x;
         bounds[1][0][1] = cows[numCows - 1].x;
         
 
         for (int i = 0; i < numCows - 1; i++) {
-            int lowerIndex = Collections.binarySearch(lower, cows[i], new TupleComp());
-            lowerIndex = -(lowerIndex + 1);
-            lower.add(lowerIndex, cows[i]);
+            lower.add(cows[i]);
             upper.remove(cows[i]);
             // System.out.println(lowerIndex);
 
             bounds[0][0][1] = cows[i].x;
-            bounds[0][1][0] = lower.get(0).y;
-            bounds[0][1][1] = lower.get(lower.size() - 1).y;
+            bounds[0][1][0] = lower.first().y;
+            bounds[0][1][1] = lower.last().y;
             bounds[1][0][0] = cows[i + 1].x;
-            bounds[1][1][0] = upper.get(0).y;
-            bounds[1][1][1] = upper.get(upper.size() - 1).y;
+            bounds[1][1][0] = upper.first().y;
+            bounds[1][1][1] = upper.last().y;
 
             areas[i] = (bounds[0][0][1] - bounds[0][0][0]) * (bounds[0][1][1] - bounds[0][1][0])
                     + (bounds[1][0][1] - bounds[1][0][0]) * (bounds[1][1][1] - bounds[1][1][0]);
@@ -108,9 +105,13 @@ public class split {
     public static class TupleComp implements Comparator<Tuple> {
         @Override
         public int compare(split.Tuple o1, split.Tuple o2) {
-            if (o1.y - o2.y == 0)
-                return (int) (o1.x - o2.x);
-            return (int) (o1.y - o2.y);
+            if (o1.y == o2.y) {
+                if(o1.x < o2.x)return -1;
+                if(o1.x>o2.x)return 1;
+                return 0;
+            }
+            if (o1.y<o2.y)return -1;
+            return 1;
         }
     }
 
@@ -125,10 +126,13 @@ public class split {
 
         @Override
         public int compareTo(split.Tuple o) {
-            if (this.x - o.x == 0) {
-                return (int) (this.y - o.y);
+            if (this.x == o.x) {
+                if(this.y < o.y)return -1;
+                if(this.y>o.y)return 1;
+                return 0;
             }
-            return (int) (this.x - o.x);
+            if (this.x<o.x)return -1;
+            return 1;
         }
 
         @Override

@@ -30,13 +30,11 @@ public class socdist {
             low[i] = Integer.parseInt(tokenizer.nextToken());
             high[i] = Integer.parseInt(tokenizer.nextToken());
             list[i] = new Tuple(low[i], high[i]);
-            if (high[i] - low[i] > maxdist) {
-                maxdist = high[i] - low[i];
-            }
+            maxdist = Math.max(high[i] - low[i], maxdist);
         }
         Arrays.sort(list);
-        long l = 0;
-        long r = maxdist;
+        long l = 1;
+        long r = list[numRange - 1].second;
         while (l < r) {
             long mid = (l + r + 1) / 2;
             // System.out.println(l + " " + mid + " " + r);
@@ -59,7 +57,7 @@ public class socdist {
         for (int i = 0; i < numRange; i++) {
             long low = list[i].first;
             long high = list[i].second;
-            startIndex = Math.max(low, startIndex);
+            startIndex = Math.max(startIndex, low);
             while (startIndex >= low && startIndex <= high) {
                 cows++;
                 startIndex += d;
