@@ -24,17 +24,14 @@ public class loan {
         long upper = 1;
         boolean condition = true;
         while (condition) {
-            System.out.println(upper + " " + (System.currentTimeMillis() - start_time));
             condition = valid(numLoan, numDays, minPayment, upper);
             upper *= 2;
         }
-        System.out.println(upper + " " + (System.currentTimeMillis() - start_time));
         long lower = 1;
         long x = (lower + upper) / 2;
         condition = true;
         while (upper - lower > 1) {
             x = (lower + upper) / 2;
-            System.out.println(lower + " " + x + " " + upper + " " + (System.currentTimeMillis() - start_time));
             condition = valid(numLoan, numDays, minPayment, x);
             if (condition) {
                 lower = x;

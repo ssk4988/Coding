@@ -1,0 +1,6 @@
+#!/bin/bash
+
+export CLASSPATH=`dirname $0`
+
+java -Xss8m -Xmx2048m `basename $0` $*
+

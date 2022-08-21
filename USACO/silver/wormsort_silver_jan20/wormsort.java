@@ -14,11 +14,11 @@ public class wormsort {
         StringTokenizer tokenizer = new StringTokenizer(in.readLine());
         int numCows = Integer.parseInt(tokenizer.nextToken());
         int numRoutes = Integer.parseInt(tokenizer.nextToken());
-        ArrayList<Route> routes = new ArrayList<>();
         tokenizer = new StringTokenizer(in.readLine());
         int[] location = new int[numCows];
         int[] destination = new int[numCows];
         Cow[] cows = new Cow[numCows];
+        int maxW = 0;
         for (int i = 0; i < numCows; i++) {
             int j = Integer.parseInt(tokenizer.nextToken()) - 1;
             destination[j] = i;
@@ -30,38 +30,35 @@ public class wormsort {
             int first = Integer.parseInt(tokenizer.nextToken()) - 1;
             int second = Integer.parseInt(tokenizer.nextToken()) - 1;
             int weight = Integer.parseInt(tokenizer.nextToken());
-            routes.add(new Route(first, second, weight));
+            maxW = Math.max(maxW, weight);
+            cows[first].neighbors.add(second);
+            cows[first].weights.add(weight);
+            cows[second].neighbors.add(first);
+            cows[second].weights.add(weight);
         }
-        Collections.sort(routes, new comp());
         int low = 0;
-        int high = routes.get(0).weight + 1;
+        int high = maxW + 1;
         int mid;
         int numComponents = 0;
         while (low < high) {
             mid = (low + high + 1) / 2;
             for (Cow cow : cows) {
                 cow.component = -1;
-                cow.neighbors = new ArrayList<>();
-            }
-            for (int i = 0; i < numRoutes; i++) {
-                if (routes.get(i).weight < mid) {
-                    break;
-                }
-                Route route = routes.get(i);
-                cows[route.first].neighbors.add(route.second);
-                cows[route.second].neighbors.add(route.first);
             }
             boolean condition = true;
-            ArrayList<Integer> queue = new ArrayList<>();
+            ArrayDeque<Integer> queue = new ArrayDeque<>();
             for (int i = 0; i < numCows; i++) {
                 if (cows[i].component == -1) {
                     queue.add(i);
                     while (!queue.isEmpty()) {
-                        int index = queue.remove(queue.size() - 1);
+                        int index = queue.poll();
+                        if (cows[index].component != -1)
+                            continue;
                         cows[index].component = numComponents;
-                        for (int neighbor : cows[index].neighbors) {
-                            if (cows[neighbor].component == -1) {
-                                queue.add(neighbor);
+                        for (int j = 0; j < cows[index].neighbors.size(); j++) {
+                            if (cows[cows[index].neighbors.get(j)].component == -1
+                                    && cows[index].weights.get(j) >= mid) {
+                                queue.add(cows[index].neighbors.get(j));
                             }
                         }
                     }
@@ -81,7 +78,7 @@ public class wormsort {
             }
         }
         int answer = low;
-        if (answer == routes.get(0).weight + 1) {
+        if (answer == maxW + 1) {
             answer = -1;
         }
         out.println(answer);
@@ -95,31 +92,12 @@ public class wormsort {
         int destination;
         int component;
         ArrayList<Integer> neighbors = new ArrayList<>();
+        ArrayList<Integer> weights = new ArrayList<>();
 
         public Cow(int location, int destination) {
             this.location = location;
             this.destination = destination;
             component = -1;
         }
-    }
-
-    public static class comp implements Comparator<Route> {
-        @Override
-        public int compare(wormsort.Route o1, wormsort.Route o2) {
-            return o2.weight - o1.weight;
-        }
-    }
-
-    public static class Route {
-        int first;
-        int second;
-        int weight;
-
-        public Route(int first, int second, int weight) {
-            this.first = first;
-            this.second = second;
-            this.weight = weight;
-        }
-
     }
 }

@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+# Sample strings, provided in the following lines, will be used to
+#  build regular expressions that help determine between PE and WA.
+
+# Header lines are at the beginning of output for each test case.
+HEADER_LINES=(
+)
+# Prefix strings are at the beginning of lines.
+PREFIX_STRINGS=(
+)
+# Inner strings are in the middle of the lines.
+INNER_STRINGS=(
+)
+# Suffix strings are at the end of lines.
+SUFFIX_STRINGS=(
+)
+# Fixed strings may occur anywhere in the output, but must appear.
+FIXED_STRINGS=(
+)
+# Set to empty or 0 if a missing period at end of line is WA
+MISSING_PERIOD_IS_PE=1
+
+# Floating point tolerances to use
+FP_ABS_TOL="0.0"
+FP_REL_TOL="0.0"
+
+# Set a problem-specific validator program to use (do not use the default)
+PROBLEM_NAME=`basename "${0}"`
+PROBLEM_NAME="${PROBLEM_NAME#compare_}"
+# CHECK_PROGRAM="`dirname $0`/check_${PROBLEM_NAME}"
+
+
+# Explanation and breakdown of response types:
+
+# The header/prefix/suffix are NEVER part of the 'answer':
+# -- PE: Omitting the header/prefix/suffix entirely
+# -- PE: A case-insensitive match
+# -- PE: Incorrect numbering (eg. all cases #1)
+# -- PE: Omitting punctuation/symbols
+# -- PE: Most missing spaces, or extra spaces
+# -- WA: Bad spelling, omitting a number, wrong punctuation
+
+# Fixed strings may or may not be part of the 'answer':
+# -- PE: A case-insensitive match
+# -- PE: Omitting punctuation/symbols
+# -- PE: Missing or extra spaces
+# -- WA: Omitting the fixed string entirely
+# -- WA: Incorrect number in the string
+# -- WA: Bad spelling, omitting a number, wrong punctuation
+
+# Source the script that does all the work
+if [ -n "$CHECK_PROGRAM" ]; then
+   . `dirname $0`/../../compare_external
+else
+   . `dirname $0`/../../compare_fuzzy_pe
+fi
+

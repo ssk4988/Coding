@@ -9,64 +9,56 @@ import java.util.*;
 
 public class snowboots {
     public static void main(String[] args) throws Exception {
-        long start = System.currentTimeMillis();
-        BufferedReader in = new BufferedReader(new FileReader("12.in"));
-        BufferedReader inOut = new BufferedReader(new FileReader("12.out"));
-        // PrintWriter out = new PrintWriter(new BufferedWriter(new
-        // FileWriter("snowboots.out")));
+        BufferedReader in = new BufferedReader(new FileReader("snowboots.in"));
+        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("snowboots.out")));
         StringTokenizer tokenizer = new StringTokenizer(in.readLine());
-        ArrayList<Boot> boots = new ArrayList<>();
-        ArrayList<Boot> bootsDepth = new ArrayList<>();
         int numSteps = Integer.parseInt(tokenizer.nextToken());
         int numBoots = Integer.parseInt(tokenizer.nextToken());
-        ArrayList<Step> steps = new ArrayList<>();
+        Step[] steps = new Step[numSteps];
+        Boot[] boots = new Boot[numBoots];
         tokenizer = new StringTokenizer(in.readLine());
+        TreeSet<Step> set = new TreeSet<>();
         for (int i = 0; i < numSteps; i++) {
-            steps.add(new Step(i, Integer.parseInt(tokenizer.nextToken())));
+            steps[i] = new Step(i, Integer.parseInt(tokenizer.nextToken()));
+            set.add(steps[i]);
         }
-        steps.get(0).right = steps.get(1);
-        steps.get(numSteps - 1).left = steps.get(numSteps - 2);
-        for(int i = 1; i < numSteps - 1; i++){
-            steps.get(i).right = steps.get(i + 1);
-            steps.get(i).left = steps.get(i - 1);
+        steps[0].right = steps[1];
+        steps[numSteps - 1].left = steps[numSteps - 2];
+        for (int i = 1; i < numSteps - 1; i++) {
+            steps[i].right = steps[i + 1];
+            steps[i].left = steps[i - 1];
         }
-        int numRight = 0;
         for (int i = 0; i < numBoots; i++) {
             tokenizer = new StringTokenizer(in.readLine());
             int maxDepth = Integer.parseInt(tokenizer.nextToken());
             int maxStep = Integer.parseInt(tokenizer.nextToken());
-            boots.add(new Boot(maxDepth, maxStep, i));
-            bootsDepth.add(boots.get(i));
+            boots[i] = new Boot(maxDepth, maxStep, i);
         }
-        steps.sort(new CompStep());
-        bootsDepth.sort(new CompDepth());
+        Arrays.sort(boots);
         int maxSteps = 1;
+        boolean[] works = new boolean[numBoots];
         for (int i = 0; i < numBoots; i++) {
-            Boot boot = bootsDepth.get(i);
-            while(steps.size() > 0 && steps.get(0).depth > boot.depth){
-                Step st = steps.get(0);
+            while (set.size() > 0 && set.last().depth > boots[i].depth) {
+                Step st = set.last();
                 int s = st.right.index - st.left.index;
                 if (s > maxSteps) {
                     maxSteps = s;
                 }
                 st.right.left = st.left;
                 st.left.right = st.right;
-                steps.remove(0);
+                set.remove(st);
             }
-            boot.works = maxSteps <= boot.steps ? 1 : 0;
+            works[boots[i].index] = maxSteps <= boots[i].steps;
         }
         for (int i = 0; i < numBoots; i++) {
-            if (Integer.parseInt(inOut.readLine()) == boots.get(i).works) {
-                numRight++;
-            }
+            out.println(works[i] ? 1 : 0);
         }
-        System.out.println(numRight + " " + numBoots + " " + (System.currentTimeMillis() - start));
 
         in.close();
-        // out.close();
+        out.close();
     }
 
-    public static class Step {
+    public static class Step implements Comparable<Step> {
         int index;
         int depth;
         Step right;
@@ -76,42 +68,32 @@ public class snowboots {
             this.index = index;
             this.depth = depth;
         }
+
+        @Override
+        public int compareTo(snowboots.Step o) {
+            if (depth == o.depth)
+                return index - o.index;
+            return depth - o.depth;
+        }
     }
 
-    public static class Boot {
+    public static class Boot implements Comparable<Boot> {
         int depth;
         int steps;
         int index;
-        int works;
 
         public Boot(int depth, int steps, int index) {
             this.depth = depth;
             this.steps = steps;
             this.index = index;
         }
-    }
 
-    public static class CompStep implements Comparator<Step>{
         @Override
-        public int compare(snowboots.Step o1, snowboots.Step o2) {
-            return o2.depth - o1.depth;
-        }
-    }
-
-    public static class CompDepth implements Comparator<Boot> {
-        @Override
-        public int compare(snowboots.Boot o1, snowboots.Boot o2) {
-            if (o2.depth == o1.depth) {
-                return o2.steps - o1.steps;
+        public int compareTo(snowboots.Boot o) {
+            if (o.depth == depth) {
+                return o.steps - steps;
             }
-            return o2.depth - o1.depth;
-        }
-    }
-
-    public static class CompIndex implements Comparator<Boot> {
-        @Override
-        public int compare(snowboots.Boot o1, snowboots.Boot o2) {
-            return o1.index - o2.index;
+            return o.depth - depth;
         }
     }
 }

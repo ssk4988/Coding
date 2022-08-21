@@ -1,0 +1,11 @@
+A = 9
+X(3) = (5 + 7) ** 9
+DIMENSION A(3), B(5), C(100)
+DO 97 I = 1,5
+DO 97 I = 1+5
+GO TO 23
+IF(X - 3)21,32,33
+IF(X - 3) = 5 000 000
+GOTO SOMEWHERE
+DIMENSION X(5 + 3)
+END

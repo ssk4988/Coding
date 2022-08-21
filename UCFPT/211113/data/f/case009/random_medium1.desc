@@ -1,0 +1,5 @@
+-3559674866624343639 # seed
+100 200 # nodes min max
+200 500 # edges min max
+1 10 # c min max
+1 # type: 1 - random dag, 2 - line, 3 - backwards line
