@@ -1,2 +1,0 @@
-judge only 2 cases
-second case is 8 2 0
