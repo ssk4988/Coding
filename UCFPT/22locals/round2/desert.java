@@ -6,14 +6,14 @@ public class desert {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         int o = Integer.parseInt(in.readLine());
         int[][] c = new int[o][2];
-        HashSet<Integer>[] cp = new HashSet[o];
+        ArrayList<Integer>[] cp = new ArrayList[o];
         int[] cpt = new int[o];
         long[][] dp = new long[o][o];
         for (int i = 0; i < o; i++) {
             StringTokenizer tokenizer = new StringTokenizer(in.readLine());
             c[i][0] = Integer.parseInt(tokenizer.nextToken());
             c[i][1] = Integer.parseInt(tokenizer.nextToken());
-            cp[i] = new HashSet<>();
+            cp[i] = new ArrayList<>();
             cp[i].add(i);
             cpt[i] = i;
         }
