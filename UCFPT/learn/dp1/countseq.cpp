@@ -25,11 +25,30 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
+ll dp[1001];
+
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
-    freopen("name.in", "r", stdin);
-    freopen("name.out", "w", stdout);
-
+    cin.exceptions(cin.failbit);
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        string s1, s2;
+        cin >> s1 >> s2;
+        memset(dp, 0, sizeof dp);
+        dp[0] = 1;
+        vi c[26];
+        for(int i = s2.length() - 1; i >= 0; i--){
+            c[s2[i] - 'a'].pb(i + 1);
+        }
+        rep(i, 0, s1.length()){
+            int c1 = s1[i] - 'a';
+            for(auto a : c[c1]){
+                dp[a] += dp[a - 1];
+            }
+        }
+        cout << dp[s2.length()] << nL;
+    }
+    
     return 0;
 }

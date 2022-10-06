@@ -25,11 +25,30 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
+int dp[1005];
+
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
-    freopen("name.in", "r", stdin);
-    freopen("name.out", "w", stdout);
+    cin.exceptions(cin.failbit);
+    int nc;
+    cin >> nc;
+    rep(cn, 0, nc)
+    {
+        int n, m;
+        cin >> n >> m;
+        memset(dp, 0, sizeof dp);
+        rep(i, 0, n)
+        {
+            int t, v;
+            cin >> t >> v;
+            for(int j = m - t; j >= 0; j--)
+            {
+                dp[t + j] = max(dp[t + j], v + dp[j]);
+            }
+        }
+        cout << "Day #" << (cn + 1) << ": " << dp[m] << nL;
+    }
 
     return 0;
 }
