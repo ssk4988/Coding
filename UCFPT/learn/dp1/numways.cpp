@@ -14,6 +14,8 @@ using vpl = vector<pl>;
 using vpd = vector<pd>;
 using vvi = vector<vi>;
 
+#define f first
+#define s second
 #define mp make_pair
 #define pb push_back
 #define lb lower_bound
@@ -22,51 +24,34 @@ using vvi = vector<vi>;
 #define sz(x) (int)(x).size()
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
-
-int m = 1e9 + 7;
-ll mod(ll k)
-{
-    return k % m;
-}
-
+int dp[10009];
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    string p, s;
-    cin >> p >> s;
-    set<string> rots;
-    ll dp[s.length() + 1];
-    ll ans = 0;
-    rep(i, 0, s.length())
-    {
-        string s2;
-        rep(j, 0, s.length())
-        {
-            s2 += s[(i + j) % s.length()];
+    int nc; cin >> nc;
+    int m = 1e9+7;
+    rep(cn, 0, nc){
+        int x; cin >> x;
+        int n; cin >> n;
+        int c[n];
+        rep(i, 0, n){
+            cin >> c[i];
         }
-        if (rots.find(s2) != rots.end())
-        {
-            continue;
-        }
-        rots.insert(s2);
-        // cout << s2 << nL;
+        
+        
         memset(dp, 0, sizeof dp);
         dp[0] = 1;
-        rep(j, 0, p.length())
-        {
-            for (int k = s2.length() - 1; k >= 0; k--)
-            {
-                if (s2[k] == p[j])
-                {
-                    dp[k + 1] = mod(dp[k + 1] + dp[k]);
+        rep(j, 0, n){
+            rep(i, 0, 10000){
+                if(c[j] + i <= 10000){
+                    dp[c[j] + i] += dp[i];
+                    dp[c[j] + i] %= m;
                 }
             }
-            // cout << "check\n";
         }
-        ans = mod(ans + dp[s.length()]);
+        cout << dp[x] << nL;
     }
-    cout << ans << nL;
-
+    
     return 0;
 }
