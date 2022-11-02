@@ -25,27 +25,27 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-void update(vi &segtree, int idx, int val)
-{
-    int segsz = sz(segtree) / 2;
-    idx += segsz;
-    segtree[idx] = val;
-    for (; idx > 1; idx >>= 1)
-    {
-        segtree[idx >> 1] = max(segtree[idx], segtree[idx ^ 1]);
+vector<int> z_function(string s) {
+    int n = (int) s.length();
+    vector<int> z(n);
+    for (int i = 1, l = 0, r = 0; i < n; ++i) {
+        if (i <= r)
+            z[i] = min (r - i + 1, z[i - l]);
+        while (i + z[i] < n && s[z[i]] == s[i + z[i]])
+            ++z[i];
+        if (i + z[i] - 1 > r)
+            l = i, r = i + z[i] - 1;
     }
+    return z;
 }
 
-int maxquery(vi &segtree, int l, int r)
+int main()
 {
-    int segsz = sz(segtree) / 2;
-    int res = 0;
-    for (l += segsz, r += segsz; l <= r; l >>= 1, r >>= 1)
-    {
-        if (l & 1)
-            res = max(res, segtree[l++]);
-        if (!(r & 1))
-            res = max(res, segtree[r--]);
-    }
-    return res;
+    cin.tie(0)->sync_with_stdio(0);
+    cin.exceptions(cin.failbit);
+    string str = "aabacaabaaaaa";
+    vi z = z_function(str);
+    for(auto &a : z) cout << a << " ";
+    cout << nL;
+    return 0;
 }

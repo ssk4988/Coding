@@ -25,27 +25,11 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-void update(vi &segtree, int idx, int val)
+int main()
 {
-    int segsz = sz(segtree) / 2;
-    idx += segsz;
-    segtree[idx] = val;
-    for (; idx > 1; idx >>= 1)
-    {
-        segtree[idx >> 1] = max(segtree[idx], segtree[idx ^ 1]);
-    }
-}
-
-int maxquery(vi &segtree, int l, int r)
-{
-    int segsz = sz(segtree) / 2;
-    int res = 0;
-    for (l += segsz, r += segsz; l <= r; l >>= 1, r >>= 1)
-    {
-        if (l & 1)
-            res = max(res, segtree[l++]);
-        if (!(r & 1))
-            res = max(res, segtree[r--]);
-    }
-    return res;
+    cin.tie(0)->sync_with_stdio(0);
+    cin.exceptions(cin.failbit);
+    
+    
+    return 0;
 }
