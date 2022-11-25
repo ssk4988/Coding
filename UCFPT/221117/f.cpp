@@ -25,16 +25,26 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-vector<int> prefix_function(string str) {
-    int n = (int)str.length();
-    vector<int> pi(n);
-    for (int i = 1; i < n; i++) {
-        int j = pi[i-1];
-        while (j > 0 && str[i] != str[j])
-            j = pi[j-1];
-        if (str[i] == str[j])
-            j++;
-        pi[i] = j;
+int main()
+{
+    cin.tie(0)->sync_with_stdio(0);
+    cin.exceptions(cin.failbit);
+    int n;
+    cin >> n;
+    rep(i, 0, n){
+        string str;cin >> str;
+        int k = str.length();
+        int sum = 0;
+
+        rep(j, 0, k){
+            int d = str[k - 1 - j] - '0';
+            int d1 = j % 2 == 0 ? d : d * 2;
+            d1 = d1 / 10 + d1 % 10;
+            sum += d1;
+        }
+        cout << (sum % 10 == 0 ? "PASS" : "FAIL") << nL;
     }
-    return pi;
+
+    
+    return 0;
 }

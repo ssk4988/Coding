@@ -25,27 +25,34 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-vector<int> z_function(string str) {
-    int n = (int) str.length();
-    vector<int> z(n);
-    for (int i = 1, l = 0, r = 0; i < n; ++i) {
-        if (i <= r)
-            z[i] = min (r - i + 1, z[i - l]);
-        while (i + z[i] < n && str[z[i]] == str[i + z[i]])
-            ++z[i];
-        if (i + z[i] - 1 > r)
-            l = i, r = i + z[i] - 1;
-    }
-    return z;
-}
-
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    string str = "aabacaabaaaaa";
-    vi z = z_function(str);
-    for(auto &a : z) cout << a << " ";
-    cout << nL;
+    int n;
+    cin >> n;
+    rep(i, 0, n)
+    {
+        vi digs;
+        string str;
+        cin >> str;
+        ll val = 0;
+        ll base = 60;
+        while (str.find(',') != -1)
+        {
+            val *= base;
+            if (str.find(',') > 0)
+                val += stoi(str.substr(0, str.find(',')));
+            str.erase(str.begin(), str.begin() + str.find(',') + 1);
+        };
+        val *= base;
+        if (str.length() > 0)
+        {
+            
+            val += stoi(str);
+        }
+        cout << val << nL;
+    }
+
     return 0;
 }

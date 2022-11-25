@@ -38,3 +38,35 @@ vector<int> prefix_function(string str) {
     }
     return pi;
 }
+
+int main()
+{
+    cin.tie(0)->sync_with_stdio(0);
+    cin.exceptions(cin.failbit);
+    string str; cin >> str;
+    vi pi = prefix_function(str);
+    set<int> vals;
+    int k = pi.back();
+    while(k > 0){
+        vals.insert(k);
+        k = pi[k - 1];
+    }
+    int n = str.length();
+    int cnt = 0;
+    vi qry(n, 0);
+    rep(i, 0, n / 2){
+        if(vals.find(i + 1) != vals.end()){
+            cnt++;
+        }
+        qry[i + 1] = qry[n - 1 - (i + 1)] = cnt;
+    }
+    int q; cin >> q;
+    rep(i, 0, q){
+        int a;
+        cin >> a;
+        a--;
+        cout << qry[a] << nL;
+    }
+    
+    return 0;
+}

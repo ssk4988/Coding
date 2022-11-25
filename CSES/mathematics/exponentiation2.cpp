@@ -25,16 +25,31 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-vector<int> prefix_function(string str) {
-    int n = (int)str.length();
-    vector<int> pi(n);
-    for (int i = 1; i < n; i++) {
-        int j = pi[i-1];
-        while (j > 0 && str[i] != str[j])
-            j = pi[j-1];
-        if (str[i] == str[j])
-            j++;
-        pi[i] = j;
+
+ll mod(ll k, ll m){
+    return k % m;
+}
+
+ll modpow(ll b, ll p, ll m){
+    if(p == 0) return 1;
+    if(p == 1) return b;
+    ll a = modpow(b, p / 2, m);
+    return mod(mod(a * a, m) * modpow(b, p % 2, m), m);
+}
+
+int main()
+{
+    cin.tie(0)->sync_with_stdio(0);
+    cin.exceptions(cin.failbit);
+    int n; 
+    cin >> n;
+    ll m = 1000000007;
+    rep(i, 0, n){
+        int a, b, c;
+        cin >> a >> b >> c;
+        ll p = modpow(b, c, m - 1);
+        cout << modpow(a, p, m) << nL;
     }
-    return pi;
+    
+    return 0;
 }
