@@ -1,0 +1,4 @@
+gen > test.in
+java c < test.in > test.wrong
+brute < test.in > test.ans
+FC test.wrong test.ans
