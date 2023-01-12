@@ -25,99 +25,119 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-void update(vector<ll> &bit, int idx, ll val)
-{
-    idx++;
-    while (idx < bit.size())
-    {
-        bit[idx] += val;
-        idx += idx & -idx;
+struct Node {
+	Node *l = 0, *r = 0, *parent = NULL;
+	int lo, hi, bit = 0;
+    bool changed = true;
+    vi val;
+	Node(vi& v, int lo, int hi) : lo(lo), hi(hi), val(64, 0) {
+		if (lo < hi) {
+			int mid = lo + (hi - lo)/2;
+			l = new Node(v, lo, mid); r = new Node(v, mid + 1, hi);
+            l->parent = r->parent = this;
+			comb();
+		}
+        else{
+            val[v[lo]]++;
+        }
+	}
+    vi combine(vi l, vi r){
+        vi res(64);
+        rep(i, 0, 64){
+            res[i] = l[i] + r[i];
+        }
+        return res;
     }
-}
-
-ll sum(vector<ll> &bit, int idx)
-{
-    idx++;
-    ll ans = 0;
-    while (idx > 0)
-    {
-        ans += bit[idx];
-        idx -= idx & -idx;
+    void comb() {
+        if(!l) return;
+        if(!r) return;
+        // if(!l->changed && !r->changed) return;
+        rep(i, 0, 64){
+            val[i] = l->val[i] + r->val[i];
+        }
+        changed = true;
     }
-    return ans;
-}
-
-void range_update(vector<ll> &bit1, vector<ll> &bit2, int l, int r, ll x)
-{
-    update(bit1, l, x);
-    update(bit1, r + 1, -x);
-    update(bit2, l, x * (l - 1));
-    update(bit2, r + 1, -x * r);
-}
-
-ll range_sum(vector<ll> &bit1, vector<ll> &bit2, int idx)
-{
-    ll ans = sum(bit1, idx) * idx - sum(bit2, idx);
-    return ans;
-}
+	vi query(int L, int R) {
+		if (R < lo || hi < L) return vi(64, 0);
+		if (L <= lo && hi <= R) return val;
+		push();
+		return combine(l->query(L, R), r->query(L, R));
+	}
+	void set(int L, int R, int x) {
+		if (R < lo || hi < L) return;
+		if (L <= lo && hi <= R) {
+            upd(x);
+        }
+		else {
+			push();
+            l->set(L, R, x), r->set(L, R, x);
+            comb();
+		}
+	}
+    void upd(int dif) {
+        vi val2(val);
+        rep(i, 0, 64){
+            val[i ^ dif] = val2[i];
+        }
+        bit ^= dif;
+    }
+	void push() {
+        if(bit == 0) return;
+        changed = true;
+        // if(parent) parent->comb();
+        if(l) {
+            l->upd(bit);
+        }
+        if(r) {
+            r->upd(bit);
+        }
+        bit = 0;
+	}
+};
 
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    // int n = 100;
-    // vl b1(n + 1), b2(n + 1);
-    // range_update(b1, b2, 0, 4, 1);
-    // range_update(b1, b2, 2, 10, 2);
-    // range_update(b1, b2, 7, 13, 3);
-    // cout << range_sum(b1, b2, 5) - range_sum(b1, b2, 1) << nL;  // 2,5
-    // cout << range_sum(b1, b2, 3) - range_sum(b1, b2, -1) << nL; // 0,3
-    // cout << range_sum(b1, b2, 3) - range_sum(b1, b2, 0) << nL;  // 2,5
-    // cout << range_sum(b1, b2, 9) - range_sum(b1, b2, 2) << nL;  // 3,9
-    string str;
-    cin >> str;
+    string str; cin >> str;
     int n = str.length();
-    int nq;
-    cin >> nq;
-    vl bit[1 << 6][2];
-    rep(i, 0, 1 << 6)
-    {
-        rep(j, 0, 2)
-        {
-            bit[i][j] = vl(n + 2);
-        }
+    vi bits;
+    bits.pb(0);
+    rep(i, 0, n){
+        int k = str[i] - 'a';
+        bits.pb(bits.back() ^ (1 << k));
     }
-    int start = 0;
-    range_update(bit[start][0], bit[start][1], 0, 0, 1);
-    rep(i, 0, n)
-    {
-        start ^= 1 << (str[i] - 'a');
-        range_update(bit[start][0], bit[start][1], i + 1, i + 1, 1);
-    }
-    rep(i, 0, nq)
-    {
-        int t;
-        cin >> t;
-        if (t == 1)
-        {
-            int l, r;
-            cin >> l >> r;
+    Node root(bits, 0, bits.size() - 1);
+    int q; cin >> q;
+    rep(i, 0, q){
+        int a; cin >> a;
+        if(a == 1){
+            int l, r; cin >> l >> r;
+            vi res = root.query(l - 1, r);
             ll ans = 0;
-            rep(j, 0, 1 << 6)
-            {
-                ll q = range_sum(bit[j][0], bit[j][1], r) - range_sum(bit[j][0], bit[j][1], l - 1);
-                ans += q * (q - 1) / 2;
+            rep(j, 0, 64){
+                if(res[j] > 1) ans += ((ll) res[j]) * (res[j] - 1) / 2;
             }
             cout << ans << nL;
         }
-        else
-        {
-            int idx;
-            char c;
-            cin >> idx >> c;
-            int v = c - 'a';
+        else{
+            int ind;
+            string st;
+            cin >> ind >> st;
+            int k = st[0] - 'a';
+            root.set(ind, root.hi, (1 << k) ^ (1 << (str[ind - 1] - 'a')));
+            str[ind - 1] = st[0];
+            // vi cur(bits.size());
+            // rep(j, 0, bits.size()){
+            //     vi v = root.query(j, j);
+            //     rep(l, 0, 64){
+            //         if(v[l] == 1){
+            //             cur[j] = l;
+            //         }
+            //     }
+            // }
         }
     }
-
+    
     return 0;
 }

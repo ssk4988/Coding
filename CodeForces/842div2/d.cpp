@@ -29,7 +29,27 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-
+    int nc;
+    cin >> nc;
+    rep(cn, 0, nc){
+        int n; cin >> n;
+        vi a(n);int cnt = 0;
+        rep(i, 0, n){
+            cin >> a[i];
+            a[i]--;
+            if(a[i] == i){
+                cnt++;
+            }
+        }
+        int best = n;
+        rep(i, 0, n - 1){
+            int ip = cnt - (a[i] == i) - (a[i + 1] == i + 1) + (a[i] == i + 1) + (a[i + 1] == i);
+            int oop = n - ip;
+            assert(oop != 1);
+            best = min(best, max(0, oop - 1));
+        }
+        cout << best << nL;
+    }
     
     return 0;
 }

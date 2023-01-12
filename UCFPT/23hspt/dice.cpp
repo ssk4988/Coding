@@ -29,7 +29,23 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int n, v;
+        cin >> n >> v;
+        ld n1 = n;
+        vector<ld> prob(n + 1, 0);
+        vector<ld> pref(n + 1, 0);
+        prob[0] = pref[0] = 100;
+        for(int i = 1; i <= n; i++){
+            prob[i] = pref[i - 1] / n1;
+            pref[i] = prob[i] + pref[i - 1];
+        }
+        rep(i, 0, v){
+            int k; cin >> k;
+            cout << prob[k] << nL;
+        }
+    }
     
     return 0;
 }

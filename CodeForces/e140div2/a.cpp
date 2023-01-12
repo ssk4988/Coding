@@ -29,7 +29,21 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        set<int> x; set<int> y;
+        rep(i, 0, 3){
+            int a, b;
+            cin >> a >> b;
+            x.insert(a);y.insert(b);
+        }
+        if(x.size() < 3 && y.size() < 3){
+            cout << "NO" << nL;
+        }
+        else{
+            cout << "YES" << nL;
+        }
+    }
     
     return 0;
 }

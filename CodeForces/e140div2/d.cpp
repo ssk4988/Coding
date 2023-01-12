@@ -29,7 +29,16 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-
-    
+    int n; string str;cin >> n >> str;
+    int ones = 0;
+    rep(i, 0, n){
+        if(str[i] == '1') ones++;
+    }
+    int low = 1 << ones;
+    int high = 1 + (1 << n) - (1 << (n - ones));
+    rep(i, low, high){
+        cout << i << " ";
+    }
+    cout << high << nL;
     return 0;
 }
