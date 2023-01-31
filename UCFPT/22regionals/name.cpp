@@ -25,49 +25,11 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-struct DSU
-{
-    vi parent;
-    vi siz;
-    DSU(int n) : parent(n), siz(n, 1)
-    {
-        rep(i, 0, n)
-        {
-            parent[i] = i;
-        }
-    }
-    int find(int a)
-    {
-        if (parent[a] == a)
-        {
-            return a;
-        }
-        return parent[a] = find(parent[a]);
-    }
-
-    void join(int a, int b)
-    {
-        a = find(a);
-        b = find(b);
-        if (a == b)
-            return;
-        if (siz[a] < siz[b])
-        {
-            swap(a, b);
-        }
-        parent[b] = a;
-        siz[a] += siz[b];
-    }
-
-    int get_siz(int a)
-    {
-        return siz[find(a)];
-    }
-};
-
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
+    
+    
     return 0;
 }

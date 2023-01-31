@@ -1,3 +1,6 @@
 
 *.json
 *.exe
+*.in
+*.out
+*.json
