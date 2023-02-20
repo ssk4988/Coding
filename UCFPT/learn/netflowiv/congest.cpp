@@ -134,42 +134,47 @@ int main()
             }
         }
     }
-    
+    vector<map<int, pi>> opt(n);
     rep(i, 0, n)
     {
         vi er;
         for (auto &edge : e[i])
         {
-            if (dist[i] - dist[edge.f] != edge.s)
+            int cnt = 0;
+            for (int w : edge.s)
             {
-                er.pb(edge.f);
+                if (dist[i] - dist[edge.f] == w)
+                {
+                    cnt++;
+                }
             }
-        }
-        for (auto &k : er)
-        {
-            e[i].erase(k);
+            if(cnt) opt[i][edge.f] = {dist[i] - dist[edge.f], cnt};
         }
     }
     map<pi, unordered_set<int>> times;
     queue<pi> qbfs;
     rep(i, 0, c)
     {
-        qbfs.push({i, 0});
+        qbfs.push({start[i], 0});
     }
     int cnt = n + 1 + 1, source = n, sink = n + 1;
-    map<pair<pi, int>, int> el;
+    map<pair<pi, pi>, int> el;
     while (!qbfs.empty())
     {
-        auto p = qbfs.front();
+        auto [a, t] = qbfs.front();
         qbfs.pop();
-        for (auto &edge : e[p.f])
+        for (auto &edge : opt[a])
         {
-            auto &es = times[{p.f, edge.f}];
-            if (es.find(p.s) == es.end())
+            auto [b, p1] = edge;
+            auto [w, num] = p1;
+            auto &es = times[{a, b}];
+            if (es.find(t) == es.end())
             {
-                es.insert(p.s);
-                qbfs.push({edge.f, p.s + edge.s});
-                el[{{p.f, edge.f}, p.s}] = cnt++;
+                es.insert(t);
+                qbfs.push({b, t + w});
+                rep(i, 0, num){
+                    el[{{a, b}, {t, i}}] = cnt++;
+                }
             }
         }
     }
@@ -185,9 +190,10 @@ int main()
     for (auto &m1 : el)
     {
         auto [m2, label] = m1;
-        auto [p, t] = m2;
-        auto [a, b] = p;
-        int t1 = t + e[a][b];
+        auto [p1, p2] = m2;
+        auto [a, b] = p1;
+        auto [t, num] = p2;
+        int t1 = t + opt[a][b].f;
         if (t == 0)
         {
             d.addEdge(a, label, 1);
@@ -198,9 +204,13 @@ int main()
         }
         else
         {
-            for (auto &edge : e[b])
+            for (auto &edge : opt[b])
             {
-                d.addEdge(label, el[{{b, edge.f}, t1}], 1);
+                auto [b2, p3] = edge;
+                auto [t2, num1] = p3;
+                rep(i, 0, num1){
+                    d.addEdge(label, el[{{b, b2}, {t1, i}}], 1);
+                }
             }
         }
     }
