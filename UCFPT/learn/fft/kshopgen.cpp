@@ -23,19 +23,24 @@ using vvi = vector<vi>;
 #define all(x) x.begin(), x.end()
 #define sz(x) (int)(x).size()
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
+#define nL "\n"
 
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n; cin >> n;
-    ll mx = 0, sum = 0;
-    rep(i, 0, n){
-        ll v; cin >> v;
-        mx = max(v,mx);
-        sum += v;
+    cout << 1 << nL;
+    cout << 50000 * 996 << nL;
+    rep(i, 1, 50001){
+        rep(j, 0, 996){
+            cout << fixed << setprecision(2) << (i / 100.0) << nL;
+        }
     }
-    cout << max(mx * 2, sum) << "\n";
+    int numq = 5;
+    cout << 2 << " " << numq << nL;
+    rep(i, 0, numq){
+        cout << fixed << setprecision(2) << ((i + 1) / 100.0) << nL;
+    }
     
     return 0;
 }

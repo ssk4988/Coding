@@ -23,19 +23,35 @@ using vvi = vector<vi>;
 #define all(x) x.begin(), x.end()
 #define sz(x) (int)(x).size()
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
+#define nL "\n"
 
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n; cin >> n;
-    ll mx = 0, sum = 0;
-    rep(i, 0, n){
-        ll v; cin >> v;
-        mx = max(v,mx);
-        sum += v;
+    int nc;
+    cin >> nc;
+    rep(cn, 0, nc)
+    {
+        int n;
+        cin >> n;
+        vector<string> vs(2 * n - 2);
+        vector<vector<string>> vs1(n);
+        vector<string> vs2;
+        rep(i, 0, 2 * n - 2)
+        {
+            string str; cin >> str;
+            vs1[str.length()].pb(str);
+        }
+        bool isPal = true;
+        rep(i, 1, n){
+            reverse(all(vs1[i][1]));
+            rep(j, 0, i){
+                if(vs1[i][0][j] != vs1[i][1][j]) isPal = false;
+            }
+        }
+        cout << (isPal ? "YES" : "NO") << nL;
     }
-    cout << max(mx * 2, sum) << "\n";
-    
+
     return 0;
 }

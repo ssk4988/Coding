@@ -23,19 +23,29 @@ using vvi = vector<vi>;
 #define all(x) x.begin(), x.end()
 #define sz(x) (int)(x).size()
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
+#define nL "\n"
 
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n; cin >> n;
-    ll mx = 0, sum = 0;
+    int n, m; cin >> n >> m;
+    multiset<int> ms;
     rep(i, 0, n){
-        ll v; cin >> v;
-        mx = max(v,mx);
-        sum += v;
+        int v; cin >> v;
+        ms.insert(v);
     }
-    cout << max(mx * 2, sum) << "\n";
+    rep(i, 0, m){
+        int v; cin >> v;
+        auto it = ms.upper_bound(v);
+        if(ms.size() == 0 || it == ms.begin()){
+            cout << -1 << nL;
+            continue;
+        }
+        it = prev(it);
+        cout << *it << nL;
+        ms.erase(it);
+    }
     
     return 0;
 }

@@ -23,19 +23,35 @@ using vvi = vector<vi>;
 #define all(x) x.begin(), x.end()
 #define sz(x) (int)(x).size()
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
+#define nL "\n"
 
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n; cin >> n;
-    ll mx = 0, sum = 0;
-    rep(i, 0, n){
-        ll v; cin >> v;
-        mx = max(v,mx);
-        sum += v;
+    int n;
+    ll t;
+    cin >> n >> t;
+    vl a(n);
+    rep(i,0,n){
+        cin >> a[i];
     }
-    cout << max(mx * 2, sum) << "\n";
+    ll lo = 0, hi = 1e18;
+    while(lo < hi){
+        ll mid = lo + (hi - lo) / 2;
+        ll t1 = 0;
+        rep(i, 0, n){
+            t1 += mid / a[i];
+            if(t1 >= t) break;
+        }
+        if(t1 >= t){
+            hi = mid;
+        }
+        else{
+            lo = mid + 1;
+        }
+    }
+    cout << lo << nL;
     
     return 0;
 }

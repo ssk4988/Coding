@@ -52,7 +52,7 @@ vpil calcrow(ll n, int rows){
 
 ll ways(vector<vector<char>> &grid){
     vvl ans(sz(grid), vl(sz(grid[0])));
-    ans[0][0] = 1;
+    ans[0][0] = grid[0][0] == '.';
     rep(i, 0, sz(ans)){
         rep(j, 0, sz(ans[i])){
             if(grid[i][j] != '.') continue;
@@ -102,7 +102,7 @@ int main()
         ll n; cin >> n;
         ll tmp = n;
         int rowsUsed = 0;
-        vector<vector<char>> ans(100, vector<char>(100, '*'));
+        vector<vector<char>> ans(100, vector<char>(100, '#'));
         rep(i, 0, 100){
             ans[i][0] = '.';
             ans[i][99] = '.';

@@ -23,19 +23,39 @@ using vvi = vector<vi>;
 #define all(x) x.begin(), x.end()
 #define sz(x) (int)(x).size()
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
+#define nL "\n"
 
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
     int n; cin >> n;
-    ll mx = 0, sum = 0;
+    vvi v;
     rep(i, 0, n){
-        ll v; cin >> v;
-        mx = max(v,mx);
-        sum += v;
+        int a, b; cin >> a >> b;
+        v.pb({a,b,i});
     }
-    cout << max(mx * 2, sum) << "\n";
+    sort(all(v));
+    set<pi> ends;
+    vi ans(n);
+    rep(i, 0, n){
+        if(ends.size() == 0 || (*ends.begin()).f >= v[i][0]){
+            ends.insert({v[i][1], int(ends.size()) + 1});
+            ans[v[i][2]] = ends.size();
+        }
+        else{
+            pi v1 = *ends.begin();
+            ans[v[i][2]] = v1.s;
+            v1.f = v[i][1];
+            ends.erase(ends.begin());
+            ends.insert(v1);
+        }
+    }
+    cout << ends.size() << nL;
+    rep(i, 0, n){
+        cout << ans[i] << " ";
+    }
+    cout << nL;
     
     return 0;
 }
