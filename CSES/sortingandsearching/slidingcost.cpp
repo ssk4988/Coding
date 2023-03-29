@@ -27,23 +27,25 @@ using vvi = vector<vi>;
 
 struct ms {
     multiset<int> ms;
+    ll sum = 0;
     int size() { return ms.size(); }
     int getLast(){ if(size() == 0){return INT_MIN; }return *ms.rbegin(); }
     int popLast(){
         int v = getLast();
-        ms.erase(prev(ms.end()));
+        remove(v);
         return v;
     }
     int getFirst(){ return *ms.begin(); }
     int popFirst(){
         int v = getFirst();
-        ms.erase(ms.begin());
+        remove(v);
         return v;
     }
     void insert(int v){
         ms.insert(v);
+        sum += v;
     }
-    void remove(int v){ ms.erase(ms.find(v)); }
+    void remove(int v){ ms.erase(ms.find(v)); sum -= v;}
 };
 
 void balance(ms &lo, ms &hi){
@@ -55,6 +57,12 @@ void balance(ms &lo, ms &hi){
         int v = hi.popFirst();
         lo.insert(v);
     }
+}
+
+ll ans(ms &lo, ms &hi){
+    balance(lo, hi);
+    int median = lo.getLast();
+    return (median * sz(lo) - lo.sum) + hi.sum - median * sz(hi);
 }
 
 int main()
@@ -71,8 +79,7 @@ int main()
     rep(i, 0, k){
         lo.insert(a[i]);
     }
-    balance(lo, hi);
-    cout << lo.getLast() << " ";
+    cout << ans(lo, hi) << " ";
     rep(i, k, n){
         if(a[i - k] > lo.getLast()){
             hi.remove(a[i - k]);
@@ -87,8 +94,7 @@ int main()
         else{
             lo.insert(a[i]);
         }
-        balance(lo, hi);
-        cout << lo.getLast() << " ";
+        cout << ans(lo, hi) << " ";
     }
     cout << nL;
 

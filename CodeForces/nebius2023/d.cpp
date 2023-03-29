@@ -29,94 +29,33 @@ using vvi = vector<vi>;
 bool DEBUG = false;
 int getmin(vi &row){
     int m = sz(row);
-    int uses = m / 4;
-    vi used(m);
-    int ans = 0;
-    rep(i, 0, m){
-        if (uses <= 0) break;
-        if(used[i]) continue;
-        if(row[i] != 1) continue;
-
-        // row[i] = 1
-        int l = i, r = i; // create [l, r)
-        for(r = i; r < m && row[r]; r++);
-        if(r - l == 1) continue;
-        int start;
-        if(l == 0){
-            start = l;
-        }
-        else if(r == m){
-            start = l + ((r - l) % 2);
-        }
-        else{
-            start = l;
-        }
-        for(int j = start; j < r && uses > 0; j += 2){
-            used[j] = used[j + 1] = true;
-            uses--;
-            ans += 1;
-        }
-    }
     int onecnt = 0;
     rep(i, 0, m){
-        if(!used[i] && row[i] == 1){
-            onecnt++;
+        if(row[i]) onecnt++;
+    }
+    int uses = 0;
+    rep(i, 0, m - 1){
+        if(row[i] && row[i + 1]){
+            uses++;i++;
         }
     }
-    // if (DEBUG) cout << "cur ans: " << ans << " 2bed left: " << uses << " ones left: " << onecnt << nL;
-    if(uses > 0){
-        // necessarily isolated
-        ans += onecnt;
-    }
-    else{
-        // not necessarily isolated
-        // either ran out of uses or removed exactly all uses
-        // no 2 beds anymore
-        ans += onecnt;
-    }
-
-    // all ones are isolated now, or not?
-    // ans += max(0, onecnt - uses);
-
-    return ans;
+    return max(0, onecnt - min(m/4,uses));
 }
 
 int getmax(vi &row){
     int m = sz(row);
-    int uses = m / 4;
-    vi used(m);
-    int ans = 0;
+    int not11 = 0;
     rep(i, 0, m - 1){
-        if(uses <= 0) break;
-        if(used[i] || used[i + 1]){
-            continue;
-        }
-        if(row[i] != 1 && row[i + 1] != 1){
-            ans++;
-            uses--;
-            used[i] = used[i + 1] = true;
-        }
-    }
-    rep(i, 0, m - 1){
-        if(uses <= 0) break;
-        if(used[i] || used[i + 1]){
-            continue;
-        }
-        if(row[i] == 1 && row[i + 1] == 1){
-            ans++;
-            uses--;
-            used[i] = used[i + 1] = true;
+        if(row[i] == 0 || row[i + 1] == 0){
+            not11++;
+            i++;
         }
     }
     int onecnt = 0;
     rep(i, 0, m){
-        if(!used[i] && row[i] == 1){
-            onecnt++;
-        }
+        if(row[i])onecnt++;
     }
-    // assert(uses <= 0);
-    ans += onecnt - uses; // assume one 1 bedroom now
-    return ans;
+    return max(0, onecnt - (m/4 - min(m/ 4, not11)));
 }
 
 int main()
