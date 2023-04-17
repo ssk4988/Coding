@@ -26,72 +26,59 @@ using vvl = vector<vl>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-vi loops(2000);
-vi calcd(2000);
+int base = 2;
+
+vi kval(80);
 
 int BLANK = -1;
 vector<vvl> dp;
 vi str;
 
-ll conv(ll k){
-    ll res = 0;
-    while(k > 0){
-        res += (k % 10) * (k % 10);
-        k /= 10;
-    }
-    return res;
-}
-
-ll solve(int dig, int runningsum, int matched){
+int ktarget;
+ll solve(int dig, int num1s, int matched){
     // cout << dig << " " << curdigit << " " << matched << nL;
     if(dig >= sz(str)){
-        return loops[runningsum];
+        return ktarget == 1 + kval[num1s];
     }
-    if(dp[dig][runningsum][matched] != BLANK) return dp[dig][runningsum][matched]; 
-    int LIM = matched ? str[dig] : 9;
-    dp[dig][runningsum][matched] = 0;
+    if(dp[dig][num1s][matched] != BLANK) return dp[dig][num1s][matched]; 
+    int LIM = matched ? str[dig] : base - 1;
+    dp[dig][num1s][matched] = 0;
     // cout << "lim for below: " << LIM << nL;
     rep(i, 0, LIM + 1){
         int newmatched = matched;
-        int newrunningsum = runningsum + i * i;
+        int newnum1s = num1s + (i == 1);
         if(newmatched && i < str[dig]) newmatched = false;
-        dp[dig][runningsum][matched] += solve(dig + 1, newrunningsum, newmatched);
+        dp[dig][num1s][matched] += solve(dig + 1, newnum1s, newmatched);
     }
     // cout << "dig: " << dig << " val: " << curdigit << " match: " << matched << " ans: " << dp[dig][curdigit][matched] << nL;
-    return dp[dig][runningsum][matched];
+    return dp[dig][num1s][matched];
 }
 
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    calcd[1] = true;
-    loops[1] = false;
-    calcd[0] = true;
-    loops[0] = false;
-    rep(i, 2, 2000){
-        if(calcd[i])continue;
-        set<ll> seen;
-        ll cur = i;
-        while(!calcd[cur] && seen.count(cur) == 0){
-            seen.insert(cur);
-            cur = conv(cur);
+    kval[0] = -1;
+    kval[1] = 0;
+    rep(i, 2, 80){
+        int num1s = 0;
+        int i2 = i;
+        while(i2 > 0){
+            if(i2 & 1) num1s++;
+            i2>>=1;
         }
-        bool works = calcd[cur] ? loops[cur] : seen.count(cur);
-        for(ll j : seen){
-            loops[j] = works;
-            calcd[j] = true;
-        }
+        kval[i] = 1 + kval[num1s];
     }
     auto digtostr = [](ll v) -> vi{
         vi res;
         while(v > 0){
-            res.pb(v % 10);
-            v /= 10;
+            res.pb(v % base);
+            v /= base;
         }
         return res;
     };
     auto calc = [&](ll v) -> ll{
+        if(ktarget == 0) return v >= 1;
         // if(v < 0) return 0;
         // if(v == 0) return 1;
         // str.clear();
@@ -100,20 +87,20 @@ int main()
         reverse(all(str));
         // cout << nL;
         // cout << sz(str) << nL;
-        dp = vector<vvl>(sz(str), vvl(2000, vl(2, BLANK)));
+        dp = vector<vvl>(sz(str), vvl(80, vl(2, BLANK)));
         ll ans = solve(0, 0, 1);
         // rep(i, 0, 1 + str.back()){
         //     ll val = solve(sz(str) - 1, i, i == str.back(), i == 0);
         //     // cout << "dig " << i << " contributes " << val << nL;
         //     ans += val;
         // }
-        return ans;
+        return ans - (ktarget == 1 && v >= 1);
     };
-    
+    // what about n0 = 1
     ll a, b; 
     while(true){
-        cin >> a >> b;
-        if(a==0 && b==0) break;
+        cin >> a >> b >> ktarget;
+        if(a==0 && b==0 && ktarget == 0) break;
         // cout << calc(a - 1) << nL;
         // cout << calc(b) << nL;
         cout << (calc(b) - calc(a - 1)) << nL;

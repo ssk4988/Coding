@@ -14,15 +14,17 @@ public class minimumquery {
         StringTokenizer tokenizer = new StringTokenizer(in.readLine());
         int size = Integer.parseInt(tokenizer.nextToken());
         int numQueries = Integer.parseInt(tokenizer.nextToken());
-        int[][] prefix = new int[size][];
+        int[][] prefix = new int[20][size];
         tokenizer = new StringTokenizer(in.readLine());
-        for (int i = 0; i < size; i++) {
-            prefix[i] = new int[size - i];
-            prefix[i][0] = Integer.parseInt(tokenizer.nextToken());
+        for (int i = 0; (1 << i) <= size; i++) {
+            prefix[i] = new int[size + 1 - (1 << i)];
         }
-        for (int i = 2; i <= size; i *= 2) {
-            for (int j = 0; j + i - 1 < size; j++) {
-                prefix[j][i - 1] = Math.min(prefix[j][i / 2 - 1], prefix[j + i / 2][i - i / 2 - 1]);
+        for(int i = 0; i < size; i++){
+            prefix[0][i] = Integer.parseInt(tokenizer.nextToken());
+        }
+        for (int i = 1; (1 << i) <= size; i++) {
+            for (int j = 0; j < prefix[i].length; j++) {
+                prefix[i][j] = Math.min(prefix[i - 1][j], prefix[i - 1][j + (1 << (i - 1))]);
             }
         }
         StringBuilder b = new StringBuilder();
@@ -31,9 +33,9 @@ public class minimumquery {
             int first = Integer.parseInt(tokenizer.nextToken()) - 1;
             int second = Integer.parseInt(tokenizer.nextToken()) - 1;
             int range = second - first + 1;
-            int p2 = (int) (Math.log(range) / Math.log(2));
-            int smaller2 = (int) Math.pow(2, p2);
-            b.append(Math.min(prefix[first][smaller2 - 1], prefix[second - smaller2 + 1][smaller2 - 1]) + "\n");
+            int p;
+            for(p = 0; (1 << (p + 1)) <= range; p++);
+            b.append(Math.min(prefix[p][first], prefix[p][second + 1 - (1 << p)]) + "\n");
         }
         System.out.print(b);
 
