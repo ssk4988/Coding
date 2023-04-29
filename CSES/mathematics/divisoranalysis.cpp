@@ -25,67 +25,57 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-ll m = 1000000007;
-ll mod(ll k, ll m1)
-{
-    return (k % m1 + m1) % m1;
+typedef unsigned long long ull;
+ull modmul(ull a, ull b, ull M) {
+	ll ret = a * b - M * ull(1.L / M * a * b);
+	return ret + M * (ret < 0) - M * (ret >= (ll)M);
 }
-ll mod(ll k)
-{
-    return mod(k, m);
-}
-
-ll modpow(ll b, ll p, ll m1)
-{
-    if (p == 0)
-        return 1;
-    if (p == 1)
-        return b;
-    ll a = modpow(b, p / 2, m1);
-    return mod(mod(a * a, m1) * modpow(b, p % 2, m1), m1);
-}
-ll modpow(ll b, ll p)
-{
-    return modpow(b, p, m);
+ull modpow(ull b, ull e, ull mod) {
+	ull ans = 1;
+	for (; e; b = modmul(b, b, mod), e /= 2)
+		if (e & 1) ans = modmul(ans, b, mod);
+	return ans;
 }
 
-ll gcdExtended(ll a, ll b, ll *x, ll *y)
-{
-
-    // Base Case
-    if (a == 0)
-    {
-        *x = 0, *y = 1;
-        return b;
-    }
-
-    // To store results of recursive call
-    ll x1, y1;
-    ll gcd = gcdExtended(b % a, a, &x1, &y1);
-
-    // Update x and y using results of recursive
-    // call
-    *x = y1 - (b / a) * x1;
-    *y = x1;
-
-    return gcd;
+bool isPrime(ull n) {
+	if (n < 2 || n % 6 % 4 != 1) return (n | 1) == 3;
+	ull A[] = {2, 325, 9375, 28178, 450775, 9780504, 1795265022},
+	    s = __builtin_ctzll(n-1), d = n >> s;
+	for (ull a : A) {   // ^ count trailing zeroes
+		ull p = modpow(a%n, d, n), i = s;
+		while (p != 1 && p != n - 1 && a % n && i--)
+			p = modmul(p, p, n);
+		if (p != n-1 && i != s) return 0;
+	}
+	return 1;
 }
 
-ll modinv(ll A, ll M)
-{
-    ll x, y;
-    ll g = gcdExtended(A, M, &x, &y);
-    if (g != 1)
-        return -1;
-    else
-    {
-        return (x % M + M) % M;
-    }
+ull pollard(ull n) {
+	auto f = [n](ull x) { return modmul(x, x, n) + 1; };
+	ull x = 0, y = 0, t = 30, prd = 2, i = 1, q;
+	while (t++ % 40 || __gcd(prd, n) == 1) {
+		if (x == y) x = ++i, y = f(x);
+		if ((q = modmul(prd, max(x,y) - min(x,y), n))) prd = q;
+		x = f(x), y = f(f(y));
+	}
+	return __gcd(prd, n);
+}
+vector<ull> factor(ull n) {
+	if (n == 1) return {};
+	if (isPrime(n)) return {n};
+	ull x = pollard(n);
+	auto l = factor(x), r = factor(n / x);
+	l.insert(l.end(), all(r));
+	return l;
 }
 
-ll modinv(ll k)
-{
-    return modinv(k, m);
+ull modinverse(ll a, ll mod){
+    return modpow(a, mod - 2, mod);
+}
+ll MOD = 1e9 + 7;
+ll MOD2 = 1e9 + 7 - 1;
+ll mod(ll k) {
+    return k % MOD;
 }
 int main()
 {
@@ -94,25 +84,61 @@ int main()
     int n;
     cin >> n;
     vector<pair<ll, ll>> factors(n);
-    ll numdivisors = 1, sumdivisors = 1, proddivisors = 1;
-    ll sqrtprod = 1, prod = 1;
-    bool isperfectsq = true;
+    // ll numdivisors = 1, sumdivisors = 1, proddivisors = 1;
+    // ll sqrtprod = 1, prod = 1;
+    // bool isperfectsq = true;
     rep(i, 0, n)
     {
         cin >> factors[i].f >> factors[i].s;
-        numdivisors = mod(numdivisors * (factors[i].s + 1));
-        proddivisors = mod(proddivisors * (factors[i].s + 1), m - 1);
-        sumdivisors = mod(sumdivisors * mod(mod(modpow(factors[i].f, factors[i].s + 1) - 1) * modinv(factors[i].f - 1)));
-        sqrtprod = mod(sqrtprod * modpow(factors[i].f, factors[i].s / 2));
-        prod = mod(prod * modpow(factors[i].f, factors[i].s));
-        isperfectsq &= factors[i].s % 2 == 0;
+        // numdivisors = mod(numdivisors * (factors[i].s + 1));
+        // proddivisors = mod(proddivisors * (factors[i].s + 1), m - 1);
+        // // sumdivisors = mod(sumdivisors * mod(mod(modpow(factors[i].f, factors[i].s + 1) - 1) * modinv(factors[i].f - 1)));
+        // sqrtprod = mod(sqrtprod * modpow(factors[i].f, factors[i].s / 2));
+        // prod = mod(prod * modpow(factors[i].f, factors[i].s));
+        // isperfectsq &= factors[i].s % 2 == 0;
     }
-    cout << modinv(2, m - 1) << nL;
-    proddivisors = mod(proddivisors * modinv(2, m - 1), m - 1);
-    proddivisors = modpow(prod, proddivisors);
-    if (isperfectsq)
-        proddivisors = mod(proddivisors * sqrtprod);
-    cout << numdivisors << " " << sumdivisors << " " << proddivisors << nL;
+    // cout << modinv(2, m - 1) << nL;
+    // proddivisors = mod(proddivisors * modinv(2, m - 1, MOD), m - 1);
+    // proddivisors = modpow(prod, proddivisors, MOD);
+    // if (isperfectsq)
+    //     proddivisors = mod(proddivisors * sqrtprod);
+    // cout << numdivisors << " " << sumdivisors << " " << proddivisors << nL;
+
+
+    ll sumdiv = 1;
+    ll numdiv = 1;
+    ll numdiv2 = 1;
+    ll proddiv = 1;
+    ll sq = 1;
+    ll prod = 1;
+    for(auto &p : factors){
+        ll num = (modpow(p.f, p.s + 1, MOD) - 1) % MOD;
+        ll denom = modinverse(p.f - 1, MOD);
+        sumdiv = (sumdiv * ((num * denom) % MOD)) % MOD;
+        numdiv = mod(numdiv * (p.s + 1));
+        prod = mod(prod * modpow(p.f, p.s, MOD));
+        if(sq != -1){
+            if(p.s % 2 == 0){
+                sq = mod(sq * modpow(p.f, p.s / 2, MOD));                
+                numdiv2 = (numdiv2 * (p.s + 1)) % MOD2;
+            }
+            else{
+                sq = -1;
+                numdiv2 = (numdiv2 * (p.s + 1) / 2) % MOD2;
+            }
+        }
+        else{
+            numdiv2 = (numdiv2 * (p.s + 1)) % MOD2;
+        }
+    }
+    if(sq == -1){
+        proddiv = modpow(prod, numdiv2, MOD);
+        
+    }
+    else{
+        proddiv = modpow(sq, numdiv2, MOD);
+    }
+    cout << numdiv << " " << sumdiv << " " << proddiv << nL;
 
     return 0;
 }

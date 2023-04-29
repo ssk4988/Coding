@@ -49,10 +49,11 @@ int get_centroid(int n, int ms, int p = 0) // n = node, ms = size of tree, p = p
 				return get_centroid(x, ms, n);
 	return n;
 }
-void dfs2(unordered_map<int, ll> &freq, int cur, int p, int dist)
+void dfs2(vl &freq, int cur, int p, int dist)
 {
 	if (r[cur])
 		return;
+	while(sz(freq) <= dist) freq.pb(0);
 	freq[dist]++;
 	for (int i : a[cur])
 	{
@@ -67,34 +68,38 @@ int centroid(int n = 1)
 	int C = get_centroid(n, dfs(n));
 
 	// do something
+	dfs(C);
+	sort(all(a[C]), [&](int s1, int s2)->bool{return s[s1] > s[s2];});
 
 	r[C] = 1;
-	unordered_map<int, ll> prev;
+	vl prev(1);
 	prev[0] = 1;
-	for (int i = 0; i < a[C].size(); i++)
+	for (int i = 0; i < sz(a[C]); i++)
 	{
 		int x = a[C][i];
-		unordered_map<int, ll> cur;
+		vl cur;
 		dfs2(cur, x, C, 1);
-		for (auto &p : prev)
+		if(prev.size() < cur.size()){
+			prev.resize(sz(cur));
+		}
+		for (int i = 0; i < prev.size(); i++)
 		{
-			if (cur.find(k - p.f) != cur.end())
+			if (k - i < cur.size())
 			{
-				ans += p.s * cur[k - p.f];
+				ans += prev[i] * cur[k - i];
 			}
 		}
-		for (auto &p : prev)
+		rep(i, 0, sz(cur))
 		{
-			cur[p.f] += p.s;
+			prev[i] += cur[i];
 		}
-		prev = cur;
 	}
 
-	vi childC;
+	// vi childC;
 	for (int x : a[C])
 		if (!r[x])
 		{
-			childC.pb(centroid(x));
+			centroid(x);
 		}
 	return C;
 }

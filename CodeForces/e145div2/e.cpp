@@ -35,42 +35,32 @@ int main()
         cin >> ops[i];
     }
     vvi dp(a + 1, vi(b + 1));
-    rep(cdsum, 0, a + b + 1){
-        vi c(1 + min(cdsum, a));
-        int plen = 1, slen = 1, prep = 0, srep = min(cdsum, a);
-        bool ps = srep = prep;
-        rep(i, 0, n){
-            if(ops[i] > 0){
-                int subamount = min(ops[i], prep);
-                if(ops[i] > prep){
-                    plen += ops[i] - prep;
-                }
-                prep -= subamount;
-                srep -= min(srep, ops[i]);
-            }
-            if(ops[i] < 0){
-                
-                int subamount = min(-ops[i], a - srep);
-                if(-ops[i] > a - srep){
-                    slen += -ops[i] - (a - srep);
-                }
-                srep += subamount;
-                prep += min(a - prep, -ops[i]);
-            }
-            if(!ps && srep == prep){
-                plen = slen = min(cdsum, a);
-                ps = true;
-            }
-        }
-        rep(i, 0, plen){
-            dp[i][cdsum - i] = prep;
-        }
-        rep(i, 0, min(cdsum, a)){
-            if(i < plen){
-                dp[i][cdsum - i] = prep;
-            }
-        }
-    }
+    vector<vector<int>> ans(a + 1, vector<int>(b + 1));
+	rep(cd, 0, a + b + 1){
+		int l = max(0, cd - b), r = min(a, cd);
+		int sum = 0;
+		for (int x : ops){
+			sum += x;
+			l = max({l, sum, cd + sum - b});
+			r = min({r, a + sum, sum + cd});
+		}
+		if (l > r) l = r = max(0, cd - b);
+		int res = l;
+		for (int x : ops){
+			if (x > 0)
+				res -= min({res, x, b - (cd - res)});
+			else
+				res += min({cd - res, -x, a - res});
+		}
+		rep(c, 0, cd + 1) if (c <= a && cd - c <= b){
+			dp[c][cd - c] = (c < l ? res : (c > r ? res + r - l : res + c - l));
+		}
+	}
+	rep(i, 0, a + 1){
+		rep(j, 0, b + 1)
+			cout << dp[i][j] << " ";
+		cout << nL;
+	}
     
     return 0;
 }

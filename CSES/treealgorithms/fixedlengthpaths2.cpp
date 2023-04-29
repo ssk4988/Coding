@@ -101,10 +101,12 @@ void centroid(int n = 1)
 
 	r[C] = 1;
 	
+	maxDepth = 0;
 	for (int i = 0; i < a[C].size(); i++)
 	{
 		int x = a[C][i];
 		dfs2(x, C, 1, false);
+		// maxDepth = 0;
 		dfs2(x, C, 1, true);
 	}
 	for (int i = 1; i <= maxDepth; i++) update(i, -query(i, i));
