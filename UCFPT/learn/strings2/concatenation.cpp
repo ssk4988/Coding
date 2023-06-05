@@ -29,30 +29,19 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n; cin >> n;
-    vi r(n);
-    rep(i, 0, n){
-        cin >> r[i];
-    }
-    ld ans = 0;
-    vector<vector<ld>> dp(n + 1, vector<ld>(101));
-    rep(i, 0, n){
-        dp[i + 1] = dp[i];
-        rep(j, 1, r[i] + 1){
-            rep(j1, j + 1, 101){
-                ans += dp[i][j1] / r[i];
-            }
-            dp[i + 1][j] += ld(1) / r[i];
+    string s1, s2; cin >> s1 >> s2;
+    set<string> se;
+    map<string, int> m;
+    rep(i, 1, sz(s1) + 1){
+        rep(j, 0, sz(s2)){
+            string ss1 = s1.substr(0, i) + s2.substr(j);
+            se.insert(ss1);
+            m[ss1]++;
         }
     }
-    ld r1 = ans * 1e6;
-    ld r2 = r1 - ll(r1);
-    if(fabs(r2 - 0.5) < 1e-5) r2 = ll(r1) % 2  == 0 ? 0 : 1;
-    else if(r2 > 0.5) r2 = 1;
-    else r2 = 0;
-    ld rounded = ll(r1) + r2;
-    rounded /= 1e6;
-    cout << fixed << setprecision(6) << rounded << nL;
-    
+    cout << sz(se) << nL;
+    for(auto &p : m){
+        if(p.s > 1) cout << p.f << " " << p.s << nL;
+    }
     return 0;
 }

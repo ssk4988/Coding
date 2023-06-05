@@ -29,30 +29,33 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n; cin >> n;
-    vi r(n);
-    rep(i, 0, n){
-        cin >> r[i];
+    int n;
+    cin >> n;
+    vvi adj(n);
+    rep(i, 0, n - 1)
+    {
+        int a, b;
+        cin >> a >> b;
+        a--, b--;
+        adj[a].pb(b);
+        adj[b].pb(a);
     }
-    ld ans = 0;
-    vector<vector<ld>> dp(n + 1, vector<ld>(101));
-    rep(i, 0, n){
-        dp[i + 1] = dp[i];
-        rep(j, 1, r[i] + 1){
-            rep(j1, j + 1, 101){
-                ans += dp[i][j1] / r[i];
-            }
-            dp[i + 1][j] += ld(1) / r[i];
+    int farthest = -1, dist = -1;
+    auto dfs = [&](int cur, int pre, int d, auto &&dfs)->void{
+        if(d > dist){
+            dist = d;
+            farthest = cur;
         }
-    }
-    ld r1 = ans * 1e6;
-    ld r2 = r1 - ll(r1);
-    if(fabs(r2 - 0.5) < 1e-5) r2 = ll(r1) % 2  == 0 ? 0 : 1;
-    else if(r2 > 0.5) r2 = 1;
-    else r2 = 0;
-    ld rounded = ll(r1) + r2;
-    rounded /= 1e6;
-    cout << fixed << setprecision(6) << rounded << nL;
+        for(int i : adj[cur]){
+            if(i == pre) continue;
+            dfs(i, cur, d + 1, dfs);
+        }
+    };
+    dfs(0, -1, 0, dfs);
+    int t1 = farthest;
+    farthest = dist = -1;
+    dfs(t1, -1, 0, dfs);
+    cout << dist << nL;
     
     return 0;
 }

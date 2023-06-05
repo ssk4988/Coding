@@ -25,7 +25,6 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-
 template <class T> int sgn(T x) { return (x > 0) - (x < 0); }
 template<class T>
 struct Point {
@@ -50,7 +49,7 @@ struct Point {
 	P normal() const { return perp().unit(); }
 	// returns point rotated 'a' radians ccw around the origin
 	P rotate(ld a) const {
-		return P(x*cosl(a)-y*sinl(a),x*sinl(a)+y*cosl(a)); }
+		return P(x*cos(a)-y*sin(a),x*sin(a)+y*cos(a)); }
 	friend ostream& operator<<(ostream& os, P p) {
 		return os << "(" << p.x << "," << p.y << ")"; }
 };
@@ -69,54 +68,58 @@ vector<pair<P, P>> tangents(P c1, ld r1, P c2, ld r2) {
 	return out;
 }
 
-template<class P>
-pair<int, P> lineInter(P s1, P e1, P s2, P e2) {
-	auto d = (e1 - s1).cross(e2 - s2);
-	if (d == 0) // if parallel
-		return {-(s1.cross(e1, s2) == 0), P(0, 0)};
-	auto p = s2.cross(e1, e2), q = s2.cross(e2, s1);
-	return {1, (s1 * p + e1 * q) / d};
+typedef Point<ld> P;
+bool circleInter(P a,P b,ld r1,ld r2,pair<P, P>* out) {
+	if (a == b) { assert(r1 != r2); return false; }
+	P vec = b - a;
+	ld d2 = vec.dist2(), sum = r1+r2, dif = r1-r2,
+	       p = (d2 + r1*r1 - r2*r2)/(d2*2), h2 = r1*r1 - p*p*d2;
+	if (sum*sum < d2 || dif*dif > d2) return false;
+	P mid = a + vec*p, per = vec.perp() * sqrt(fmax(0, h2) / d2);
+	*out = {mid + per, mid - per};
+	return true;
 }
 
-typedef Point<ld> P;
-const ld eps = 1e-9;
+using P = Point<ld>;
+
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n; ld p, x, y, r;
-	const ld pi = acosl(-1);
-	while(true){
-		cin >> n >> p >> x >> y >> r;
-		P red(x, y); P o(0, 0);
-		if(n == 0) break;
-		vector<pair<ld, int>> events;
-		rep(i, 0, n){
-			ld x1, y1, r1; cin >> x1 >> y1 >> r1;
-			P c(x1, y1);
-			vector<pair<P, P>> tns = tangents(red, r, c, -r1);
-			assert(sz(tns) == 2); // assume circle does not touch other
-			// if(r1 < r){
-			// 	pair<int, P> inter = lineInter(tns[0].f, tns[0].s, tns[1].f, tns[1].s);
-			// 	assert(inter.f == 1);
-			// 	if(inter.s.dist() <= p + eps) continue;
-			// }
-			vector<P> ts;
-			for(auto &p1 : tns){
-				P d = p1.s - p1.f;
-				d = d.unit();
-				ld lo = 0, hi = 3 * p;
-				while(((d * hi + p1.f) - (d * lo + p1.f)).dist() > eps){
-					ld mid = (lo + hi) /2;
-					P newp = d * mid + p1.f;
-					if(newp.dist() > p) hi = mid;
-					else lo = mid;
-				}
-				ts.pb(d * lo + p1.f);
-			}
-			if(o.cross(ts[0], ts[1]) < 0) swap(ts[0], ts[1]);
-			ld a1 = ts[0].angle(), a2 = ts[1].angle();
-			if(a1 >= 0 && a2 < 0){
+    int n; cin >> n;
+    vector<P> trees(n); vd rs(n);
+    rep(i, 0, n){
+        cin >> trees[i].x >> trees[i].y >> rs[i];
+    }
+    const ld pi = acosl(-1);
+    ld b, d; cin >> b >> d; P o(0, 0);
+    vector<pair<ld, int>> events;
+    rep(i, 0, n){
+        rs[i] += b;
+        vector<pair<P, P>> tns = tangents(trees[i], rs[i], o, 0);
+        assert(sz(tns) == 2);
+        if(tns[0].f.dist() >= d){
+            // circle intersection
+            pair<P, P> res;
+            if(circleInter(o, trees[i], d, rs[i], &res)){
+                if(o.cross(res.f, res.str) < 0) swap(res.f, res.str);
+                ld a1 = res.f.angle(), a2 = res.str.angle();
+                if(a1 >= 0 && a2 < 0){
+                    events.pb({a1, 1});
+                    events.pb({pi, -1});
+                    events.pb({-pi, 1});
+                    events.pb({a2, -1});
+                }
+                else{
+                    events.pb({a1, 1});
+                    events.pb({a2, -1});
+                }
+            }
+        }
+        else{
+            if(o.cross(tns[0].f, tns[1].f) < 0) swap(tns[0], tns[1]);
+            ld a1 = tns[0].f.angle(), a2 = tns[1].f.angle();
+            if(a1 >= 0 && a2 < 0){
                 events.pb({a1, 1});
                 events.pb({pi, -1});
                 events.pb({-pi, 1});
@@ -126,22 +129,22 @@ int main()
                 events.pb({a1, 1});
                 events.pb({a2, -1});
             }
-		}
-		int cnt = 0;
-		ld ans = 0;
-		ld pre = -pi;
-		events.pb({-pi, 0});
-		events.pb({pi, 0});
-		sort(all(events));
-		for(auto [angle, inc] : events){
-			ld dif = angle - pre;
-			if(cnt == 0) ans += dif;
-			cnt += inc;
-			pre = angle;
-		}
-		cout << fixed << setprecision(4) << (ans / 2 / pi) << "\n";
+        }
+    }
+    int cnt = 0;
+    ld ans = 0;
+    ld pre = -pi;
+    events.pb({-pi, 0});
+    events.pb({pi, 0});
+    sort(all(events));
+    for(auto [angle, inc] : events){
+        ld dif = angle - pre;
+        if(cnt == 0) ans += dif;
+        cnt += inc;
+        pre = angle;
+    }
+    cout << fixed << setprecision(8) << (ans / 2 / pi) << "\n";
 
-	}
     
     return 0;
 }

@@ -29,30 +29,30 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n; cin >> n;
-    vi r(n);
-    rep(i, 0, n){
-        cin >> r[i];
-    }
-    ld ans = 0;
-    vector<vector<ld>> dp(n + 1, vector<ld>(101));
-    rep(i, 0, n){
-        dp[i + 1] = dp[i];
-        rep(j, 1, r[i] + 1){
-            rep(j1, j + 1, 101){
-                ans += dp[i][j1] / r[i];
-            }
-            dp[i + 1][j] += ld(1) / r[i];
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int n; cin >> n;
+        vi p(n), rev(n);
+        rep(i, 0, n){
+            cin >> p[i];
+            p[i]--;
+            rev[p[i]] = i;
+        }
+        vi vals;
+        vals.pb(rev[0]);
+        vals.pb(rev[n - 1]);
+        vals.pb(rev[1]);
+        sort(all(vals));
+        if(vals[0] == rev[n - 1]){
+            cout << (vals[0] + 1) << " " << (vals[1] + 1) << nL;
+        }
+        else if(vals[1] == rev[n - 1]){
+            cout << (vals[0] + 1) << " " << (vals[0] + 1) << nL;
+        }
+        else{
+            cout << (vals[2] + 1) << " " << (vals[1] + 1) << nL;
         }
     }
-    ld r1 = ans * 1e6;
-    ld r2 = r1 - ll(r1);
-    if(fabs(r2 - 0.5) < 1e-5) r2 = ll(r1) % 2  == 0 ? 0 : 1;
-    else if(r2 > 0.5) r2 = 1;
-    else r2 = 0;
-    ld rounded = ll(r1) + r2;
-    rounded /= 1e6;
-    cout << fixed << setprecision(6) << rounded << nL;
     
     return 0;
 }

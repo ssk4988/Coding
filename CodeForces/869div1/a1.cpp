@@ -29,30 +29,24 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n; cin >> n;
-    vi r(n);
+    int n, q; cin >> n >> q;
+    vi a(n);
     rep(i, 0, n){
-        cin >> r[i];
+        cin >> a[i];
     }
-    ld ans = 0;
-    vector<vector<ld>> dp(n + 1, vector<ld>(101));
-    rep(i, 0, n){
-        dp[i + 1] = dp[i];
-        rep(j, 1, r[i] + 1){
-            rep(j1, j + 1, 101){
-                ans += dp[i][j1] / r[i];
+    vvi dp(n, vi(2));
+    rep(i,0, n){
+        dp[i][0] = 1;
+        rep(j, 0, i){
+            if(a[j] < a[i]){
+                dp[i][0] = max(dp[i][0], 1 + dp[j][1]);
             }
-            dp[i + 1][j] += ld(1) / r[i];
+            else{
+                dp[i][1] = max(dp[i][1], max(1 + dp[j][0], dp[j][1]));
+            }
         }
+        dp[i][1] = max(dp[i][1], dp[i][0]);
     }
-    ld r1 = ans * 1e6;
-    ld r2 = r1 - ll(r1);
-    if(fabs(r2 - 0.5) < 1e-5) r2 = ll(r1) % 2  == 0 ? 0 : 1;
-    else if(r2 > 0.5) r2 = 1;
-    else r2 = 0;
-    ld rounded = ll(r1) + r2;
-    rounded /= 1e6;
-    cout << fixed << setprecision(6) << rounded << nL;
     
     return 0;
 }

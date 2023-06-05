@@ -64,27 +64,28 @@ struct Node
 		push();
 		return l->query(L, R) + r->query(L, R);
 	}
-	void add(ll L, ll R, ll start)
+	void add(ll L, ll R)
 	{
 		if (R <= lo || hi <= L)
 			return;
 		if (L <= lo && hi <= R)
 		{
-			// cout << "on segment [" << lo << ", " << hi << "), adding " << (start - 1) << " to const and " << 1 << " to slope, initial from " << initial;
-			initial += (start - 1) * (hi - lo);
-			lzconst += (start - 1);
+			// cout << "on segment [" << lo << ", " << hi << "), adding " << (lo - L) << " to const and " << 1 << " to slope, initial from " << initial;
+			initial += (lo - L) * (hi - lo);
+			lzconst += (lo - L);
 			initial += 1 * tri(hi - lo);
 			lzslope += 1;
 			// cout << " to " << initial << nL;
 		}
 		else
 		{
-			push(), l->add(L, R, start), r->add(L, R, start + r->lo - lo);
+			push(), l->add(L, R), r->add(L, R);
 			initial = l->initial + r->initial;
 		}
 	}
 	void push()
 	{
+		if(lo + 1 == hi) return;
 		if (lzslope != 0)
 		{
 			l->lzslope += lzslope;
@@ -100,9 +101,9 @@ struct Node
 		{
 			// cout << "on segment [" << lo << ", " << hi << "), pushing const of " << (lzconst + r->lo - lo) << " to right and " << lzconst << " to left" << nL;
 			l->lzconst += lzconst;
-			r->lzconst += lzconst + r->lo - lo;
+			r->lzconst += lzconst;
 			l->initial += lzconst * (l->hi - l->lo);
-			r->initial += (lzconst) * (r->hi - r->lo);
+			r->initial += lzconst * (r->hi - r->lo);
 			lzconst = 0;
 		}
 	}
@@ -129,7 +130,7 @@ int main()
 			int a, b;
 			cin >> a >> b;
 			a--, b--;
-			tree->add(a, b + 1, 1);
+			tree->add(a, b + 1);
 		}
 		else
 		{

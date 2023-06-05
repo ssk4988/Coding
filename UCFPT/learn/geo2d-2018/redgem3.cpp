@@ -79,23 +79,23 @@ pair<int, P> lineInter(P s1, P e1, P s2, P e2) {
 }
 
 typedef Point<ld> P;
-const ld eps = 1e-9;
+const ld eps = 1e-15;
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
     int n; ld p, x, y, r;
-	const ld pi = acosl(-1);
 	while(true){
 		cin >> n >> p >> x >> y >> r;
-		P red(x, y); P o(0, 0);
+		P red(x, y);
 		if(n == 0) break;
-		vector<pair<ld, int>> events;
+		vector<pair<ld, pi>> circum;
+		ld pi = acosl(-1);
 		rep(i, 0, n){
 			ld x1, y1, r1; cin >> x1 >> y1 >> r1;
 			P c(x1, y1);
 			vector<pair<P, P>> tns = tangents(red, r, c, -r1);
-			assert(sz(tns) == 2); // assume circle does not touch other
+			assert(sz(tns) == 2);
 			// if(r1 < r){
 			// 	pair<int, P> inter = lineInter(tns[0].f, tns[0].s, tns[1].f, tns[1].s);
 			// 	assert(inter.f == 1);
@@ -104,9 +104,9 @@ int main()
 			vector<P> ts;
 			for(auto &p1 : tns){
 				P d = p1.s - p1.f;
-				d = d.unit();
-				ld lo = 0, hi = 3 * p;
-				while(((d * hi + p1.f) - (d * lo + p1.f)).dist() > eps){
+				d = d / d.dist();
+				ld lo = 0, hi = 1e15;
+				while(fabs(hi - lo) > eps){
 					ld mid = (lo + hi) /2;
 					P newp = d * mid + p1.f;
 					if(newp.dist() > p) hi = mid;
@@ -114,32 +114,42 @@ int main()
 				}
 				ts.pb(d * lo + p1.f);
 			}
-			if(o.cross(ts[0], ts[1]) < 0) swap(ts[0], ts[1]);
-			ld a1 = ts[0].angle(), a2 = ts[1].angle();
-			if(a1 >= 0 && a2 < 0){
-                events.pb({a1, 1});
-                events.pb({pi, -1});
-                events.pb({-pi, 1});
-                events.pb({a2, -1});
-            }
-            else{
-                events.pb({a1, 1});
-                events.pb({a2, -1});
-            }
+			if(c.cross(ts[0], ts[1]) < 0) swap(ts[0], ts[1]);
+			if(ts[0].angle() > ts[1].angle()){
+				circum.pb({-pi, {1, i}});
+				circum.pb({ts[1].angle(), {-1, i}});
+				circum.pb({ts[0].angle(), {1, i}}); 
+				circum.pb({pi, {-1, i}});
+			}
+			else{
+				circum.pb({ts[0].angle(), {1, i}}); 
+				circum.pb({ts[1].angle(), {-1, i}});
+			}
 		}
-		int cnt = 0;
-		ld ans = 0;
+		// circum.pb({-pi, 0});
+		circum.pb({pi, {0, -1}});
+		sort(all(circum));
 		ld pre = -pi;
-		events.pb({-pi, 0});
-		events.pb({pi, 0});
-		sort(all(events));
-		for(auto [angle, inc] : events){
-			ld dif = angle - pre;
-			if(cnt == 0) ans += dif;
-			cnt += inc;
-			pre = angle;
+		map<int, ld> freq;
+		set<int> f2;
+		// int start = 0;
+		// for(auto &p : circum){
+		// 	if(f2.count(p.s.s) == 0 && p.s.f == -1){
+		// 		start++;
+		// 	}
+		// 	f2.insert(p.s.s);
+		// }
+		int score = 0;
+		ld ans = 0;
+		// int mxscore = 0, mnscore = 
+		for(auto &p : circum){
+			ld dif = p.f - pre;
+			freq[score] += dif;
+			if(score > 0) ans += dif;
+			pre = p.f;
+			score += p.s.f;
 		}
-		cout << fixed << setprecision(4) << (ans / 2 / pi) << "\n";
+		cout << fixed << setprecision(4) << (1 - ans / 2 / pi) << nL;
 
 	}
     

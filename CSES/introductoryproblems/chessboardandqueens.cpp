@@ -29,30 +29,30 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n; cin >> n;
-    vi r(n);
-    rep(i, 0, n){
-        cin >> r[i];
-    }
-    ld ans = 0;
-    vector<vector<ld>> dp(n + 1, vector<ld>(101));
-    rep(i, 0, n){
-        dp[i + 1] = dp[i];
-        rep(j, 1, r[i] + 1){
-            rep(j1, j + 1, 101){
-                ans += dp[i][j1] / r[i];
-            }
-            dp[i + 1][j] += ld(1) / r[i];
+    vvi grid(8, vi(8));
+    rep(i, 0, 8){
+        string str; cin >> str;
+        rep(j, 0, 8){
+            grid[i][j] = str[j] == '.';
         }
     }
-    ld r1 = ans * 1e6;
-    ld r2 = r1 - ll(r1);
-    if(fabs(r2 - 0.5) < 1e-5) r2 = ll(r1) % 2  == 0 ? 0 : 1;
-    else if(r2 > 0.5) r2 = 1;
-    else r2 = 0;
-    ld rounded = ll(r1) + r2;
-    rounded /= 1e6;
-    cout << fixed << setprecision(6) << rounded << nL;
+    vi row(8), col(8), d1(15), d2(15);
+    int ans = 0;
+    auto bt = [&](int idx, auto &&bt)->void{
+        if(idx == 8){
+            ans++;
+            return;
+        }
+        rep(c, 0, 8){
+            int d1v = c + idx, d2v = (7 - c) + idx;
+            if(!grid[idx][c] || row[idx] || col[c] || d1[d1v] || d2[d2v]) continue;
+            row[idx] = col[c] = d1[d1v] = d2[d2v] = true;
+            bt(idx + 1, bt);
+            row[idx] = col[c] = d1[d1v] = d2[d2v] = false;
+        }
+    };
+    bt(0, bt);
+    cout << ans << nL;
     
     return 0;
 }
