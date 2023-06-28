@@ -25,17 +25,28 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-struct UF {
-	vi e;
-	UF(int n) : e(n, -1) {}
-	bool sameSet(int a, int b) { return find(a) == find(b); }
-	int size(int x) { return -e[find(x)]; }
-	int find(int x) { return e[x] < 0 ? x : e[x] = find(e[x]); }
-	bool join(int a, int b) {
-		a = find(a), b = find(b);
-		if (a == b) return false;
-		if (e[a] > e[b]) swap(a, b);
-		e[a] += e[b]; e[b] = a;
-		return true;
-	}
-};
+int main()
+{
+    cin.tie(0)->sync_with_stdio(0);
+    cin.exceptions(cin.failbit);
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int n, m; cin >> n >> m;
+        ll sum1 = 0, sum2 = 0;
+        rep(i, 0, n){
+            ll k; cin >> k;
+            sum1 += k;
+        }
+        rep(i, 0, m){
+            ll k; cin >> k;
+            sum2 += k;
+        }
+        if(sum1 > sum2){
+            cout << "Tsondu\n";
+        }
+        else if(sum1 == sum2) cout << "Draw\n";
+        else cout << "Tenzing\n";
+    }
+    
+    return 0;
+}

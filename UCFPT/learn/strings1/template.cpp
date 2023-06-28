@@ -112,20 +112,6 @@ vector<int> getlcp(string &input, vector<int> &sa)
     return lcp;
 }
 
-// vector<int> prefix_function(string str) {
-//     int n = (int)str.length();
-//     vector<int> pi(n);
-//     for (int i = 1; i < n; i++) {
-//         int j = pi[i-1];
-//         while (j > 0 && str[i] != str[j])
-//             j = pi[j-1];
-//         if (str[i] == str[j])
-//             j++;
-//         pi[i] = j;
-//     }
-//     return pi;
-// }
-
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
@@ -185,63 +171,5 @@ int main()
         }
     }
     cout << ans << nL;
-    // vi z = z_function(str);
-    // vi kmp = prefix_function(str);
-    // int lastc = 0;
-    // for(int i = 0; i < n; i++){
-    //     if(kmp[i] == i){
-    //         lastc = i;
-    //     }
-    // }
-    // lastc++;
-    // int dp[n + 1];
-    // rep(i, 0, n + 1){
-    //     dp[i] = max(i, lastc);
-    // }
-    // for(int i = lastc; i < n; i++){
-    //     int k = kmp[i];
-    //     while(k > lastc){
-    //         if(i - k < dp[k]){
-    //             dp[k] = i + 1;
-    //         }
-    //         k = kmp[k - 1];
-    //     }
-    // }
-    
-
-    // while (lo < hi)
-    // {
-    //     int mi = lo + (hi - lo) / 2;
-    //     int cur = 0, end = cur + mi;
-    //     bool works = true;
-    //     while (end < n && works)
-    //     {
-    //         int next = -1;
-    //         for (int i = cur + 1; i <= end; i++)
-    //         {
-    //             if (z[i] >= mi)
-    //             {
-    //                 cur = i;
-    //                 end = cur + mi;
-    //                 break;
-    //             }
-    //         }
-    //         works = false;
-    //     }
-    //     if(works){
-    //         hi = mi;
-    //     }
-    //     else{
-    //         lo = mi + 1;
-    //     }
-    // }
-    // cout << lo << nL;
-    // int ans = n;
-    // for(int i = n; i > 0; i--){
-    //     if(dp[i] == n){
-    //         ans = i;
-    //     }
-    // }
-    // cout << ans << nL;
     return 0;
 }

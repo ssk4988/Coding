@@ -13,6 +13,7 @@ using vpi = vector<pi>;
 using vpl = vector<pl>;
 using vpd = vector<pd>;
 using vvi = vector<vi>;
+using vvl = vector<vl>;
 
 #define f first
 #define s second
@@ -25,17 +26,29 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-struct UF {
-	vi e;
-	UF(int n) : e(n, -1) {}
-	bool sameSet(int a, int b) { return find(a) == find(b); }
-	int size(int x) { return -e[find(x)]; }
-	int find(int x) { return e[x] < 0 ? x : e[x] = find(e[x]); }
-	bool join(int a, int b) {
-		a = find(a), b = find(b);
-		if (a == b) return false;
-		if (e[a] > e[b]) swap(a, b);
-		e[a] += e[b]; e[b] = a;
-		return true;
-	}
-};
+int main()
+{
+    cin.tie(0)->sync_with_stdio(0);
+    cin.exceptions(cin.failbit);
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int n; cin >> n;
+        vpi v(n);
+        vvl occ(n + 1);
+        rep(i, 0, n){
+            cin >> v[i].f >> v[i].s;
+            occ[v[i].f].pb(v[i].s);
+        }
+        ll ans = 0;
+        rep(i, 1, n + 1){
+            sort(all(occ[i]));
+            reverse(all(occ[i]));
+            rep(j, 0, min(i, sz(occ[i]))){
+                ans += occ[i][j];
+            }
+        }
+        cout << ans << nL;
+    }
+    
+    return 0;
+}

@@ -13,6 +13,7 @@ using vpi = vector<pi>;
 using vpl = vector<pl>;
 using vpd = vector<pd>;
 using vvi = vector<vi>;
+using vvl = vector<vl>;
 
 #define f first
 #define s second
@@ -24,18 +25,24 @@ using vvi = vector<vi>;
 #define sz(x) (int)(x).size()
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
+ll MOD = 1e9 + 7;
+ll mod(ll k){
+    return k % MOD;
+}
 
-struct UF {
-	vi e;
-	UF(int n) : e(n, -1) {}
-	bool sameSet(int a, int b) { return find(a) == find(b); }
-	int size(int x) { return -e[find(x)]; }
-	int find(int x) { return e[x] < 0 ? x : e[x] = find(e[x]); }
-	bool join(int a, int b) {
-		a = find(a), b = find(b);
-		if (a == b) return false;
-		if (e[a] > e[b]) swap(a, b);
-		e[a] += e[b]; e[b] = a;
-		return true;
-	}
-};
+int main()
+{
+    cin.tie(0)->sync_with_stdio(0);
+    cin.exceptions(cin.failbit);
+    int n, m, k; cin >> n >> m >> k;
+    vvl dp(m + 1, vl(n + 1)); // dim 0 index dim 1 number intervals created dim 2 whether this index is opened or not
+    dp[0][0] = 1;
+    k--;
+    rep(i, 0, m){
+        rep(j, 0, n + 1){
+            
+        }
+    }
+    
+    return 0;
+}

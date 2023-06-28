@@ -25,17 +25,30 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-struct UF {
-	vi e;
-	UF(int n) : e(n, -1) {}
-	bool sameSet(int a, int b) { return find(a) == find(b); }
-	int size(int x) { return -e[find(x)]; }
-	int find(int x) { return e[x] < 0 ? x : e[x] = find(e[x]); }
-	bool join(int a, int b) {
-		a = find(a), b = find(b);
-		if (a == b) return false;
-		if (e[a] > e[b]) swap(a, b);
-		e[a] += e[b]; e[b] = a;
-		return true;
-	}
-};
+int main()
+{
+    cin.tie(0)->sync_with_stdio(0);
+    cin.exceptions(cin.failbit);
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        ll n, k, g; cin >> n >> k >> g;
+        ll tot = k * g;
+        ll half = (g + 1) /2 - 1;
+        if(n * half >= tot){
+            cout << tot << nL;
+            continue;
+        }
+        ll ans = n * half;
+        ll rem = tot - n * half;
+        ll count = rem / g;
+        rem %= g;
+        if(rem != 0)
+            ans -= g - rem;
+        // ans = tot - count * g;
+        cout << ans << nL;
+        // g == 2???
+
+    }
+    
+    return 0;
+}
