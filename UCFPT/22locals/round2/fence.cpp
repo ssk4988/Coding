@@ -144,14 +144,14 @@ array<P, 2> hullDiameter(vector<P> S) {
 	pair<ld, array<P, 2>> res({0, {S[0], S[0]}});
 	rep(i,0,j)
 		for (;; j = (j + 1) % n) {
-            pair<ld, array<P, 2>> test = {(S[i] - S[j]).dist2(), {S[i], S[j]}};
-            if(test > res){
-                res = test;
-            }
-            else break;
-			// res = max(res, {(S[i] - S[j]).dist2(), {S[i], S[j]}});
-			// if ((S[(j + 1) % n] - S[j]).cross(S[i + 1] - S[i]) >= 0)
-			// 	break;
+            // pair<ld, array<P, 2>> test = {(S[i] - S[j]).dist2(), {S[i], S[j]}};
+            // if(test > res){
+            //     res = test;
+            // }
+            // else break;
+			res = max(res, {(S[i] - S[j]).dist2(), {S[i], S[j]}});
+			if ((S[(j + 1) % n] - S[j]).cross(S[i + 1] - S[i]) >= 0)
+				break;
 		}
 	return res.second;
 }
@@ -167,7 +167,7 @@ int main()
     }
     // reverse(all(p));
     ld lo = 0, hi = sqrtl(3e14);
-    const ld epsans = 1e-7;
+    const ld epsans = 1e-9;
     while(fabs(hi - lo) > epsans){
         ld mid = (lo + hi) / 2;
         vector<Line> hps, ls;
@@ -186,7 +186,7 @@ int main()
             hi = mid;
             continue;
         }
-        reverse(all(hpi));
+        // reverse(all(hpi));
         array<P, 2> diam = hullDiameter(hpi);
         if((diam[0] - diam[1]).dist() >= d) lo = mid;
         else hi = mid;

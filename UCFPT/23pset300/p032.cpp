@@ -13,7 +13,6 @@ using vpi = vector<pi>;
 using vpl = vector<pl>;
 using vpd = vector<pd>;
 using vvi = vector<vi>;
-using vvl = vector<vl>;
 
 #define f first
 #define s second
@@ -26,84 +25,88 @@ using vvl = vector<vl>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-struct Node2 {
-	Node2 *l = 0, *r = 0;
-	int lo, hi;
+struct PST {
+	PST *l = 0, *r = 0;
+	int lo, hi, mid = 0;
     ll val = 0, lzadd = 0;
-	Node2(vl &v, int lo, int hi) : lo(lo), hi(hi) {
+	PST(vl& v, int lo, int hi) : lo(lo), hi(hi) {
 		if (lo + 1 < hi) {
-			int mid = lo + (hi - lo)/2;
-			l = new Node2(v, lo, mid); r = new Node2(v, mid, hi);
+			mid = lo + (hi - lo)/2;
+			l = new PST(v, lo, mid); r = new PST(v, mid, hi);
 		}
-        else val = v[lo];
+		else val = v[lo];
 	}
-	int query(int i) {
-		if (i + 1 <= lo || hi <= i) {assert(false);return 0;}
-		if (i == lo && hi == i + 1){
-            return val % 256;
+    PST(PST *n) : lo(n->lo), hi(n->hi), val(n->val), mid(n->mid), lzadd(n->lzadd) {l = n->l; r = n->r;}
+	ll query(int idx) {
+		if (idx + 1 <= lo || hi <= idx) assert(false);
+		if (idx <= lo && hi <= idx + 1) return val;
+        push();
+        if(mid <= idx) return r->query(idx);
+        else return l->query(idx);
+	}
+    PST * add(int L, int R, ll v){
+        if (R <= lo || hi <= L) return this;
+        if (L <= lo && hi <= R) {
+            PST *n = new PST(this);
+            n->val += v;
+            n->lzadd += v;
+            return n;
         }
-		push();
-        int mid = lo + (hi - lo) / 2;
-        if(mid <= i) return r->query(i);
-        else return l->query(i);
-	}
-	void add(int L, int R, ll v) { 
-		if (R <= lo || hi <= L) return;
-		if (L <= lo && hi <= R){
-            val += v;
-            lzadd += v;
+        else{
+            push();
+            PST *n = new PST(this);
+            n->l = l->add(L, R, v);
+            n->r = r->add(L, R, v);
+            return n;
         }
-		else {
-			push(), l->add(L, R, v), r->add(L, R, v);
-		}
-	}
-	void push() {
+    }
+    void push(){
         if(lzadd == 0) return;
-        l->add(lo, hi, lzadd);
-        r->add(lo, hi, lzadd);
+        l = l->add(lo, hi, lzadd);
+        r = r->add(lo, hi, lzadd);
         lzadd = 0;
-	}
+    }
 };
-
-vector<array<int, 3>> queries;
 
 struct Node {
 	Node *l = 0, *r = 0;
-	int lo, hi;
-    int idx = -1, lzidx = -1, t = -1, lzt = -1, arr = -1, lzarr = -1;
+	int lo, hi, start = -1;
+    PST *p = NULL; 
+    int lzstart = -1;
+    PST *lzp = NULL;
 	Node(int lo, int hi) : lo(lo), hi(hi) {
 		if (lo + 1 < hi) {
 			int mid = lo + (hi - lo)/2;
 			l = new Node(lo, mid); r = new Node(mid, hi);
 		}
 	}
-	void query(int i) {
-		if (i + 1 <= lo || hi <= i){ assert(false); return;}
+	ll query(int i) {
+		if (i + 1 <= lo || hi <= i) return 0;
 		if (i == lo && hi == i + 1){
-            queries.pb({arr, lo - idx, t});
-            return;
+            if(start == -1) return 0;
+            return p->query(lo - start);
         }
 		push();
         int mid = lo + (hi - lo) / 2;
-        if(mid <= i) r->query(i);
-        else l->query(i);
+        if(mid <= i) return r->query(i);
+        else return l->query(i);
 	}
-	void set(int L, int R, int a, int time) { // a is arr idx, time
+	void set(int L, int R, PST *x) {
 		if (R <= lo || hi <= L) return;
 		if (L <= lo && hi <= R){
-            lzarr = arr = a;
-            t = lzt = time;
-            lzidx = idx = L;
+            lzp = p = x;
+            lzstart = start = L;
         }
 		else {
-			push(), l->set(L, R, a, time), r->set(L, R, a, time);
+			push(), l->set(L, R, x), r->set(L, R, x);
 		}
 	}
 	void push() {
-        if(lzidx == -1) return;
-        l->set(lzidx, hi, lzarr, lzt);
-        r->set(lzidx, hi, lzarr, lzt);
-        lzidx = -1, lzarr = -1, lzt = -1;
+        if(lzp == NULL) return;
+        l->set(lzstart, hi, lzp);
+        r->set(lzstart, hi, lzp);
+        lzstart = -1;
+        lzp = NULL;
 	}
 };
 
@@ -113,52 +116,31 @@ int main()
     cin.exceptions(cin.failbit);
     int n, m, q; cin >> n >> m >> q;
     Node *ch = new Node(0, n);
-    vector<vpi> mods(m);
-    // vector<PST*> psts(m);
-    vector<Node2*> trees(m);
+    vector<PST*> psts(m);
     vi ks(m);
-    vvl vs;
     rep(i, 0, m){
         cin >> ks[i];
         vl v(ks[i]);
         rep(j, 0, ks[i]){
             cin >> v[j];
         }
-        vs.pb(v);
-        trees[i] = new Node2(v, 0, ks[i]);
-        // psts[i] = new PST(v, 0, ks[i]);
+        psts[i] = new PST(v, 0, ks[i]);
     }
     rep(i, 0, q){
         int t; cin >> t;
         if(t == 1){
             int idx, p; cin >> idx >> p;
             idx--, p--;
-            // mods[idx].pb({p, p + ks[idx]});
-            ch->set(p, p + ks[idx], idx, sz(mods[idx]));
+            ch->set(p, p + ks[idx], psts[idx]);
         }
         else if(t == 2){
             int p; cin >> p; p--;
-            ch->query(p);
-            // cout << ((ch->query(p) % 256 + 256) % 256) << "\n";
+            cout << ((ch->query(p) % 256 + 256) % 256) << "\n";
         }
         else{
             int idx, l, r; cin >> idx >> l >> r;
             l--,r--,idx--;
-            mods[idx].pb({l, r + 1});
-            // psts[idx] = psts[idx]->add(l, r + 1, 1);
-        }
-    }
-    vi modt(m, 0);
-    for(auto [arr, qidx, t] : queries){
-        if(arr == -1) cout << 0 << nL;
-        else{
-            while(t > modt[arr]){
-                // mod seg tree
-                trees[arr]->add(mods[arr][modt[arr]].f, mods[arr][modt[arr]].s, 1);
-                modt[arr]++;
-            }
-            cout << trees[arr]->query(qidx) << nL;
-            // query seg tree
+            psts[idx] = psts[idx]->add(l, r + 1, 1);
         }
     }
     

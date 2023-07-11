@@ -92,56 +92,28 @@ T polygonArea2(vector<Point<T>> &v)
 template<class P>
 int sideOf(P s, P e, P p) { return sgn(s.cross(e, p)); }
 
-// template<class P>
-// int sideOf(const P& s, const P& e, const P& p, double eps) {
-// 	auto a = (e-s).cross(p-s);
-// 	double l = (e-s).dist()*eps;
-// 	return (a > l) - (a < -l);
-// }
+
 
 template<class P> bool onSegment(P s, P e, P p) {
 	return p.cross(s, e) == 0 && (s - p).dot(e - p) <= 0;
 }
 
-// #define cmp(i,j) sgn(dir.perp().cross(poly[(i)%n]-poly[(j)%n]))
-// #define extr(i) cmp(i + 1, i) >= 0 && cmp(i, i - 1 + n) < 0
-// template <class P> int extrVertex(vector<P>& poly, P dir) {
-// 	int n = sz(poly), lo = 0, hi = n;
-// 	if (extr(0)) return 0;
-// 	while (lo + 1 < hi) {
-// 		int m = (lo + hi) / 2;
-// 		if (extr(m)) return m;
-// 		int ls = cmp(lo + 1, lo), ms = cmp(m + 1, m);
-// 		(ls < ms || (ls == ms && ls == cmp(lo, m)) ? hi : lo) = m;
-// 	}
-// 	return lo;
-// }
-
-// #define cmpL(i) sgn(a.cross(poly[i], b))
-// template <class P>
-// array<int, 2> lineHull(P a, P b, vector<P>& poly) {
-// 	int endA = extrVertex(poly, (a - b).perp());
-// 	int endB = extrVertex(poly, (b - a).perp());
-// 	if (cmpL(endA) < 0 || cmpL(endB) > 0)
-// 		return {-1, -1};
-// 	array<int, 2> res;
-// 	rep(i,0,2) {
-// 		int lo = endB, hi = endA, n = sz(poly);
-// 		while ((lo + 1) % n != hi) {
-// 			int m = ((lo + hi + (lo < hi ? 0 : n)) / 2) % n;
-// 			(cmpL(m) == cmpL(endB) ? lo : hi) = m;
-// 		}
-// 		res[i] = (lo + !cmpL(hi)) % n;
-// 		swap(endA, endB);
-// 	}
-// 	if (res[0] == res[1]) return {res[0], -1};
-// 	if (!cmpL(res[0]) && !cmpL(res[1]))
-// 		switch ((res[0] - res[1] + sz(poly) + 1) % sz(poly)) {
-// 			case 0: return {res[0], res[0]};
-// 			case 2: return {res[1], res[1]};
-// 		}
-// 	return res;
-// }
+#define cmp(i, j) p.cross(h[i], h[j == n ? 0 : j]) * (R ?: -1)
+template<bool R, class P> int getTangent(vector<P>& h, P p) {
+	int n = sz(h), lo = 0, hi = n - 1, md;
+	if (cmp(0, 1) >= R && cmp(0, n - 1) >= !R) return 0;
+	while (md = (lo + hi + 1) / 2, lo < hi) {
+		auto a = cmp(md, md + 1), b = cmp(md, lo);
+		if (a >= R && cmp(md, md - 1) >= !R) return md;
+		if (cmp(lo, lo + 1) < R)
+			a < R&& b >= 0 ? lo = md : hi = md - 1;
+		else a < R || b <= 0 ? lo = md : hi = md - 1;
+	}
+	return -1; // point strictly inside hull
+}
+template<class P> pi hullTangents(vector<P>& h, P p) {
+	return {getTangent<0>(h, p), getTangent<1>(h, p)};
+}
 
 using P = Point<ll>;
 
@@ -206,91 +178,31 @@ int main()
     { return (i + 1) % n; };
     auto pre = [&](int i) -> int
     { return (n + i - 1) % n; };
-    deque<P> inter;
-    ll rangearea = 0;
-    int side = -1;
-    for (P po : notinhull)
-    {
-        int side2 = po.y < curhull[0].y || (po.y == curhull[0].y && po.x < curhull[0].x);
-        if (side2 != side)
-        {
-            inter.clear();
-            l = -1, r = -1;
-            rep(i, 0, n)
-            {
-                if (curhull[i].cross(po, curhull[nex(i)]) > 0)
-                {
-                    l = i, r = nex(i);
-                    break;
-                }
-            }
-            assert(l != -1);
-            while (curhull[pre(l)].cross(po, curhull[l]) > 0)
-                l = pre(l);
-            while (curhull[r].cross(po, curhull[nex(r)]) > 0)
-                r = nex(r);
-            for (int i = l; true; i = (i + 1) % n)
-            {
-                inter.pb(curhull[i]);
-                if (i == r)
-                    break;
-            }
-            rangearea = inter.back().cross(inter.front());
-            rep(i, 0, sz(inter) - 1) rangearea += inter[i].cross(inter[i + 1]);
-            side = side2;
+    vl crosses(n);
+    crosses[n - 1] = curhull[n - 1].cross(curhull[0]);
+    rep(i, 0, n - 1) crosses[i] = curhull[i].cross(curhull[i + 1]);
+    vl prefc(crosses);
+    rep(i, 1, n) prefc[i] += prefc[i - 1];
+    auto rangesum = [&](int l, int r)->ll{
+        if(l == r) return 0;
+        assert(l < r);
+        ll res = prefc[r - 1];
+        if(l) res -= prefc[l - 1];
+        return res;
+    };
+    auto getarea = [&](int l, int r)->ll{
+        if(l <= r) return rangesum(l, r) + curhull[r].cross(curhull[l]);
+        else{
+            ll res = rangesum(0, r) + rangesum(l, n) + curhull[r].cross(curhull[l]);
+            return res;
         }
-        else
-        {
-            while (l != r && curhull[l].cross(po, curhull[nex(l)]) < 0)
-            {
-                rangearea -= inter.back().cross(inter.front());
-                rangearea -= inter.front().cross(inter[1]);
-                l = nex(l);
-                inter.pop_front();
-                rangearea += inter.back().cross(inter.front());
-            }
-            if (l == r)
-            {
-                inter.clear();
-                int i = l;
-                l = -1, r = -1;
-                for(; true; i = nex(i))
-                {
-                    if (curhull[i].cross(po, curhull[nex(i)]) > 0)
-                    {
-                        l = i, r = nex(i);
-                        break;
-                    }
-                }
-                assert(l != -1);
-                while (curhull[pre(l)].cross(po, curhull[l]) > 0)
-                    l = pre(l);
-                while (curhull[r].cross(po, curhull[nex(r)]) > 0)
-                    r = nex(r);
-                for (int i = l; true; i = (i + 1) % n)
-                {
-                    inter.pb(curhull[i]);
-                    if (i == r)
-                        break;
-                }
-                rangearea = inter.back().cross(inter.front());
-                rep(i, 0, sz(inter) - 1) rangearea += inter[i].cross(inter[i + 1]);
-            }
-            else
-            {
-                while (curhull[r].cross(po, curhull[nex(r)]) > 0)
-                {
-                    rangearea -= inter.back().cross(inter.front());
-                    r = nex(r);
-                    inter.pb(curhull[r]);
-                    rangearea += inter[sz(inter) - 2].cross(inter.back());
-                    rangearea += inter.back().cross(inter.front());
-                }
-            }
-        }
-        assert(po.cross(inter.back(), inter.front()) > 0);
-        ans = max(ans, curarea - rangearea + po.cross(inter.back(), inter.front()));
+    };
+    for(P po : notinhull){
+        pi idxs = hullTangents(curhull, po);
+        ll area = getarea(idxs.f, idxs.s);
+        ans = max(ans, curarea - area + po.cross(curhull[idxs.s], curhull[idxs.f]));
     }
+    
     cout << fixed << setprecision(1) << (ld(ans) / 2) << nL;
 
     return 0;

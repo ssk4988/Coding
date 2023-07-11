@@ -62,7 +62,7 @@ struct Node {
 	Node *l = 0, *r = 0;
 	int lo, hi, idx = -1;
     PST *p = NULL; 
-    int lzidx = -1;
+    int lzstart = -1;
     PST *lzp = NULL;
 	Node(int lo, int hi) : lo(lo), hi(hi) {
 		if (lo + 1 < hi) {
@@ -85,19 +85,19 @@ struct Node {
 		if (R <= lo || hi <= L) return;
 		if (L <= lo && hi <= R){
             lzp = p = x;
-            lzidx = idx = L;
+            lzstart = idx = L;
         }
 		else {
 			push(), l->set(L, R, x), r->set(L, R, x);
 		}
 	}
 	void push() {
-        if(lzidx == -1) return;
-		l->lzidx = l->idx = lzidx;
+        if(lzstart == -1) return;
+		l->lzstart = l->idx = lzstart;
         l->lzp = l->p = lzp;
-        r->lzidx = r->idx = lzidx;
+        r->lzstart = r->idx = lzstart;
         r->lzp = r->p = lzp;
-        lzidx = -1;
+        lzstart = -1;
         lzp = NULL;
 	}
 };
