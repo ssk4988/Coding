@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
@@ -30,7 +29,30 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int n, k; cin >> n >> k;
+        vi a(n);
+        rep(i, 0, n) cin >> a[i];
+        sort(all(a));
+        multiset<int> pre;
+        pre.insert(0);
+        int lef = 0;
+        vi dp(n);
+        rep(i, 0, n){
+            while(lef < i && a[lef] + k < a[i]){
+                pre.erase(pre.find(dp[lef]));
+                lef++;
+            }
+            dp[i] = 1 + *pre.rbegin();
+            pre.insert(dp[i]);
+        }
+        int ans = 0;
+        rep(i, 0, n){
+            ans = max(ans, dp[i]);
+        }
+        cout << (n - ans) << nL;
+    }
     
     return 0;
 }

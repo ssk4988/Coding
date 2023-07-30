@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
@@ -30,7 +29,25 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int n, k; cin >> n >> k;
+        vi a(n);
+        rep(i, 0, n) cin >> a[i];
+        int cntf = 0, cntb = 0;
+        rep(i, 0, n){
+            if(cntf >= k && a[i] == a[n - 1]) cntb++;
+            if(a[i] == a[0]) cntf++;
+        }
+        bool works;
+        if(a[0] == a[n - 1]){
+            works = cntf >= k;
+        }
+        else{
+            works = cntf >= k && cntb >= k;
+        }
+        cout << (works ? "YES": "NO") << nL;
+    }
     
     return 0;
 }

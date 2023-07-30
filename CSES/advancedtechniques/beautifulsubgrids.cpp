@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
@@ -26,11 +25,26 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
+#pragma GCC target("popcnt")
+
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int n; cin >> n;
+    vector<bitset<3000>> gs(n);
+    rep(i, 0, n){
+        string str; cin >> str;
+        gs[i] = bitset<3000>(str);
+    }
+    ll ans = 0;
+    rep(i, 0, n){
+        rep(j, 0, i){
+            ll cnt = (gs[i] & gs[j]).count();
+            ans += (cnt - 1) * cnt / 2;
+        }
+    }
+    cout << ans << nL;
     
     return 0;
 }

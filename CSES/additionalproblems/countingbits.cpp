@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
@@ -30,7 +29,27 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int numbits = 55;
+    vl bitsum(numbits);
+    bitsum[0] = 1;
+    rep(i, 1, numbits){
+        bitsum[i] = bitsum[i - 1] * 2 + ((1LL) << i);
+    }
+    ll n; cin >> n; n++;
+    auto solve = [&](ll v)->ll{
+        ll ans = 0, ones = 0;
+        for(int i = numbits - 1; i >= 0; i--){
+            if(v & (1LL << i)){
+                ans += (i ? bitsum[i - 1] : 0) + ones * (1LL << i);
+                ones++;
+            }
+        }
+        return ans;
+    };
+    // rep(i, 1, 12){
+    //     cout << i << " " << solve(i) << nL;
+    // }
+    cout << solve(n) << nL;
     
     return 0;
 }

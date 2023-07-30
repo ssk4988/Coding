@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
@@ -30,7 +29,26 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
-    
+    string str; cin >> str;
+    vi frq(26);
+    map<vi, ll> mm;
+    vi frq1(26, -1);
+    rep(i, 0, sz(str)) frq1[str[i] - 'a'] = 0;
+    mm[frq1]++;
+
+    rep(i, 0, sz(str)){
+        frq[str[i] - 'a']++;
+        vi a(26, -1);
+        int mn = INT_MAX;
+        rep(j, 0, 26) if(frq1[j] != -1) mn = min(mn, frq[j]);
+        rep(j, 0, 26) if(frq1[j] != -1) a[j] = frq[j] - mn;
+        mm[a]++;
+    }
+    ll ans = 0;
+    for(auto [key, val] : mm){
+        ans += (val - 1) * val / 2;
+    }
+    cout << ans << nL;
+
     return 0;
 }

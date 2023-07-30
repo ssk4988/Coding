@@ -25,105 +25,56 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-map<pi, vi> queries;
-map<pi, int> ansq;
+vpi queries;
+vi answers;
 vvi appearances;
-vi ans;
-int n, m, q;
 
-struct UF
-{
-    vi e;
-    UF(int n) : e(n, -1) {}
-    bool sameSet(int a, int b) { return find(a) == find(b); }
-    int size(int x) { return -e[find(x)]; }
-    int find(int x) { return e[x] < 0 ? x : e[x] = find(e[x]); }
-    bool join(int a, int b, int d)
-    {
-        a = find(a), b = find(b);
-        if (a == b)
-            return false;
-        if (appearances[a].size() < appearances[b].size())
-            swap(a, b);
-        e[a] += e[b];
-        e[b] = a;
-        pi p = {a, b};
-        if (p.f > p.s)
-        {
-            swap(p.f, p.s);
+struct UF {
+	vi e;
+	UF(int n) : e(n, -1) {}
+	bool sameSet(int a, int b) { return find(a) == find(b); }
+	int size(int x) { return -e[find(x)]; }
+	int find(int x) { return e[x] < 0 ? x : e[x] = find(e[x]); }
+	bool join(int a, int b, int t) {
+		a = find(a), b = find(b);
+		if (a == b) return false;
+		if (e[a] > e[b]) swap(a, b);
+        for(int i : appearances[b]){
+            appearances[a].pb(i);
         }
-        for (auto &v : queries[p])
-        {
-            ans[v] = d;
+		e[a] += e[b]; e[b] = a;
+        for(int i : appearances[b]){
+            if(sameSet(queries[i].f, queries[i].s) && answers[i] == -1) answers[i] = t;
         }
-        queries[p].clear();
-        ansq[p] = d;
-        for (int b1 : appearances[b])
-        {
-            if (b1 != a)
-            {
-                appearances[a].pb(b1);
-                p = {b1, b};
-                if (p.f > p.s)
-                    swap(p.f, p.s);
-                pi p1 = {b1, a};
-                if (p1.f > p1.s)
-                    swap(p1.f, p1.s);
-
-                for (int k : queries[p])
-                {
-                    if (ansq.find(p1) == ansq.end())
-                    {
-                        queries[p1].pb(k);
-                    }
-                    else
-                    {
-                        ans[k] = d;
-                    }
-                }
-                queries[p].clear();
-            }
-        }
-        appearances[b].clear();
-        return true;
-    }
+		return true;
+	}
 };
 
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    cin >> n >> m >> q;
+    int n, m, q; cin >> n >> m >> q;
+    UF uf(n);
+    vpi roads(m);
+    rep(i, 0, m){
+        int a, b; cin >> a >> b; a--,b--;
+        roads[i] = {a, b};
+    }
+    queries.resize(q);
+    answers.assign(q, -1);
     appearances.resize(n);
-    ans.resize(q, -1);
-    UF dsu(n);
-    vpi roads(m), qry(q);
-    rep(i, 0, m)
-    {
-        cin >> roads[i].f >> roads[i].s;
-        roads[i].f--;
-        roads[i].s--;
+    rep(i, 0, q){
+        int a, b; cin >> a >> b; a--,b--;
+        queries[i] = {a, b};
+        appearances[a].pb(i);
+        appearances[b].pb(i);
+        if(a == b) answers[i] = 0;
     }
-    // self-loops?
-    rep(i, 0, q)
-    {
-        cin >> qry[i].f >> qry[i].s;
-        qry[i].f--;
-        qry[i].s--;
-        if (qry[i].f > qry[i].s)
-            swap(qry[i].f, qry[i].s);
-        queries[qry[i]].pb(i);
-        appearances[qry[i].f].pb(qry[i].s);
-        appearances[qry[i].s].pb(qry[i].f);
+    rep(i, 0, m){
+        uf.join(roads[i].f, roads[i].s, i + 1);
     }
-    rep(i, 0, m)
-    {
-        dsu.join(roads[i].f, roads[i].s, i + 1);
-    }
-    rep(i, 0, q)
-    {
-        cout << ans[i] << nL;
-    }
+    rep(i, 0, q) cout << answers[i] << nL;
 
     return 0;
 }

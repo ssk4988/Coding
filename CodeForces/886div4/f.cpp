@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
@@ -30,7 +29,26 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int n; cin >> n;
+        vl freq(n + 1);
+        rep(i, 0, n){
+            int a; cin >> a;
+            if(a <= n) freq[a]++;
+        }
+        vl occ(n + 1);
+        rep(i, 1, n + 1){
+            int cur = i;
+            while(cur <= n){
+                occ[cur] += freq[i];
+                cur += i;
+            }
+        }
+        ll ans = 0;
+        rep(i, 0, n + 1) ans = max(occ[i], ans);
+        cout << ans << nL;
+    }
     
     return 0;
 }

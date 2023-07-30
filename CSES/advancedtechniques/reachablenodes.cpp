@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
@@ -26,11 +25,26 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
+const int maxn = 50002;
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int n, m; cin >> n >> m;
+    vvi adj(n);
+    rep(i, 0, m){
+        int a, b; cin >> a >> b; a--,b--;
+        adj[a].pb(b);
+    }
+    vector<bitset<maxn>> ans(n);
+    auto dfs = [&](int cur, auto &&dfs)->bitset<maxn>{
+        if(ans[cur].any()) return ans[cur];
+        ans[cur].set(cur);
+        for(int nex : adj[cur]) ans[cur] |= dfs(nex, dfs);
+        return ans[cur];
+    };
+    rep(i, 0, n) cout << dfs(i, dfs).count() << " ";
+    cout << nL;
     
     return 0;
 }

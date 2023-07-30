@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
@@ -30,7 +29,26 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    ll ans = 0;
+    rep(i, 1, 1000000){
+        string is = to_string(i);
+        string is1(is);
+        reverse(all(is1));
+        if(!(is == is1)) continue;
+        vi bs;
+        int j = i;
+        while(j){
+            bs.pb(j % 2);
+            j /= 2;
+        }
+        vi bs1(bs);
+        reverse(all(bs1));
+        if(bs == bs1){
+            ans += i;
+            cout << i << nL;
+        }
+    }
+    cout << ans << nL;
     
     return 0;
 }

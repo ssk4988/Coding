@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
@@ -26,11 +25,38 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
+
+
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int n; cin >> n;
+        map<int, ll> row, col, d1, d2;
+        rep(i, 0, n){
+            int x, y; cin >> x >> y;
+            row[x]++;
+            col[y]++;
+            d1[x + y]++;
+            d2[x - y]++;
+        }
+        ll ans = 0;
+        for(auto [key, val] : row){
+            ans += val * ll(val - 1);
+        }
+        for(auto [key, val] : col){
+            ans += val * ll(val - 1);
+        }
+        for(auto [key, val] : d1){
+            ans += val * ll(val - 1);
+        }
+        for(auto [key, val] : d2){
+            ans += val * ll(val - 1);
+        }
+        cout << ans << nL;
+    }
     
     return 0;
 }

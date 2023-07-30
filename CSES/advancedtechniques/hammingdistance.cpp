@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
@@ -30,7 +29,19 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int n, k; cin >> n >> k;
+    vi a(n);
+    rep(i, 0, n){
+        string s; cin >> s;
+        a[i] = stoi(s, NULL, 2);
+    }
+    int ans = k;
+    rep(i, 0, n){
+        rep(j, 0, i){
+            ans = min(ans, __builtin_popcount(a[i] ^ a[j]));
+        }
+    }
+    cout << ans << nL;
     
     return 0;
 }

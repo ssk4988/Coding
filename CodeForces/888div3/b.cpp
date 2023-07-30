@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
@@ -30,7 +29,19 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int n; cin >> n;
+        vi a(n);
+        rep(i, 0, n) cin >> a[i];
+        vi a2(a);
+        sort(all(a2));
+        bool works = true;
+        rep(i, 0, n){
+            if((a[i] % 2) != (a2[i] % 2)) works = false;
+        }
+        cout << (works ? "YES" : "NO") << nL;
+    }
     
     return 0;
 }

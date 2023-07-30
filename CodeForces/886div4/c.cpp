@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
@@ -30,7 +29,23 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        vector<string> grid(8);
+        rep(i, 0, 8) cin >> grid[i];
+        rep(j, 0, 8){
+            rep(i, 0, 8){
+                if(grid[i][j] != '.'){
+                    rep(k, i, 8){
+                        if(grid[k][j] == '.') break;
+                        cout << grid[k][j];
+                    }
+                    break;
+                }
+            }
+        }
+        cout << nL;
+    }
     
     return 0;
 }

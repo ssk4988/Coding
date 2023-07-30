@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
@@ -30,7 +29,19 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    ll n; cin >> n;
+    ll lo = 1, hi = n * n;
+    ll target = (n * n + 1) / 2;
+    while(lo < hi){
+        ll mid = lo + (hi - lo) / 2;
+        ll cnt = 0;
+        rep(i, 1, n + 1){
+            cnt += min(n, mid / i);
+        }
+        if(cnt >= target) hi = mid;
+        else lo = mid + 1;
+    }
+    cout << lo << nL;
     
     return 0;
 }

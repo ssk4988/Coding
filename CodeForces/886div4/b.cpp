@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
@@ -30,7 +29,20 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int best = -1;
+        int n; cin >> n;
+        vpi ps(n);
+        rep(i, 0, n){
+            cin >> ps[i].f >> ps[i].s;
+            if(ps[i].f <= 10){
+                if(best == -1) best = i;
+                else if(ps[i].s > ps[best].s) best = i;
+            }
+        }
+        cout << (1 + best) << nL;
+    }
     
     return 0;
 }

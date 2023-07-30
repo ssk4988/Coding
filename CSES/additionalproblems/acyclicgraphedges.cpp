@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <bits/stdc++.h>
 using namespace std;
 
 using ll = long long;
@@ -30,7 +29,12 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int n, m; cin >> n >> m;
+    rep(i, 0, m){
+        int a, b; cin >> a >> b;
+        if(a > b) swap(a, b);
+        cout << a << " " << b << nL;
+    }
     
     return 0;
 }
