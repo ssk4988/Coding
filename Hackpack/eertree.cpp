@@ -25,18 +25,19 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-
-
+/**
+ * Author: Jacob Steinebronn
+ * Date: 09/20/2022
+ * Description: Generates an eertree on str. $cur$ is accurate at the end of the main loop before the final assignment to $t$.
+ * Time: $O(|S|)$
+ * Status: Works but not stress-tested
+ */
 int main()
 {
-    cin.tie(0)->sync_with_stdio(0);
-    cin.exceptions(cin.failbit);
-    string str; cin >> str;
-    
+    string str;
     vi slink = {0, 0}, len = {-1, 0};
     vvi down(2, vi(26, -1));
     int cur = 0, t = 0;
-    vl dp(2);
     for (int i = 0; i < str.size(); i++)
     {
         char c = str[i];
@@ -48,7 +49,6 @@ int main()
             down[cur][ci] = slink.size();
             down.emplace_back(26, -1);
             len.pb(len[cur] + 2);
-            dp.pb(0);
             if (len.back() > 1)
             {
                 do
@@ -63,16 +63,5 @@ int main()
         else
             cur = down[cur][ci];
         t = i - len[cur] + 1;
-        dp[cur]++;
     }
-    for(int i = slink.size() - 1; i > 0; i--){
-        dp[slink[i]] += dp[i];
-    }
-    ll best = 0;
-    rep(i, 0, sz(dp)){
-        best = max(best, dp[i] * len[i]);
-    }
-    cout << best << nL;
-
-    return 0;
 }

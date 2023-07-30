@@ -25,106 +25,93 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-#define maxN 200000
-
-pl pows[maxN];
-pl m = {1000000007, 1000000009};
-ll base = 29;
-
-ll mod1(ll k, ll m1){
-    return (k % m1 + m1) % m1;
+typedef uint64_t ull;
+static int C; // initialized below
+ 
+// Arithmetic mod two primes and 2^32 simultaneously.
+// "typedef uint64_t H;" instead if Thue-Morse does not apply.
+template<int M, class B>
+struct A {
+	int x; B b; A(int x=0) : x(x), b(x) {}
+	A(int x, B b) : x(x), b(b) {}
+	A operator+(A o){int y = x+o.x; return{y - (y>=M)*M, b+o.b};}
+	A operator-(A o){int y = x-o.x; return{y + (y< 0)*M, b-o.b};}
+	A operator*(A o) { return {(int)(1LL*x*o.x % M), b*o.b}; }
+	explicit operator ull() { return x ^ (ull) b << 21; }
+	bool operator==(A o) const { return (ull)*this == (ull)o; }
+	bool operator<(A o) const { return (ull)*this < (ull)o; }
+};
+typedef A<1000000007, A<1000000009, unsigned>> H;
+ 
+ll MOD = 1e9 + 7;
+ 
+ll mod(ll k){
+    return k % MOD;
 }
-
-pl mod(pl k){
-    return {mod1(k.f, m.f), mod1(k.s, m.s)};
-}
-
-struct Tree
-{
-    int L, R, mid, len;
-    pl val;
-
-    Tree *left, *right;
-
-    Tree(int l, int r)
-    {
-        L = l;
-        R = r;
-        mid = (L + R) / 2;
-        val = {0, 0};
-        len = R - L + 1;
-        if (L == R)
-            return;
-        left = new Tree(l, mid);
-        right = new Tree(mid + 1, r);
+ 
+vl pows;
+using pll = pair<pl, ll>;
+struct Node {
+	Node *l = 0, *r = 0;
+	int lo, hi, mid;
+    pll val;
+	Node(string& v, int lo, int hi) : lo(lo), hi(hi), mid(0) {
+		if (lo + 1 < hi) {
+			mid = lo + (hi - lo)/2;
+			l = new Node(v, lo, mid); r = new Node(v, mid, hi);
+			val = comb(l->val, r->val);
+		}
+		else{
+            val = {{v[lo] - 'a' + 1, v[lo] - 'a' + 1}, 1};
+        }
+	}
+    pll comb(pll a, pll b){
+        return {{mod(a.f.f + mod(pows[a.s] * b.f.f)), mod(mod(a.f.s * pows[b.s]) + b.f.s)}, a.s + b.s};
     }
-
-    void update(int idx, int nval)
-    {
-        if (idx < L || R < idx)
-            return;
-        if (L == R)
-        {
-            val = mod({nval, nval});
+    void change(int idx, char c){
+        if(lo + 1 == hi){
+            val = {{c - 'a' + 1, c - 'a' + 1}, 1};
             return;
         }
-        left->update(idx, nval);
-        right->update(idx, nval);
-        val = mod({pows[left->len].f * right->val.f, pows[left->len].s * right->val.s});
-        val = mod({left->val.f + val.f, left->val.s + val.s});
+        if(mid <= idx) r->change(idx, c);
+        else l->change(idx, c);
+        val = comb(l->val, r->val);
     }
-
-    pl query(int l, int r){
-        if(r < L || R < l) return {0, 0};
-        if(l <= L && R <= r) return val;
-        pl lres = left->query(l, r);
-        pl rres = right->query(l, r);
-        int llen = left->R < l || r < left->L ? 0 : min(left->R, r) - max(left->L, l) + 1;
-        pl res = mod({pows[llen].f * rres.f, pows[llen].s * rres.s});
-        res = mod({lres.f + res.f, lres.s + res.s});
-        return res;
+    pll query(int L, int R){
+        if(hi <= L || R <= lo) return {{0, 0}, 0};
+        if(L <= lo && hi <= R) return val;
+        return comb(l->query(L, R), r->query(L, R));
     }
 };
-int n;
-
-int revindex(int k){
-    return n - 1 - k;
-}
-
+#include <sys/time.h>
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int q; cin >> n >> q;
-    pows[0] = {1, 1};
-    rep(i, 1, n){
-        pows[i] = mod({pows[i - 1].f * base, pows[i - 1].s * base});
+    timeval tp;
+	gettimeofday(&tp, 0);
+	C = (int)tp.tv_usec; // (less than modulo)
+	assert((ull)(H(1)*2+1-3) == 0);
+    pows.pb(1);
+    int LIM = 2e5 + 100;
+    rep(i, 0, LIM){
+        pows.pb(mod(pows.back() * C));
     }
-    Tree tree(0, n - 1);
-    Tree revtree(0, n - 1);
+    int n, q; cin >> n >> q;
     string str; cin >> str;
-    rep(i, 0, n){
-        tree.update(i, str[i] - 'a' + 1);
-        revtree.update(i, str[revindex(i)] - 'a' + 1);
-    }
+    Node tree(str, 0, sz(str));
     rep(i, 0, q){
-        int t; cin >> t;
-        if(t == 1){
-            int ind;
-            char c;
-            cin >> ind >> c;
-            ind--;
-            tree.update(ind, c - 'a' + 1);
-            revtree.update(revindex(ind), c - 'a' + 1);
+        int v; cin >> v;
+        if(v == 1){
+            int idx; cin >> idx; idx--;
+            char c; cin >> c;
+            tree.change(idx, c);
         }
         else{
-            int a, b;
-            cin >> a >> b;
-            a--; b--;
-            cout << ((tree.query(a, b) == revtree.query(revindex(b), revindex(a))) ? "YES" : "NO") << nL;
+            int l, r; cin >> l >> r; l--, r--;
+            pll res = tree.query(l, r + 1);
+            cout << (res.f.f == res.f.s ? "YES" : "NO") << nL;
         }
     }
-
-    
     return 0;
 }
