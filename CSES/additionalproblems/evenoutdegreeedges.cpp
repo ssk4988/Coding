@@ -34,7 +34,47 @@ int main()
         cout << "IMPOSSIBLE\n";
         return 0;
     }
+    vi visited(n);
     vi deg(n);
+    vpi edges;
+    vvi adj(n);
+    rep(i, 0, m){
+        int a, b; cin >> a >> b;
+        a--, b--;
+        adj[a].pb(b);
+        adj[b].pb(a);
+    }
+    int t = 1;
+    auto dfs = [&](int cur, int par, auto &&dfs)->void{
+        visited[cur] = t++;
+        for(int nex : adj[cur]){
+            if(nex == par) continue;
+            if(visited[nex] && visited[nex] < visited[cur]){
+                edges.pb({cur, nex});
+                deg[cur] ^= 1;
+            }
+            else if(!visited[nex]){
+                dfs(nex, cur, dfs);
+                if(deg[nex]){
+                    edges.pb({nex, cur});
+                    deg[nex] ^= 1;
+                }
+                else{
+                    edges.pb({cur, nex});
+                    deg[cur] ^= 1;
+                }
+            }
+        }
+    };
+    bool works = true;
+    rep(i, 0, n){
+        if(!visited[i]) dfs(i, -1, dfs);
+        if(deg[i]) works = false;
+    }
+    if(works){
+        for(auto [a, b] : edges) cout << (a + 1) << " " << (b + 1) << nL;
+    }
+    else cout << "IMPOSSIBLE\n";
     // vector<
     
     return 0;

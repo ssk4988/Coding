@@ -36,14 +36,6 @@ struct PST {
 		}
 		else val = v[lo];
 	}
-    PST(PST *n) : lo(n->lo), hi(n->hi), val(n->val), lzadd(n->lzadd) {l = n->l; r = n->r;}
-	ll pointquery(int idx) {
-		if (idx <= lo && hi <= idx + 1) return val;
-        push();
-        int mid = lo + (hi - lo)/2;
-        if(mid <= idx) return r->pointquery(idx);
-        else return l->pointquery(idx);
-	}
     ll query(int L, int R){
         if (R < lo || hi < L) return 0; // idempotent
 		if (L <= lo && hi <= R) return val;
@@ -52,7 +44,7 @@ struct PST {
     }
     PST * add(int L, int R, ll v){
         if (R <= lo || hi <= L) return this;
-        PST *n = new PST(this);
+        PST *n = new PST(*this);
         if (L <= lo && hi <= R) {
             n->val += v;
             n->lzadd += v;

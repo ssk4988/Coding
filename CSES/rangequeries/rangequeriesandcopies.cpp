@@ -29,14 +29,6 @@ const ll inf = 1e9;
 struct Node {
 	Node *l = 0, *r = 0;
 	ll lo, hi, mset = 0, sum = 0;
-	Node(Node *other){
-		l = other->l;
-		r = other->r;
-		lo = other->lo;
-		hi = other->hi;
-		mset = other->mset;
-		sum = other->sum;
-	}
 	Node(vl& v, ll lo, ll hi) : lo(lo), hi(hi) {
 		if (lo + 1 < hi) {
 			ll mid = lo + (hi - lo)/2;
@@ -54,7 +46,7 @@ struct Node {
 	Node* set(ll ind, ll x) {
 		int L = ind, R = ind + 1;
 		if (R <= lo || hi <= L) return this;
-		Node *ret = new Node(this);
+		Node *ret = new Node(*this);
 		if (L <= lo && hi <= R){
             ret->mset = x;
             ret->sum = x * (hi - lo);
@@ -100,7 +92,7 @@ int main()
             cout << roots[k]->query(a, b + 1) << nL;
         }
         else{
-			roots.pb(new Node(roots[k]));
+			roots.pb(new Node(*roots[k]));
         }
     }
     
