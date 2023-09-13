@@ -30,7 +30,7 @@ int main()
     cin.exceptions(cin.failbit);
     int n, m;
     cin >> n >> m;
-    int arr[n], rev[n];
+    vi arr(n), rev(n);
     int cnt = 1;
     rep(i, 0, n)
     {
@@ -43,34 +43,25 @@ int main()
         if (rev[i + 1] < rev[i])
             cnt++;
     }
+    auto cont = [&](int v)->int{
+        int ans = 0;
+        if(v && v < n) ans += rev[v] < rev[v - 1];
+        // if(v + 1 < n) ans += rev[v + 1] < rev[v];
+        return ans;
+    };
     rep(i, 0, m)
     {
-        set<int> check;
-        int a[2];
-        rep(j, 0, 2)
-        {
-            cin >> a[j];
-            a[j]--;
-            if (arr[a[j]] - 1 >= 0)
-                check.insert(arr[a[j]] - 1);
-            if (arr[a[j]] + 1 < n)
-                check.insert(arr[a[j]]);
-        }
-        for (int c : check)
-        {
-            if (rev[c] > rev[c + 1])
-                cnt--;
-        }
-        rev[arr[a[0]]] = a[1];
-        rev[arr[a[1]]] = a[0];
-        int tmp = arr[a[0]];
-        arr[a[0]] = arr[a[1]];
-        arr[a[1]] = tmp;
-        for (int c : check)
-        {
-            if (rev[c] > rev[c + 1])
-                cnt++;
-        }
+        int a, b; cin >> a >> b;
+        a--, b--;
+        set<int> rel;
+        rel.insert(arr[a]);
+        rel.insert(arr[a] + 1);
+        rel.insert(arr[b]);
+        rel.insert(arr[b] + 1);
+        for(int i : rel) cnt -= cont(i);
+        swap(rev[arr[a]], rev[arr[b]]);
+        swap(arr[a], arr[b]);
+        for(int i : rel) cnt += cont(i);
         cout << cnt << "\n";
     }
 

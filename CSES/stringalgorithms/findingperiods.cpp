@@ -25,103 +25,33 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-ll M = 1e9 + 7;
-ll base = 29;
-ll mod(ll v)
-{
-    return (v % M + M) % M;
-}
-
-ll modpow(ll b, ll pow)
-{
-    if (pow == 0)
-        return 1;
-    if (pow == 1)
-        return b;
-    ll res = modpow(b, pow / 2);
-    res = mod(res * res);
-    if (pow % 2)
-    {
-        res = mod(res * b);
+vector<int> z_function(string str) {
+    int n = (int) str.length();
+    vector<int> z(n);
+    for (int i = 1, l = 0, r = 0; i < n; ++i) {
+        if (i <= r)
+            z[i] = min (r - i + 1, z[i - l]);
+        while (i + z[i] < n && str[z[i]] == str[i + z[i]])
+            ++z[i];
+        if (i + z[i] - 1 > r)
+            l = i, r = i + z[i] - 1;
     }
-    return res;
+    return z;
 }
-
-ll gcdExtended(ll a, ll b, ll *x, ll *y)
-{
-
-    // Base Case
-    if (a == 0)
-    {
-        *x = 0, *y = 1;
-        return b;
-    }
-
-    // To store results of recursive call
-    ll x1, y1;
-    ll gcd = gcdExtended(b % a, a, &x1, &y1);
-
-    // Update x and y using results of recursive
-    // call
-    *x = y1 - (b / a) * x1;
-    *y = x1;
-
-    return gcd;
-}
-
-vector<ll> bp;
-vector<ll> pref;
-vi ans;
-vector<bool> good;
 
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    string str;
-    cin >> str;
-    int n = str.length();
-    bp.pb(1);
-    pref.pb(str[0] - 'a' + 1);
-    good.pb(false);
-    rep(i, 1, n)
-    {
-        bp.pb(mod(bp[i - 1] * base));
-        pref.pb(mod(pref[i - 1] + mod(bp[i] * (str[i] - 'a' + 1))));
-        good.pb(false);
-    }
+    string str; cin >> str;
+    vi z = z_function(str);
+    vi ans;
 
-    // good[n-1] = true;
-    bp.pb(mod(bp[n - 1] * base));
-    rep(i, 0, n)
-    {
-        if (good[i])
-            continue;
-        int len = i + 1;
-        ll inv, y;
-        gcdExtended(bp[len] - 1, M, &inv, &y);
-        inv = (inv % M + M) % M;
-        ll hash = mod(mod(pref[i] * (bp[n / len * len] - 1)) * inv);
-        int rem = n % len;
-        if (rem)
-        {
-            hash = mod(hash + mod(pref[rem - 1] * bp[n - rem]));
-        }
-        if (hash == pref[n - 1])
-        {
-            for (int j = len; j <= n; j += len)
-            {
-                good[j - 1] = true;
-            }
-            // break;
-        }
+    rep(i, 1, sz(str)){
+        if(z[i] + i == sz(str) && z[i] >= min(i, sz(str) - i)) ans.pb(i);
     }
-    rep(i, 0, n)
-    {
-        if (good[i])
-            cout << i + 1 << " ";
-    }
+    ans.pb(sz(str));
+    for(int i : ans) cout << i << " ";
     cout << nL;
-
     return 0;
 }

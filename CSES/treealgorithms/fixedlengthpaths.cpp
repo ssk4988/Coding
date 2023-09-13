@@ -79,12 +79,12 @@ int centroid(int n = 1)
 		int x = a[C][i];
 		vl cur;
 		dfs2(cur, x, C, 1);
-		if(prev.size() < cur.size()){
+		if(sz(prev) < sz(cur)){
 			prev.resize(sz(cur));
 		}
-		for (int i = 0; i < prev.size(); i++)
+		for (int i = 0; i < sz(prev); i++)
 		{
-			if (k - i < cur.size())
+			if (k - i < sz(cur))
 			{
 				ans += prev[i] * cur[k - i];
 			}
