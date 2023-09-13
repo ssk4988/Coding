@@ -26,7 +26,7 @@ using vvi = vector<vi>;
 #define nL "\n"
 
 const bool DEBUG = false;
-const int N = 1e5 + 10;
+const int N = 1e5 + 1;
 struct PST {
 	PST *l = 0, *r = 0;
 	int lo, hi;
@@ -46,19 +46,22 @@ struct PST {
 	}
 	PST * add(int L, int R, ll v) {
 		if (R <= lo || hi <= L) return this;
-		PST *n = new PST(*this);
         if(DEBUG && lo == 0 && hi == N){
             cout << "calling " << v << " with L=" << L << " and R=" << R << nL;
         }
+        PST *n;
 		if (L <= lo && hi <= R) {
             if(DEBUG){
                 cout << "adding " << v << " to [" << lo << ", " << hi << "]" << nL;
             }
+            n = new PST(*this);
 			n->val += v;
 			n->lzadd += v;
             n->sum += (hi - lo) * v;
+
 		} else {
-			push();
+            push();
+            n = new PST(*this);
 			n->l = l->add(L, R, v);
 			n->r = r->add(L, R, v);
             n->sum = n->l->sum + n->r->sum;
@@ -97,7 +100,8 @@ int main()
                 if(l > 0) tree = tree->add(1, l + 1, 1);
             }
             else tree = tree->add(start, l + 1, 1);
-            tree = tree->add(l + 1, min(N, l + 1 + k - 1 + 1), -1);
+            int left = l + 1, right = min(N, l + 1 + k - 1 + 1);
+            if(left < right) tree = tree->add(left, right, -1);
         }
         else if(c == 'B'){
             int idx; cin >> idx; idx--;
