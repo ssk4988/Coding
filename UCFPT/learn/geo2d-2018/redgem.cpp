@@ -14,12 +14,8 @@ using vpl = vector<pl>;
 using vpd = vector<pd>;
 using vvi = vector<vi>;
 
-#define f first
-#define s second
-#define mp make_pair
+
 #define pb push_back
-#define lb lower_bound
-#define ub upper_bound
 #define all(x) x.begin(), x.end()
 #define sz(x) (int)(x).size()
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
@@ -70,12 +66,13 @@ vector<pair<P, P>> tangents(P c1, ld r1, P c2, ld r2) {
 }
 
 template<class P>
-pair<int, P> lineInter(P s1, P e1, P s2, P e2) {
-	auto d = (e1 - s1).cross(e2 - s2);
-	if (d == 0) // if parallel
-		return {-(s1.cross(e1, s2) == 0), P(0, 0)};
-	auto p = s2.cross(e1, e2), q = s2.cross(e2, s1);
-	return {1, (s1 * p + e1 * q) / d};
+vector<P> circleLine(P c, ld r, P a, P b) {
+	P ab = b - a, p = a + ab * (c-a).dot(ab) / ab.dist2();
+	ld s = a.cross(b, c), h2 = r*r - s*s / ab.dist2();
+	if (h2 < 0) return {};
+	if (h2 == 0) return {p};
+	P h = ab.unit() * sqrt(h2);
+	return {p - h, p + h};
 }
 
 typedef Point<ld> P;
@@ -94,29 +91,48 @@ int main()
 		rep(i, 0, n){
 			ld x1, y1, r1; cin >> x1 >> y1 >> r1;
 			P c(x1, y1);
-			vector<pair<P, P>> tns = tangents(red, r, c, -r1);
-			assert(sz(tns) == 2); // assume circle does not touch other
-			// if(r1 < r){
-			// 	pair<int, P> inter = lineInter(tns[0].f, tns[0].s, tns[1].f, tns[1].s);
-			// 	assert(inter.f == 1);
-			// 	if(inter.s.dist() <= p + eps) continue;
-			// }
-			vector<P> ts;
-			for(auto &p1 : tns){
-				P d = p1.s - p1.f;
-				d = d.unit();
-				ld lo = 0, hi = 3 * p;
-				while(((d * hi + p1.f) - (d * lo + p1.f)).dist() > eps){
-					ld mid = (lo + hi) /2;
-					P newp = d * mid + p1.f;
-					if(newp.dist() > p) hi = mid;
-					else lo = mid;
+			vector<pair<P, P>> tans = tangents(red, r, c, -r1);
+			vector<P> points; // points on the circumference of purple
+			bool samepoint = false;
+			for(auto [s, e] : tans){
+				if((e - s).dist() < eps){
+					// same point
+					// do stuff with perpendicular to centers
+					P dif = (c - red).rotate(-pi/2);
+					vector<P> inters = circleLine(o, p, s, s + dif);
+					points.resize(2);
+					bool did0 = false, did1 = false;
+					for(P inter : inters){
+						// is this the starting or ending intersection
+						if((inter - s).dot(dif) > 0){
+							points[0] = inter;
+							did0 = true;
+						}
+						else{
+							points[1] = inter;
+							did1 = true;
+						}
+					}
+					samepoint = true;
+					assert(did0 && did1);
+					break;
 				}
-				ts.pb(d * lo + p1.f);
+				else{
+					vector<P> inters = circleLine(o, p, s, e);
+					for(P inter : inters){
+						if((inter - s).dot(e - s) > 0){
+							points.pb(inter);
+						}
+					}
+				}
 			}
-			if(o.cross(ts[0], ts[1]) < 0) swap(ts[0], ts[1]);
-			ld a1 = ts[0].angle(), a2 = ts[1].angle();
-			if(a1 >= 0 && a2 < 0){
+			
+			assert(sz(points) == 2);
+			// make sure that the points are in correct order
+			if(!samepoint && red.cross(points[0], points[1]) < 0) swap(points[0], points[1]);
+			// points[1] to left of points[0]
+			ld a1 = points[0].angle(), a2 = points[1].angle();
+			if(a2 < a1){
                 events.pb({a1, 1});
                 events.pb({pi, -1});
                 events.pb({-pi, 1});

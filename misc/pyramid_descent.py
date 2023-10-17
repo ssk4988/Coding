@@ -1,0 +1,47 @@
+'''
+Notes:
+This Python solution read from standard input and prints to standard output
+It uses backtracking to find the answer, which may be inefficient if a lot of paths cause the same product
+If I were to recode this, I would use a meet in the middle approach where I choose a row and check for
+each number in the row the possibile products leading to it from above and below, and checking if
+the target is among them and constructing the answer with buildback
+As will all backtrackers and similar solutions, the time complexity is very large O(2^n)
+In this case, it is 2^n because this pyramid descent would model Pascal's triangle, whose row sum is 2^n
+'''
+
+# reads from standard input and prints to standard output
+# use command 'python3 pyramid_descent.py < filename.txt'
+
+
+target = int(input().split()[1])
+
+# read the pyramid into a 2D array
+pyramid = []
+while True:
+    try:
+        pyramid.append(list(map(int, input().split(','))))
+    except EOFError:
+        break
+n = len(pyramid)
+
+moves = []
+# backtracking solution to find the answer
+def backtrack(product, row, col):
+    # will never reach target with this product
+    if product == 0 or target % product != 0:
+        return False
+    if row + 1 == n:
+        return product == target
+    moves.append('L')
+    if backtrack(product * pyramid[row + 1][col], row + 1, col):
+        return True
+    moves.pop()
+    moves.append('R')
+    if backtrack(product * pyramid[row + 1][col + 1], row + 1, col + 1):
+        return True
+    moves.pop()
+        
+if n == 0 or not backtrack(pyramid[0][0], 0, 0):
+    print("No Solution!")
+else:
+    print(''.join(moves))

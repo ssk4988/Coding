@@ -1,0 +1,6 @@
+G is the child of C
+H is the grandchild of A
+F and G are siblings
+F and H are 1st cousins
+F and K are 1st cousins, 1 time removed
+B and K are 0th cousins, 2 times removed
