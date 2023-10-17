@@ -1,0 +1,56 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+using pi = pair<int, int>;
+using pl = pair<ll, ll>;
+using pd = pair<ld, ld>;
+using vi = vector<int>;
+using vl = vector<ll>;
+using vd = vector<ld>;
+using vpi = vector<pi>;
+using vpl = vector<pl>;
+using vpd = vector<pd>;
+using vvi = vector<vi>;
+
+#define f first
+#define s second
+#define mp make_pair
+#define pb push_back
+#define lb lower_bound
+#define ub upper_bound
+#define all(x) x.begin(), x.end()
+#define sz(x) (int)(x).size()
+#define rep(i, a, b) for (int i = a; i < (b); ++i)
+#define nL "\n"
+
+#pragma GCC optimize("O3")
+// #pragma GCC target("avx2,bmi,bmi2,popcnt,lzcnt")
+
+ll hsh(const int a, const int b){
+    return ll(a) << 32 + b;
+}
+
+int main()
+{
+    cin.tie(0)->sync_with_stdio(0);
+    cin.exceptions(cin.failbit);
+    int nc = 1 << 5; cout << nc << nL;
+    srand(time(NULL));
+    rep(cn, 0, nc){
+        int a, b, c, d, m; 
+        // cin >> a >> b >> c >> d >> m;
+        // rep(i, 0, 1 << 5){
+            a = (cn & (1 << 0)) ? 1 : 0;
+            b = (cn & (1 << 1)) ? 1 : 0;
+            c = (cn & (1 << 2)) ? 1 : 0;
+            d = (cn & (1 << 3)) ? 1 : 0;
+            m = (cn & (1 << 4)) ? 1 : 0;
+        // }
+        // a = abs(rand() * rand()), b = abs(rand() * rand()), c = abs(rand() * rand()), d = abs(rand() * rand()), m = abs(rand() * rand());
+        cout << a << " " << b << " " << c << " " << d << " " << m << nL;
+
+    } 
+    return 0;
+}
