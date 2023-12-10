@@ -28,7 +28,7 @@ using vvi = vector<vi>;
 template<int BITS = 32>
 struct XORBasis {
 	int basis[BITS] = {};
-	int nbasic = 0, nfree = 0;
+	int npivot = 0, nfree = 0;
 	bool indep(int v) {
 		for(int i = BITS - 1; i >= 0; i--)
 			if (v & (1 << i)) v ^= basis[i];
@@ -40,7 +40,7 @@ struct XORBasis {
 				if (basis[i]) v ^= basis[i];
 				else {
                     basis[i] = v;
-                    nbasic++;
+                    npivot++;
                     return;
                 }
 			}

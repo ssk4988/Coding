@@ -68,6 +68,7 @@ int main()
     vl l(n);
     rep(i, 0, n){
         ll x1, x2, y; cin >> x1 >> x2 >> y;
+        y *= -1;
         if(x1 > x2) swap(x2, x1);
         if(x1 == x2) continue;
         l[i] = abs(x2 - x1);
@@ -78,65 +79,76 @@ int main()
         v1.pb({P(x1, y), P(x2, y)});
     }
     ll ans = 0;
-    P ref;
     auto side = [](P a)->bool{
         if(a.y > 0) return true;
         if(a.y < 0) return false;
         return a.x >= 0;
     };
     auto cmp = [&](P a, P b)->bool{
-        bool ab = side(a - ref), bb = side(b - ref);
-        if(ab != bb) return ab < bb;
-        return ref.cross(a, b) < 0;
+        if(side(a) != side(b)) return side(a) < side(b);
+        return a.cross(b) > 0; // now counterclockwise
     };
     auto cmpp = [&](pp a, pp b)->bool{
         if(cmp(a.f, b.f)) return true;
-        if(ref.cross(a.f, b.f) == 0) return a.s < b.s;
-        return false;
+        if(a.f.cross(b.f) == 0) return a.s > b.s;
+        return false; // should never happen
     };
     for(auto [p, idx] : v){
         vector<vector<pp>> a(2);
         ll base = l[idx];
         ans = max(ans, base);
-        ref = p;
         // cout << "reference: " << p << nL;
+        vector<pp> events;
         for(auto [p1, p2] : v1){
-            if(p1.y == p.y) continue;
-            if(!cmp(p1, p2)) swap(p1, p2);
-            assert(getidx.count(p1));
-            int idx1 = getidx[p1];
-            a[side(p1 - ref)].pb({p1, -idx1 - 1});
-            a[side(p2 - ref)].pb({p2, idx1});
+            if(p1.y == p.y) continue; // horizontal drilling impossible
+            int len = abs(p1.x - p2.x);
+            P v1(p1 - p), v2(p2 - p);
+            if(!side(v1)) v1 = v1 * -1;
+            if(!side(v2)) v2 = v2 * -1;
+            if(cmp(v2, v1)) swap(v2, v1);
+            events.emplace_back(v1, len);
+            events.emplace_back(v2, -len);
+            // if(!cmp(p1, p2)) swap(p1, p2);
+            // assert(getidx.count(p1));
+            // int idx1 = getidx[p1];
+            // a[side(p1 - ref)].pb({p1, -idx1 - 1});
+            // a[side(p2 - ref)].pb({p2, idx1});
         }
-        sort(all(a[0]), cmpp);
-        sort(all(a[1]), cmpp);
+        sort(all(events), cmpp);
+        ll running = 0;
+        for(auto [p1, len] : events){
+            running += len;
+            ans = max(ans, base + running);
+        }
+        // sort(all(a[0]), cmpp);
+        // sort(all(a[1]), cmpp);
         // unordered_set<int> inset;
-        rep(sidetype, 0, 2){
-            int pnt = 0;
-            base = l[idx];
-            for(auto [p1, idx1] : a[sidetype]){
-                if(idx1 < 0) {
-                    idx1 = -idx1 - 1;
-                    base += l[idx1];
-                    // cout << "adding in " << p1 << nL;
-                }
-                else{
-                    base -= l[idx1];
-                    // cout << "removing " << p1 << nL;
-                }
-                while(pnt < sz(a[1 - sidetype]) && (ref.cross(p1, a[1 - sidetype][pnt].f) > 0 || (ref.cross(p1, a[1 - sidetype][pnt].f) == 0 && a[1 - sidetype][pnt].s < idx))){
-                    auto [p2, idx2] = a[1 - sidetype][pnt];
-                    if(idx2 < 0){
-                        idx2 = -idx2 - 1;
-                        base += l[idx2];
-                    }
-                    else base -= l[idx2];
+        // rep(sidetype, 0, 2){
+        //     int pnt = 0;
+        //     base = l[idx];
+        //     for(auto [p1, idx1] : a[sidetype]){
+        //         if(idx1 < 0) {
+        //             idx1 = -idx1 - 1;
+        //             base += l[idx1];
+        //             // cout << "adding in " << p1 << nL;
+        //         }
+        //         else{
+        //             base -= l[idx1];
+        //             // cout << "removing " << p1 << nL;
+        //         }
+        //         while(pnt < sz(a[1 - sidetype]) && (ref.cross(p1, a[1 - sidetype][pnt].f) > 0 || (ref.cross(p1, a[1 - sidetype][pnt].f) == 0 && a[1 - sidetype][pnt].s < idx))){
+        //             auto [p2, idx2] = a[1 - sidetype][pnt];
+        //             if(idx2 < 0){
+        //                 idx2 = -idx2 - 1;
+        //                 base += l[idx2];
+        //             }
+        //             else base -= l[idx2];
 
-                    pnt++;
-                }
-                ans = max(ans, base);
-            }
-        }
+        //             pnt++;
+        //         }
+        //         ans = max(ans, base);
+        //     }
+        // }
     }
     cout << ans << "\n";
     

@@ -76,12 +76,32 @@ struct Node
 	}
 };
 
+struct Tree {
+	typedef int T;
+	static constexpr T unit = INT_MIN;
+	T f(T a, T b) { return max(a, b); } // (any associative fn)
+	vector<T> s; int n;
+	Tree(int n = 0, T def = unit) : s(2*n, def), n(n) {}
+	void update(int pos, T val) {
+		for (s[pos += n] = val; pos /= 2;)
+			s[pos] = f(s[pos * 2], s[pos * 2 + 1]);
+	}
+	T query(int b, int e) { // query [b, e)
+		T ra = unit, rb = unit;
+		for (b += n, e += n; b < e; b /= 2, e /= 2) {
+			if (b % 2) ra = f(ra, s[b++]);
+			if (e % 2) rb = f(s[--e], rb);
+		}
+		return f(ra, rb);
+	}
+};
+
 template <bool VALS_EDGES>
 struct HLD
 {
 	int N, tim = 0;
 	vi par, siz, depth, rt, pos;
-	Node *tree;
+	Tree tree;
 	HLD(int n, vl &arr)
 		: N(n), par(N, -1), siz(N, 1), depth(N),
 		  rt(N), pos(N)
@@ -90,7 +110,11 @@ struct HLD
 		dfsHld(0);
 		vl arr2(sz(arr));
 		rep(i, 0, sz(pos)) arr2[pos[i]] = arr[i];
-		tree = new Node(arr2, 0, N);
+		// tree = new Node(arr2, 0, N);
+		tree = Tree(n, 0);
+		rep(i, 0, sz(arr2)){
+			tree.update(i, arr2[i]);
+		}
 	}
 	void dfsSz(int v)
 	{
@@ -130,18 +154,18 @@ struct HLD
 	void modifyPath(int u, int v, int val)
 	{
 		process(u, v, [&](int l, int r)
-				{ tree->set(l, r, val); });
+				{ tree.update(l, val); });
 	}
 	ll queryPath(int u, int v)
 	{ // Modify depending on problem
 		ll res = -inf;
 		process(u, v, [&](int l, int r)
-				{ res = max(res, tree->query(l, r)); });
+				{ res = max(res, (ll)tree.query(l, r)); });
 		return res;
 	}
 	int querySubtree(int v)
 	{ // modifySubtree is similar
-		return tree->query(pos[v] + VALS_EDGES, pos[v] + siz[v]);
+		return tree.query(pos[v] + VALS_EDGES, pos[v] + siz[v]);
 	}
 };
 

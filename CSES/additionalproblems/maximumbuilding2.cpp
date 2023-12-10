@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
-
+ 
 using ll = long long;
 using ld = long double;
 using pi = pair<int, int>;
@@ -13,7 +13,7 @@ using vpi = vector<pi>;
 using vpl = vector<pl>;
 using vpd = vector<pd>;
 using vvi = vector<vi>;
-
+ 
 #define f first
 #define s second
 #define mp make_pair
@@ -24,6 +24,12 @@ using vvi = vector<vi>;
 #define sz(x) (int)(x).size()
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
+ 
+bool cmp(pi a, pi b){
+    return a.f >= b.f;
+    // if(a.f >= b.f) return true;
+    // return false;
+}
 
 int main()
 {
@@ -43,40 +49,34 @@ int main()
         }
     }
     vvi ways(n + 1, vi(m + 1));
-    vi cols(m, n);
-    int ans = 0;
+    vi cols(m, n); // highest in each col we have seen (lowest row index)
     for (int i = n - 1; i >= 0; i--)
     {
         rep(j, 0, m) if (grid[i][j]) cols[j] = i;
-        stack<pi> st;
-        st.push({i, -1});
+        vector<pi> st;
+        st.pb({i, -1});
+        // cout << "testing row " << i << endl;
         rep(j, 0, m)
         {
             pi nex = {cols[j], j};
-            while (st.top() > nex)
+            while (sz(st) && cmp(st.back(), nex))
             {
-                auto [row, col] = st.top();
-                st.pop();
-                int pre = (sz(st) ? st.top().s : -1) + 1;
-                // ans = max(ans, (row - i) * (j - pre));
-                if (row - i > 0 && j - pre > 0)
-                {
-                    ways[row - i][j - pre]++;
-                    // cout << (row - i) << "x" << (j - pre) << " rect at " << i << "," << pre << nL;
-                }
+                // auto [row, col] = st.back();
+                st.pop_back();
+                // int pre = (sz(st) ? st.back().s : -1) + 1;
+                // if (row - i > 0 && j - pre > 0)
+                // {
+                //     ways[row - i][j - pre]++;
+                // }
             }
-            st.push(nex);
-        }
-        while (sz(st))
-        {
-            auto [row, col] = st.top();
-            st.pop();
-            int pre = (sz(st) ? st.top().s : -1) + 1;
-            // ans = max(ans, (row - i) * (m - pre));
-            if (row - i > 0 && m - pre > 0)
-            {
-                ways[row - i][m - pre]++;
-                // cout << (row - i) << "x" << (m - pre) << " rect at " << i << "," << pre << nL;
+            st.pb(nex);
+            rep(k, 0, sz(st)){
+                auto [row, col] = st[k];
+                int pre = k ? st[k - 1].s : -1;
+                ways[row - i][j - pre]++;
+                if(k){
+                    ways[st[k - 1].f - i][j - pre]--;
+                }
             }
         }
     }
@@ -89,14 +89,10 @@ int main()
     }
     rep(i, 1, n + 1){
         rep(j, 1, m + 1){
-            // if(i + 1 <= n) ways[i][j] += ways[i + 1][j];
-            // if(j + 1 <= m) ways[i][j] += ways[i][j + 1];
-            // if(i + 1 <= n && j + 1 <= m) ways[i][j] -= ways[i + 1][j + 1];
             cout << ways[i][j] << " ";
         }
         cout << nL;
     }
-    // cout << ans << nL;
-
+ 
     return 0;
 }

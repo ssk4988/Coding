@@ -22,115 +22,116 @@ using vvi = vector<vi>;
 #define ub upper_bound
 #define all(x) x.begin(), x.end()
 #define sz(x) (int)(x).size()
+#define ssize(x) (int)(x).size()
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-const int MN = 2e5 + 20;
-int n, k1, k2;
-ll ans = 0;
 
-int maxDepth = 0;
-vector<int> a[MN];
-bool r[MN]; // removed
-int s[MN];	// subtree size
-ll bit[MN];
-
-void update(int index, ll change)
-{
-	index++;
-	while (index < MN)
-	{
-		bit[index] += change;
-		index += index & -index;
-	}
-}
-
-ll query(int index)
-{
-	index++;
-	ll sum = 0;
-	while (index > 0)
-	{
-		sum += bit[index];
-		index -= index & -index;
-	}
-	return sum;
-}
-
-ll query(int l, int r)
-{
-	return query(r) - query(l - 1);
-}
-
-int dfs(int n, int p = 0)
-{
-	s[n] = 1;
-	for (int x : a[n])
-		if (x != p && !r[x])
-			s[n] += dfs(x, n);
-	return s[n];
-}
-int get_centroid(int n, int ms, int p = 0) // n = node, ms = size of tree, p = parent
-{
-	for (int x : a[n])
-		if (x != p && !r[x])
-			if (s[x] * 2 > ms)
-				return get_centroid(x, ms, n);
-	return n;
-}
-void dfs2(int cur, int p, int dist, bool add)
-{
-	if (r[cur] || dist > k2)
-		return;
-	maxDepth = max(dist, maxDepth);
-	if(add) update(dist, 1);
-	else ans += query(max(0, k1 - dist), k2 - dist);
-	for (int i : a[cur])
-	{
-		if (!r[i] && i != p)
-		{
-			dfs2(i, cur, dist + 1, add);
-		}
-	}
-}
-void centroid(int n = 1)
-{
-	int C = get_centroid(n, dfs(n));
-
-	// do something
-
-	r[C] = 1;
-	
-	maxDepth = 0;
-	for (int i = 0; i < a[C].size(); i++)
-	{
-		int x = a[C][i];
-		dfs2(x, C, 1, false);
-		// maxDepth = 0;
-		dfs2(x, C, 1, true);
-	}
-	for (int i = 1; i <= maxDepth; i++) update(i, -query(i, i));
-	for (int x : a[C])
-		if (!r[x])
-		{
-			centroid(x);
-		}
-}
+template <class F> struct centroid {
+    vector<vector<int>> adj;
+    F f;
+    vector<int> sub_sz;
+    /**
+     * @param a_adj unweighted undirected forest
+     * @param a_f called on centroid of each decomposition
+     * @time O(n log n)
+     * @space `adj` and `sub_sz` arrays take O(n); recursion stack for `dfs` is
+     * O(log n); recursion stack for `calc_sz` is O(n)
+     */
+    centroid(const vector<vector<int>>& a_adj, F a_f)
+        : adj(a_adj), f(a_f), sub_sz(ssize(adj), -1) {
+        for (int i = 0; i < ssize(adj); i++)
+            if (sub_sz[i] == -1) dfs(i);
+    }
+    void calc_sz(int u, int p) {
+        sub_sz[u] = 1;
+        for (auto v : adj[u]) {
+            if (v == p) continue;
+            calc_sz(v, u);
+            sub_sz[u] += sub_sz[v];
+        }
+    }
+    void dfs(int u) {
+        calc_sz(u, -1);
+        for (int p = -1, sz_root = sub_sz[u];;) {
+            auto big_ch = find_if(begin(adj[u]), end(adj[u]), [&](int v) -> bool {
+                return v != p && 2 * sub_sz[v] > sz_root;
+            });
+            if (big_ch == end(adj[u])) break;
+            p = u, u = *big_ch;
+        }
+        f(adj, u);
+        for (auto v : adj[u]) {
+            iter_swap(find(begin(adj[v]), end(adj[v]), u), rbegin(adj[v]));
+            adj[v].pop_back();
+            dfs(v);
+        }
+    }
+};
 
 int main()
 {
-	cin.tie(0)->sync_with_stdio(0);
-	cin.exceptions(cin.failbit);
-	cin >> n >> k1 >> k2;
-	update(0, 1);
-	rep(i, 0, n - 1)
-	{
-		int x, y;
-		cin >> x >> y;
-		a[x].pb(y);
-		a[y].pb(x);
-	}
-	centroid();
-	cout << ans << nL;
-	return 0;
+    cin.tie(0)->sync_with_stdio(0);
+    cin.exceptions(cin.failbit);
+    int n, k1, k2; cin >> n >> k1 >> k2;
+    vvi adj(n);
+    rep(i, 0, n - 1){
+        int a, b; cin >> a >> b; a--, b--;
+        adj[a].pb(b);
+        adj[b].pb(a);
+    }
+    ll ans = 0;
+    auto score = [&](vl &pref, vl &freq) -> ll {
+        ll res = 0;
+        for(int i : freq) {
+            if(i > 0 && pref[i] == 0) break;
+            int upper = k2 - i, lower = max(k1 - i, i);
+            if(upper >= lower){
+                res += (pref[upper] - (lower > 0 ? pref[lower - 1] : 0));
+                if(lower <= i && upper <= i) res--; // dont match with self
+            }
+        }
+        return res;
+    };
+    vl freq(n + 1), newfreq(n + 1), updates, newupdates;
+    centroid(adj, [&](const vvi &a, int root) -> void {
+        auto dfs = [&](int cur, int par, int d, auto&&dfs)->void {
+            newfreq[d]++;
+            updates.push_back(d);
+            freq[d]++;
+            newupdates.pb(d);
+            for(int nex : a[cur]){
+                if(nex == par) continue;
+                dfs(nex, cur, d+1, dfs);
+            }
+        };
+        freq[0]++;
+        updates.pb(0);
+        for(int nex : a[root]){
+            dfs(nex, root, 1, dfs);
+            rep(i, 1, sz(newfreq)){
+                if(newfreq[i] == 0) break;
+                newfreq[i] += newfreq[i - 1];
+            }
+            ans -= score(newfreq, newupdates);
+            rep(i, 1, sz(newfreq)){
+                if(newfreq[i] == 0) break;
+                newfreq[i] = 0;
+            }
+            newupdates.clear();
+        }
+        rep(i, 1, sz(freq)){
+            if(freq[i] == 0) break;
+            freq[i] += freq[i - 1];
+        }
+        ans += score(freq, updates);
+        rep(i, 0, sz(freq)){
+            if(freq[i] == 0) break;
+            freq[i] = 0;
+        }
+        updates.clear();
+    });
+    cout << ans << "\n";
+    
+    return 0;
 }
