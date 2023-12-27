@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
- 
+
 using ll = long long;
 using ld = long double;
 using pi = pair<int, int>;
@@ -13,7 +13,7 @@ using vpi = vector<pi>;
 using vpl = vector<pl>;
 using vpd = vector<pd>;
 using vvi = vector<vi>;
- 
+
 #define f first
 #define s second
 #define mp make_pair
@@ -25,8 +25,8 @@ using vvi = vector<vi>;
 #define ssize(x) (int)(x).size()
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
- 
- 
+
+
 template <class F> struct centroid {
     vector<vector<int>> adj;
     F f;
@@ -68,7 +68,7 @@ template <class F> struct centroid {
         }
     }
 };
- 
+
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
@@ -81,31 +81,55 @@ int main()
         adj[b].pb(a);
     }
     ll ans = 0;
-    vl freq(n + 5), newfreq;
+    auto score = [&](vl &pref, vl &freq) -> ll {
+        ll res = 0;
+        for(int i : freq) {
+            if(i > 0 && pref[i] == 0) break;
+            int upper = k2 - i, lower = max(k1 - i, i);
+            if(upper >= lower){
+                res += (pref[upper] - (lower > 0 ? pref[lower - 1] : 0));
+                if(lower <= i && upper <= i) res--; // dont match with self
+            }
+        }
+        return res;
+    };
+    vl freq(n + 1), newfreq(n + 1), updates, newupdates;
     centroid(adj, [&](const vvi &a, int root) -> void {
-        int maxd = 0;
-        auto dfs = [&](int cur, int par, int d, auto&&dfs) -> void {
-            maxd = max(d, maxd);
-            ans += freq[max(0, k1 - d)];
-            ans -= freq[max(0, k2 - d + 1)];
-            while(sz(newfreq) <= d) newfreq.pb(0);
+        auto dfs = [&](int cur, int par, int d, auto&&dfs)->void {
             newfreq[d]++;
+            updates.push_back(d);
+            freq[d]++;
+            newupdates.pb(d);
             for(int nex : a[cur]){
                 if(nex == par) continue;
                 dfs(nex, cur, d+1, dfs);
             }
         };
         freq[0]++;
+        updates.pb(0);
         for(int nex : a[root]){
             dfs(nex, root, 1, dfs);
-            ll acc = 0;
-            for(int i = sz(newfreq) - 1; i >= 0; i--){
-                acc += newfreq[i];
-                freq[i] += acc;
+            rep(i, 1, sz(newfreq)){
+                if(newfreq[i] == 0) break;
+                newfreq[i] += newfreq[i - 1];
             }
-            newfreq.clear();
+            ans -= score(newfreq, newupdates);
+            rep(i, 1, sz(newfreq)){
+                if(newfreq[i] == 0) break;
+                newfreq[i] = 0;
+            }
+            newupdates.clear();
         }
-        rep(i, 0, maxd + 1) freq[i] = 0;
+        rep(i, 1, sz(freq)){
+            if(freq[i] == 0) break;
+            freq[i] += freq[i - 1];
+        }
+        ans += score(freq, updates);
+        rep(i, 0, sz(freq)){
+            if(freq[i] == 0) break;
+            freq[i] = 0;
+        }
+        updates.clear();
     });
     cout << ans << "\n";
     
