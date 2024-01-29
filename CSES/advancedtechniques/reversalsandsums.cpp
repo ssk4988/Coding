@@ -29,21 +29,21 @@ struct Node {
 	Node *l = 0, *r = 0;
 	int val, y, c = 1;
     ll sum;
-    bool sw = false;
+    bool rev = false;
 	Node(int val) : val(val), y(rand()), sum(val) {}
 	void recalc();
     void push(){
-        if(sw == 0) return;
+        if(rev == 0) return;
         // swap(l, r);
         if(l){
-            l->sw ^= 1;
+            l->rev ^= 1;
             swap(l->l, l->r);
         }
         if(r){
-            r->sw ^= 1;
+            r->rev ^= 1;
             swap(r->l, r->r);
         }
-        sw = 0;
+        rev = 0;
     }
 };
 
@@ -105,7 +105,7 @@ void move(Node*& t, int l, int r, int k) {
 void rev(Node*& t, int l, int r) {
 	Node *a, *b, *c;
 	tie(a,b) = split(t, l); tie(b,c) = split(b, r - l);
-    b->sw ^= 1;
+    b->rev ^= 1;
     swap(b->l, b->r);
     t = merge(merge(a, b), c);
 }

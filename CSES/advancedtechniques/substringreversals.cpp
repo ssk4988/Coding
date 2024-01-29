@@ -25,37 +25,47 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
+/**
+ * Author: someone on Codeforces
+ * Date: 2017-03-14
+ * Source: folklore
+ * Description: A short self-balancing tree. It acts as a
+ *  sequential container with log-time splits/joins, and
+ *  is easy to augment with additional data.
+ * Time: $O(\log N)$
+ * Status: stress-tested
+ */
+
 struct Node {
 	Node *l = 0, *r = 0;
 	int val, y, c = 1;
-    bool sw = false;
+    bool rev = false;
 	Node(int val) : val(val), y(rand()) {}
 	void recalc();
-    void push(){
-        if(sw == 0) return;
-        // swap(l, r);
-        if(l){
-            l->sw ^= 1;
-            swap(l->l, l->r);
-        }
-        if(r){
-            r->sw ^= 1;
-            swap(r->l, r->r);
-        }
-        sw = 0;
+	void push();
+    void tag() {
+        rev = !rev;
+        swap(l, r);
     }
 };
 
 int cnt(Node* n) { return n ? n->c : 0; }
 void Node::recalc() { c = cnt(l) + cnt(r) + 1; }
+void Node::push() {
+    if(rev){
+        rev = false;
+        if(l) l->tag();
+        if(r) r->tag();
+    }
+}
 
 template<class F> void each(Node* n, F f) {
-	if (n) { each(n->l, f); f(n->val); each(n->r, f); }
+	if (n) { n->push(); each(n->l, f); f(n->val); each(n->r, f); }
 }
 
 pair<Node*, Node*> split(Node* n, int k) {
 	if (!n) return {};
-    n->push();
+	n->push();
 	if (cnt(n->l) >= k) { // "n->val >= k" for lower_bound(k)
 		auto pa = split(n->l, k);
 		n->l = pa.second;
@@ -72,8 +82,7 @@ pair<Node*, Node*> split(Node* n, int k) {
 Node* merge(Node* l, Node* r) {
 	if (!l) return r;
 	if (!r) return l;
-    l->push();
-    r->push();
+	l->push(), r->push();
 	if (l->y > r->y) {
 		l->r = merge(l->r, r);
 		l->recalc();
@@ -97,11 +106,11 @@ void move(Node*& t, int l, int r, int k) {
 	if (k <= l) t = merge(ins(a, b, k), c);
 	else t = merge(a, ins(c, b, k - r));
 }
+
 void rev(Node*& t, int l, int r) {
 	Node *a, *b, *c;
 	tie(a,b) = split(t, l); tie(b,c) = split(b, r - l);
-    b->sw ^= 1;
-    swap(b->l, b->r);
+    b->tag();
     t = merge(merge(a, b), c);
 }
 
