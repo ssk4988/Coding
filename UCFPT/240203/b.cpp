@@ -25,33 +25,35 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-vector<int> z_function(string str) {
-    int n = (int) str.length();
-    vector<int> z(n);
-    for (int i = 1, l = 0, r = 0; i < n; ++i) {
-        if (i <= r)
-            z[i] = min (r - i + 1, z[i - l]);
-        while (i + z[i] < n && str[z[i]] == str[i + z[i]])
-            ++z[i];
-        if (i + z[i] - 1 > r)
-            l = i, r = i + z[i] - 1;
-    }
-    return z;
-}
-
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    string str; cin >> str;
-    vi z = z_function(str);
-    vi ans;
-
-    rep(i, 1, sz(str)){
-        if(z[i] + i == sz(str)) ans.pb(i);
+    const int LIM = 1e6 + 1;
+    int n; cin >> n;
+    vvi adj(n), bucket(LIM);
+    vi e(n);
+    rep(i, 0, n){
+        int d; cin >> e[i] >> d;
+        bucket[e[i]].pb(i);
+        rep(j, 0, d){
+            int x; cin >> x; x--;
+            adj[i].pb(x);
+        }
     }
-    ans.pb(sz(str));
-    for(int i : ans) cout << i << " ";
-    cout << nL;
+    int seen = 0, ans = 0;
+    vi used(n);
+    auto revdfs = [&](int u, auto &&self) -> void {
+        if(used[u]) return;
+        for(int v : adj[u]) self(v, self);
+        used[u] = true;
+        ans = max(seen++ + e[u], ans);
+    };
+    for(int i = sz(bucket) - 1; i >= 0; i--){
+        for(auto x : bucket[i]){
+            revdfs(x, revdfs);
+        }
+    }
+    cout << ans << "\n";
     return 0;
 }

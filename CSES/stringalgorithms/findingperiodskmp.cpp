@@ -3,11 +3,13 @@ using namespace std;
 
 using ll = long long;
 using ld = long double;
+using pi = pair<int, int>;
 using pl = pair<ll, ll>;
 using pd = pair<ld, ld>;
 using vi = vector<int>;
 using vl = vector<ll>;
 using vd = vector<ld>;
+using vpi = vector<pi>;
 using vpl = vector<pl>;
 using vpd = vector<pd>;
 using vvi = vector<vi>;
@@ -23,12 +25,7 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-const ll MOD = 1e9 + 7;
-ll mod(ll k){
-    return k % MOD;
-}
-
-vi pi(const string& s) {
+vi kmp(const string& s) {
 	vi p(sz(s));
 	rep(i,1,sz(s)) {
 		int g = p[i-1];
@@ -42,27 +39,31 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n; cin >> n;
     string str; cin >> str;
-    int m = sz(str);
-    vi kmp = pi(str);
-    vvi aut(m + 1, vi(26));
-    aut[0][str[0] - 'A'] = 1;
-    rep(i, 1, m){
-        aut[i] = aut[kmp[i-1]];
-        aut[i][str[i] - 'A'] = i + 1;
+    vi k = kmp(str);
+    vi ans(sz(str) + 1);
+    int len = sz(str);
+    for(int i = 0; i < sz(k); i++){
+        cout << i << " " << k[i] << nL;
     }
-    aut[m] = vi(26, m);
-    // rep(i, 0, 26) aut[m][i] = m;
-    vector<vl> dp(n + 1, vl(m + 1));
-    dp[0][0] = 1;
-    rep(i, 0, n){
-        rep(j, 0, m + 1){
-            rep(k, 0, 26){
-                dp[i + 1][aut[j][k]] = mod(dp[i + 1][aut[j][k]] + dp[i][j]);
-            }
+
+    ans[len] = true;
+    while(len && k[len-1] * 2 >= len){
+        // cout << (sz(str) - len) << nL;
+        // ans.pb(sz(str) - len);
+        len = k[len-1];
+        ans[len] = true;
+    }
+    // reverse(all(ans));
+    for(int i = sz(ans) - 1; i >= 0; i--){
+        if(ans[i]){
+            for(int j = i; j < sz(ans); j += i) ans[j] = true;
         }
     }
-    cout << dp[n][m] << nL;
+    // ans.pb(sz(str));
+    rep(i, 0, sz(ans)){
+        if(ans[i]) cout << i << " ";
+    }
+    cout << nL;
     return 0;
 }

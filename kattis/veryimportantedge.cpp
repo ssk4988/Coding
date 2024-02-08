@@ -46,23 +46,24 @@ int main()
     cin.exceptions(cin.failbit);
     int n, m; cin >> n >> m;
     vector<array<int, 3>> edges(m);
-    rep(i, 0, m){
-        cin >> edges[i][1] >> edges[i][2] >> edges[i][0]; edges[i][1]--, edges[i][2]--;
+    for(auto &[w, u, v] : edges) {
+        cin >> u >> v >> w; u--, v--;
     }
     vi edgeorder(m), unused, depth(n), par(n, -1), orig(n), best(n);
     iota(all(edgeorder), 0);
     sort(all(edgeorder), [&](int u, int v) -> bool { return edges[u] < edges[v]; });
-    UF uf(n), path(n);
+    UF uf(n), path(n), uf2(n);
     vvi adj(n);
     ll sum = 0;
-    rep(i, 0, m){
-        if(!uf.join(edges[edgeorder[i]][1], edges[edgeorder[i]][2])){
-            unused.pb(edgeorder[i]);
+    for(int i : edgeorder) {
+        auto &[w, u, v] = edges[i];
+        if(!uf.join(u, v)){
+            if(uf2.join(u, v)) unused.pb(i);
         }
         else {
-            adj[edges[edgeorder[i]][1]].pb(edgeorder[i]);
-            adj[edges[edgeorder[i]][2]].pb(edgeorder[i]);
-            sum += edges[edgeorder[i]][0];
+            adj[u].pb(i);
+            adj[v].pb(i);
+            sum += edges[i][0];
         }
     }
     auto other = [&](int u, int e) -> int { return edges[e][1 + (edges[e][1] == u)]; };
@@ -80,7 +81,7 @@ int main()
     };
     dfs(0, -1, dfs);
     for(int e : unused) {
-        auto [w, u, v] = edges[e];
+        auto &[w, u, v] = edges[e];
         u = path.find(u), v = path.find(v);
         while(u != v) {
             int upd = depth[u] >= depth[v] ? u : v;

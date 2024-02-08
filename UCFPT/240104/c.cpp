@@ -134,51 +134,36 @@ int main()
         int n, k; cin >> n >> k;
         vi a(n);
         set<int> unused;
-        LinkCut tree((n + 2) * 2);
-        // 0 jump 1 lazy
+        LinkCut tree(n + 2);
         rep(i, 0, n){
             cin >> a[i]; a[i];
         }
         rep(i, 0, n + 1){
             unused.insert(i);
-            tree.link(i * 2, i * 2 + 1); // jump to lazy of self
-            tree.link(i * 2 + 1, (i + 1) * 2 + 1); // lazy to next lazy
+            tree.link(i, i + 1);
         }
-        int sink = (n + 1) * 2 + 1;
-        tree.link((n + 1) * 2, (n + 1) * 2 + 1);
-        // int mindex = n;
+        int sink = n + 1;
         vi ans;
-        // cout << "num nodes is " << (n + 2) * 2 << endl;
         rep(i, 0, n){
-            // cout << "on " << i << " " << a[i] << endl;
-            // mindex = min(mindex, a[i]);
             while(sz(unused)){
-                // cout << "loop interation" << endl;
                 auto it = unused.lower_bound(a[i]);
                 if(it == unused.begin()) break;
                 it = prev(it);
                 int val = *it;
                 if(val + k < a[i]) break;
-                // cout << "checking " << val << endl;
-                // cout << "cut " << val << endl;
-                tree.cut(val * 2 + 1, (val + 1) * 2 + 1);
-                // cout << "did cut " << endl;
-                tree.update(val * 2 + 1, 1);
-                tree.link(val * 2 + 1, min(n, val + k) * 2);
+                tree.cut(val, val + 1);
+                tree.update(val, 1);
+                tree.link(val, min(n, val + k));
                 tree.makeRoot(&tree.node[sink]);
-                // cout << "did link" << endl;
                 unused.erase(val);
             }
-            // tree.reroot(sink);
             tree.access(&tree.node[0]);
             tree.makeRoot(&tree.node[sink]);
             tree.access(&tree.node[0]);
             ans.pb(tree.node[0].sum);
-            // cout << ans << " ";
-            // cout << "finished " << i << " " << ans.back() << endl;
         }
         for(int i : ans) cout << i << " ";
-        cout << endl;
+        cout << "\n";
     }
     
     return 0;

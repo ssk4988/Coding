@@ -25,33 +25,40 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-vector<int> z_function(string str) {
-    int n = (int) str.length();
-    vector<int> z(n);
-    for (int i = 1, l = 0, r = 0; i < n; ++i) {
-        if (i <= r)
-            z[i] = min (r - i + 1, z[i - l]);
-        while (i + z[i] < n && str[z[i]] == str[i + z[i]])
-            ++z[i];
-        if (i + z[i] - 1 > r)
-            l = i, r = i + z[i] - 1;
-    }
-    return z;
-}
-
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    string str; cin >> str;
-    vi z = z_function(str);
-    vi ans;
+	int n, k; cin >> n >> k;
+	vi par(n), depth(n), deep(n);
+	vvi child(n);
+	rep(i, 1, n){
+		cin >> par[i]; par[i]--;
+		child[par[i]].pb(i);
+	}
+	priority_queue<int> pq;
+	auto dfs = [&](int u, auto &&dfs) -> void {
+		deep[u] = depth[u];
+		for(int v : child[u]){
+			depth[v] = depth[u] + 1;
+			dfs(v, dfs);
+			deep[u] = max(deep[u], deep[v]);
+		}
+		sort(all(child[u]), [&](int a, int b) -> bool {return deep[a] < deep[b]; });
+		rep(i, 0, sz(child[u]) - 1){
+			pq.push(deep[child[u][i]] - 2 * depth[u]);
+		}
+	};
+	dfs(0, dfs);
+	ll ans = 2 * (n - 1) - deep[0];
+	while(k && sz(pq)){
+		int x = pq.top(); pq.pop();
+		if(x <= 0) break;
+		ans -= x;
+		k--;
+	}
+	cout << ans << nL;
 
-    rep(i, 1, sz(str)){
-        if(z[i] + i == sz(str)) ans.pb(i);
-    }
-    ans.pb(sz(str));
-    for(int i : ans) cout << i << " ";
-    cout << nL;
+    
     return 0;
 }

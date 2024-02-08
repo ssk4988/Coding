@@ -3,11 +3,13 @@ using namespace std;
 
 using ll = long long;
 using ld = long double;
+using pi = pair<int, int>;
 using pl = pair<ll, ll>;
 using pd = pair<ld, ld>;
 using vi = vector<int>;
 using vl = vector<ll>;
 using vd = vector<ld>;
+using vpi = vector<pi>;
 using vpl = vector<pl>;
 using vpd = vector<pd>;
 using vvi = vector<vi>;
@@ -24,45 +26,38 @@ using vvi = vector<vi>;
 #define nL "\n"
 
 const ll MOD = 1e9 + 7;
-ll mod(ll k){
+inline ll mod(ll k){
     return k % MOD;
-}
-
-vi pi(const string& s) {
-	vi p(sz(s));
-	rep(i,1,sz(s)) {
-		int g = p[i-1];
-		while (g && s[i] != s[g]) g = p[g-1];
-		p[i] = g + (s[i] == s[g]);
-	}
-	return p;
 }
 
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n; cin >> n;
-    string str; cin >> str;
-    int m = sz(str);
-    vi kmp = pi(str);
-    vvi aut(m + 1, vi(26));
-    aut[0][str[0] - 'A'] = 1;
-    rep(i, 1, m){
-        aut[i] = aut[kmp[i-1]];
-        aut[i][str[i] - 'A'] = i + 1;
-    }
-    aut[m] = vi(26, m);
-    // rep(i, 0, 26) aut[m][i] = m;
-    vector<vl> dp(n + 1, vl(m + 1));
-    dp[0][0] = 1;
-    rep(i, 0, n){
-        rep(j, 0, m + 1){
-            rep(k, 0, 26){
-                dp[i + 1][aut[j][k]] = mod(dp[i + 1][aut[j][k]] + dp[i][j]);
-            }
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int n; cin >> n;
+        vi a(n), b(n);
+        rep(i, 0, n){
+            cin >> a[i];
         }
+        rep(i, 0, n) cin >> b[i];
+        sort(all(a));
+        sort(all(b));
+        reverse(all(a));
+        reverse(all(b));
+        int pnt = 0;
+        ll ways = 1;
+        rep(i, 0, n){
+            while(pnt < n && a[pnt] > b[i]){
+                pnt++;
+            }
+            int w = pnt - i;
+            if(w <= 0) ways = 0;
+            ways = mod(ways * w);
+        }
+        cout << ways << "\n";
     }
-    cout << dp[n][m] << nL;
+    
     return 0;
 }

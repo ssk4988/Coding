@@ -25,33 +25,29 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-vector<int> z_function(string str) {
-    int n = (int) str.length();
-    vector<int> z(n);
-    for (int i = 1, l = 0, r = 0; i < n; ++i) {
-        if (i <= r)
-            z[i] = min (r - i + 1, z[i - l]);
-        while (i + z[i] < n && str[z[i]] == str[i + z[i]])
-            ++z[i];
-        if (i + z[i] - 1 > r)
-            l = i, r = i + z[i] - 1;
-    }
-    return z;
-}
-
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    string str; cin >> str;
-    vi z = z_function(str);
-    vi ans;
-
-    rep(i, 1, sz(str)){
-        if(z[i] + i == sz(str)) ans.pb(i);
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int n; cin >> n;
+        vpi a(n);
+        rep(i, 0, n){
+            cin >> a[i].f;
+        }
+        rep(i, 0, n) cin >> a[i].s;
+        sort(all(a));
+        // sort(all(a), [](pi a, pi b) -> bool {
+        //     return a.f < b.f && a.s < b.s;
+        // });
+        rep(i, 0, n) cout << a[i].f << " ";
+        cout << nL;
+        rep(i, 0, n){
+            cout << a[i].s << " ";
+        }
+        cout << nL;
     }
-    ans.pb(sz(str));
-    for(int i : ans) cout << i << " ";
-    cout << nL;
+    
     return 0;
 }

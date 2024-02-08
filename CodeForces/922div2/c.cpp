@@ -25,33 +25,33 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-vector<int> z_function(string str) {
-    int n = (int) str.length();
-    vector<int> z(n);
-    for (int i = 1, l = 0, r = 0; i < n; ++i) {
-        if (i <= r)
-            z[i] = min (r - i + 1, z[i - l]);
-        while (i + z[i] < n && str[z[i]] == str[i + z[i]])
-            ++z[i];
-        if (i + z[i] - 1 > r)
-            l = i, r = i + z[i] - 1;
-    }
-    return z;
-}
-
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    string str; cin >> str;
-    vi z = z_function(str);
-    vi ans;
-
-    rep(i, 1, sz(str)){
-        if(z[i] + i == sz(str)) ans.pb(i);
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        ll a, b, r; cin >> a >> b >> r;
+        ll c = 1;
+        for(; c * 2 <= a || c * 2 <= b; c *= 2);
+        bool flip = false, abig = false;
+        ll x = 0;
+        while(c){
+            ll ab = a & c, bb = b & c;
+            if(ab != bb){
+                if(!flip){
+                    flip = true;
+                    abig = ab > bb;
+                }
+                else if((x | c) <= r){
+                    if(abig == (ab > bb))
+                        x |= c;
+                }
+            }
+            c /= 2;
+        }
+        cout << abs((a ^ x) - (b ^ x)) << nL;
     }
-    ans.pb(sz(str));
-    for(int i : ans) cout << i << " ";
-    cout << nL;
+    
     return 0;
 }
