@@ -41,7 +41,7 @@ int main()
         ll t, r;
         cin >> a >> b >> t >> r;
         a--, b--;
-        adj[a].push_back({b, t, r});
+        // adj[a].push_back({b, t, r});
         adj[b].push_back({a, t, r});
         edges.push_back({a, b, t, r});
     }
@@ -68,14 +68,6 @@ int main()
     }
     // rep(i, 0, n) cout << dist[i] << endl;
     // cout << "did dijkstra" << endl;
-    vvi optimalnext(n);
-    for (auto [a, b, t, r] : edges)
-    {
-        if (dist[a] > dist[b])
-            swap(a, b);
-        if (dist[a] + r == dist[b])
-            optimalnext[b].pb(a);
-    }
     int pt, pr;
     cin >> pt;
     vpi turtlepath(pt);
@@ -115,8 +107,16 @@ int main()
         curt += r;
         rabbittime[i + 1] = curt;
     }
+    vvi optimalnext(n);
+    for (auto [a, b, t, r] : edges)
+    {
+        // if (dist[a] > dist[b])
+        //     swap(a, b);
+        if (dist[b] + r == dist[a])
+            optimalnext[a].pb(b);
+    }
     // cout << "found rabbit times" << sz(rabbitpath) << endl;
-    // rep(i, 0, sz(rabbitpath)) cout << "rabbit at: " << rabbitpath[i] << " " << rabbittime[i] << endl;
+    // rep(i, 0, sz(rabbitpath)) cout << "rabbit at: " << rabbitpath[i] << " " << rabbittime[i] << " " << dist[rabbitpath[i]] << endl;
     vi ans;
     int idx = 0; // where is turtle on path
     rep(i, 0, sz(rabbitpath) - 1)
@@ -128,7 +128,7 @@ int main()
         // cout << "under time" << endl;
         int nextnode = rabbitpath[i + 1];
         // not diverging
-        if (sz(optimalnext[rabbitpath[i]]) < 1 || (sz(optimalnext[rabbitpath[i]]) == 1 && optimalnext[rabbitpath[i]][0] == nextnode))
+        if (sz(optimalnext[rabbitpath[i]]) == 1 && optimalnext[rabbitpath[i]][0] == nextnode)
             continue;
         // cout << "diverges" << endl;
         int rabbitArrive = curt + dist[rabbitpath[i]];

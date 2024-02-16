@@ -39,6 +39,8 @@ int main()
         adj[u].pb({v, t});
         radj[v].pb({u, t});
     }
+    adj[0].pb({0, 0});
+    radj[0].pb({0, 0});
     auto dijkstra = [](int source, vector<vector<pair<int, ll>>> &graph) -> vl {
         int n = sz(graph);
         vl dist(n, inf);
@@ -59,9 +61,8 @@ int main()
     };
     vl from = dijkstra(0, adj), to = dijkstra(n - 1, radj);
     auto test = [&](ll delay) -> bool {
-        // cout << "testing " << delay << endl;
+        while(sz(from) > n) from.pop_back();
         int nodes = n;
-        auto graph = adj;
         vector<vector<pair<int, ll>>> dag(nodes);
         vector<bool> good(nodes); // can make it to n - 1
         good[n-1] = true;
@@ -74,47 +75,34 @@ int main()
                     dag[u].pb({v, w});
                 }
                 else if(to[v] < delay){
-                    graph.pb({});
                     dag.pb({});
                     dag[nodes].pb({v, delay - to[v]});
-                    graph[nodes].pb({v, delay - to[v]});
-                    graph[u].pb({nodes, w - (delay - to[v])});
+                    from.pb(from[u] + w - (delay - to[v]));
                     good.pb(true);
                     nodes++;
                 }
             }
         }
-        vl from1 = dijkstra(0, graph);
         vi state(nodes);
+        vl dp(nodes, -1);
         auto dfs = [&](int u, auto &&dfs) -> bool {
             if(state[u] == 2) return false;
             if(state[u] == 1) return true;
             state[u] = 1;
+            dp[u] = 0;
             for(auto [v, w] : dag[u]){
                 if(dfs(v, dfs)) return true;
+                dp[u] = max(dp[u], dp[v] + w);
             }
             state[u] = 2;
             return false;
         };
-        rep(i, 0, nodes){
-            if(good[i] && from1[i] <= a && dfs(i, dfs)) {
-                // infinite cycle we can reach before getting called
-                return true;
-            }
-        }
-        vl dp(nodes, -1);
-        auto calc = [&](int u, auto &&calc) -> ll {
-            if(dp[u] != -1) return dp[u];
-            dp[u] = 0;
-            for(auto [v, w] : dag[u]){
-                // if(!good[v]) continue;
-                dp[u] = max(dp[u], calc(v, calc) + w);
-            }
-            return dp[u];
-        };
         ll longest = -inf;
         rep(i, 0, nodes){
-            if(good[i] && from1[i] <= a) longest = max(longest, calc(i, calc));
+            if(good[i] && from[i] <= a) {
+                if(dfs(i, dfs)) return true;
+                longest = max(longest, dp[i]);
+            }
         }
         return longest >= b - a;
     };

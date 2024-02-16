@@ -55,6 +55,20 @@ struct Point {
 		return os << "(" << p.x << "," << p.y << ")"; }
 };
 
+template<class P> bool onSegment(P s, P e, P p) {
+	return p.cross(s, e) == 0 && (s - p).dot(e - p) <= 0;
+}
+
+template<class P>
+int sideOf(P s, P e, P p) { return sgn(s.cross(e, p)); }
+
+template<class P>
+int sideOf(const P& s, const P& e, const P& p, double eps) {
+	auto a = (e-s).cross(p-s);
+	double l = (e-s).dist()*eps;
+	return (a > l) - (a < -l);
+}
+
 typedef Point<ll> P;
 vector<P> convexHull(vector<P> pts) {
 	if (sz(pts) <= 1) return pts;
@@ -63,12 +77,24 @@ vector<P> convexHull(vector<P> pts) {
 	int s = 0, t = 0;
 	for (int it = 2; it--; s = --t, reverse(all(pts)))
 		for (P p : pts) {
-			while (t >= s + 2 && h[t-2].cross(h[t-1], p) < 0) t--;
+			while (t >= s + 2 && h[t-2].cross(h[t-1], p) <= 0) t--;
 			h[t++] = p;
 		}
 	return {h.begin(), h.begin() + t - (t == 2 && h[0] == h[1])};
 }
 
+bool inHull(const vector<P>& l, P p, bool strict = true) {
+	int a = 1, b = sz(l) - 1, r = !strict;
+	if (sz(l) < 3) return r && onSegment(l[0], l.back(), p);
+	if (sideOf(l[0], l[a], l[b]) > 0) swap(a, b);
+	if (sideOf(l[0], l[a], p) >= r || sideOf(l[0], l[b], p)<= -r)
+		return false;
+	while (abs(a - b) > 1) {
+		int c = (a + b) / 2;
+		(sideOf(l[0], l[c], p) > 0 ? b : a) = c;
+	}
+	return sgn(l[a].cross(l[b], p)) < r;
+}
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
@@ -79,9 +105,13 @@ int main()
         cin >> v[i].x >> v[i].y;
     }
 	vector<P> res = convexHull(v);
-	cout << sz(res) << nL;
-	for(auto &p : res){
-		cout << p.x << " " << p.y << nL;
+	vector<P> ans;
+	rep(i, 0, n){
+		if(inHull(res, v[i], false) && !inHull(res, v[i], true)) ans.pb(v[i]);
+	}
+	cout << sz(ans) << "\n";
+	for(auto [x, y] : ans){
+		cout << x << " " << y << "\n";
 	}
     
     return 0;

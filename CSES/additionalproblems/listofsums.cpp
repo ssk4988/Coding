@@ -29,18 +29,53 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
+    // int n; cin >> n;
+    // vi a(n);
+    // rep(i, 0, n)cin >> a[i];
+    // vi res;
+    // rep(i, 0, n){
+    //     rep(j, i + 1, n){
+    //         res.pb(a[i] + a[j]);
+    //     }
+    // }
+    // sort(all(res));
+    // for(int i : res) cout << i << " ";
+    // cout << nL;
     int n; cin >> n;
-    vi a(n);
-    rep(i, 0, n)cin >> a[i];
-    vi res;
-    rep(i, 0, n){
-        rep(j, i + 1, n){
-            res.pb(a[i] + a[j]);
+    int n2 = n * (n - 1) / 2;
+    vi a(n2);
+    rep(i, 0, n2) cin >> a[i];
+    sort(all(a));
+    // a[0] - x0 = x1
+    // a[1] - x0 = x2
+    // brute force the sum of x1 and x2
+    // x1 + x2 = a[0] + a[1] - 2 * x0
+    rep(i, 2, n2){
+        int s1 = a[0] + a[1] - a[i];
+        if(s1 <= 0 || s1 % 2 != 0) continue;
+        int x0 = s1 / 2, x1 = a[0] - x0, x2 = a[1] - x0;
+        vi v = {x0, x1, x2};
+        multiset<ll> ss(all(a));
+        rep(i, 0, sz(v))
+            rep(j, i + 1, sz(v))
+                ss.erase(ss.find(v[i] + v[j]));
+        bool works = true;
+        while(sz(ss) && works){
+            int x = *ss.begin() - v[0];
+            for(int i : v){
+                if(ss.find(i + x) == ss.end()){
+                    works = false;
+                    break;
+                }
+                ss.erase(ss.find(i + x));
+            }
+            v.pb(x);
+        }
+        if(works){
+            for(int i : v) cout << i << " ";
+            cout << "\n";
+            break;
         }
     }
-    sort(all(res));
-    for(int i : res) cout << i << " ";
-    cout << nL;
-    
     return 0;
 }
