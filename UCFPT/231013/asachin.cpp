@@ -1,18 +1,11 @@
 #include <bits/stdc++.h>
-// #include <ext/pb_ds/assoc_container.hpp> //gp_hash_table
 
 #define all(a) a.begin(), a.end()
 #define pb push_back
-#define eb emplace_back
 #define sz(a) (int)a.size()
-#define bitcount(a) (int)__builtin_popcount(a)
-#define bitcountll(a) (int)__builtin_popcountll(a)
 #define rep(i, from, to) for (int i = from; i < (to); ++i)
-#define fora(x, o) for (auto &x : o)
-#define bitat(x, i) (((x) >> (i)) & 1)
 
 using namespace std;
-// using namespace __gnu_pbds;
 
 typedef long long int ll;
 typedef long double ld;
@@ -20,6 +13,7 @@ typedef pair<int, int> pii;
 typedef pair<ll, ll> pll;
 typedef pair<double, double> pdd;
 typedef vector<int> vi;
+typedef vector<vi> vvi;
 typedef vector<ll> vll;
 
 template <class T, class U>
@@ -53,47 +47,47 @@ int CaseN;
 
 vi Z(const string &S)
 {
-    vi z(sz(S)), diff(sz(S), sz(S));
+    vvi z(2, vi(sz(S)));
     int l = -1, r = -1;
+    int times = 0;
     rep(i, 1, sz(S))
     {
-        z[i] = 0;
+        int diff = 0;
         if (i < r)
         {
+            rep(j, 0, 2)
+                z[j][i] = min(r - i, z[j][i - l]);
             vi diff_cands;
-            if (i <= diff[l] + l && diff[l] != sz(S))
-                diff_cands.push_back(diff[l] + l);
-            if (diff[i - l] + i < r)
-                diff_cands.push_back(diff[i - l] + i);
+            if (i <= z[0][l] + l)
+                diff_cands.push_back(z[0][l] + l);
+            if (z[0][i - l] + i < r)
+                diff_cands.push_back(z[0][i - l] + i);
             sort(all(diff_cands));
             diff_cands.erase(unique(all(diff_cands)), diff_cands.end());
-            z[i] = min(r - i, z[i - l]);
             for (int j : diff_cands)
                 if (S[j] != S[j - i])
                 {
-                    if (j - i < diff[i])
-                        diff[i] = j - i;
-                    else
-                        z[i] = min(z[i], j - i);
+                    z[diff][i] = min(z[diff][i], j - i);
+                    diff++;
                 }
         }
-        while (i + z[i] < sz(S))
+        while (diff < 2 && i + z[diff][i] < sz(S))
         {
-            if (S[i + z[i]] != S[z[i]])
+            if (S[i + z[diff][i]] != S[z[diff][i]])
             {
-                if (diff[i] < z[i])
-                    break;
-                diff[i] = z[i];
+                diff++;
+                if(diff >= 2) continue;
+                z[diff][i] = z[diff - 1][i];
             }
-            z[i]++;
+            times++;
+            z[diff][i]++;
         }
-        if (i + z[i] > r)
-            l = i, r = i + z[i];
+        z[1][i] = max(z[1][i], z[0][i]);
+        if (i + z[1][i] > r)
+            l = i, r = i + z[1][i];
     }
-    cout << S << "\n";
-    cout << z << endl;
-    cout << diff << endl;
-    return z;
+    assert(times <= 2 * sz(S));
+    return z[1];
 }
 
 const ll mod = 998244353;
