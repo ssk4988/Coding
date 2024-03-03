@@ -81,7 +81,7 @@ struct bs {
         s[b / BITS] |= 1 << (b % BITS);
     }
     int get(int b) {
-        return s[b / BITS] >> (b % BITS);
+        return (s[b / BITS] >> (b % BITS)) & 1;
     }
     bs& operator |=(bs &o){
         rep(i, 0, sz(s)){
@@ -101,8 +101,8 @@ void solve() {
     };
     rep(i, 0, m){
         int a, b; cin >> a >> b;
-        a = (a > 0 ? a-1 : -(a+1) + n);
-        b = (b > 0 ? b-1 : -(b+1) + n);
+        a = (a > 0 ? a-1 : abs(a)-1 + n);
+        b = (b > 0 ? b-1 : abs(b)-1 + n);
         g[invert(a)].pb(b);
         g[invert(b)].pb(a);
     }
@@ -173,6 +173,7 @@ void solve() {
         findbad(i, findbad);
     }
     rep(i, 0, n){
+        // cout << i << " " << invert(i) << endl;
         if(reaches[comp[i]].get(comp[invert(i)])){
             fixed[i] |= 2;
         }
