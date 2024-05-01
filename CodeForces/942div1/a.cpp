@@ -29,31 +29,31 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n;
-    cin >> n;
-    vvi adj(n);
-    rep(i, 0, n - 1)
-    {
-        int a, b;
-        cin >> a >> b;
-        a--, b--;
-        adj[a].pb(b);
-        adj[b].pb(a);
-    }
-    auto diameter = [&](int u, int p, auto &&diameter) -> vi
-    {
-        vi best;
-        for (int v : adj[u]){
-            if (v == p) continue;
-            vi cur = diameter(v, u, diameter);
-            if (sz(cur) > sz(best)) swap(cur, best);
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int n; ll k; cin >> n >> k;
+        vl a(n);
+        rep(i, 0, n){
+            cin >> a[i];
         }
-        best.push_back(u);
-        return best;
-    };
-    vi diam = diameter(0, -1, diameter);
-    diam = diameter(diam[0], -1, diameter);
-    cout << sz(diam) - 1 << nL;
-
+        ll best = 0;
+        auto test = [&](ll x) -> bool {
+            ll cnt = 0;
+            rep(i, 0, n){
+                if(a[i] < x) cnt += x - a[i];
+            }
+            return cnt <= k;
+        };
+        for(ll dif = 1LL << 42; dif; dif /= 2){
+            if(test(best + dif)) best += dif;
+        }
+        rep(i, 0, n){
+            if(a[i] < best) k -= best - a[i];
+        }
+        rep(i, 0, n) if(a[i] > best) k++;
+        ll seq = k + best * n;
+        cout << (seq - n + 1) << "\n";
+    }
+    
     return 0;
 }

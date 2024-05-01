@@ -29,31 +29,25 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n;
-    cin >> n;
-    vvi adj(n);
-    rep(i, 0, n - 1)
-    {
-        int a, b;
-        cin >> a >> b;
-        a--, b--;
-        adj[a].pb(b);
-        adj[b].pb(a);
-    }
-    auto diameter = [&](int u, int p, auto &&diameter) -> vi
-    {
-        vi best;
-        for (int v : adj[u]){
-            if (v == p) continue;
-            vi cur = diameter(v, u, diameter);
-            if (sz(cur) > sz(best)) swap(cur, best);
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int n; cin >> n;
+        vi a(n);
+        rep(i, 0, n) cin >> a[i];
+        sort(all(a));
+        a.erase(unique(all(a)), a.end());
+        for(int i = sz(a) - 1; i > 0; i--) a[i] -= a[i - 1];
+        reverse(all(a));
+        bool winning = true;
+        rep(i, 1, sz(a)){
+            if(!winning){
+                winning = true;
+            } else{
+                if(a[i] == 1) winning = false;
+            }
         }
-        best.push_back(u);
-        return best;
-    };
-    vi diam = diameter(0, -1, diameter);
-    diam = diameter(diam[0], -1, diameter);
-    cout << sz(diam) - 1 << nL;
-
+        cout << (winning ? "Alice" : "Bob") << nL;
+    }
+    
     return 0;
 }

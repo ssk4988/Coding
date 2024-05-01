@@ -29,31 +29,15 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n;
-    cin >> n;
-    vvi adj(n);
-    rep(i, 0, n - 1)
-    {
-        int a, b;
-        cin >> a >> b;
-        a--, b--;
-        adj[a].pb(b);
-        adj[b].pb(a);
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int n; cin >> n;
+        vi a(n);
+        rep(i, 0, n) {cin >> a[i]; a[i]--;}
+        bool two = false;
+        rep(i, 0, n) if(a[a[i]] == i) two = true;
+        cout << (2 + !two) << nL;
     }
-    auto diameter = [&](int u, int p, auto &&diameter) -> vi
-    {
-        vi best;
-        for (int v : adj[u]){
-            if (v == p) continue;
-            vi cur = diameter(v, u, diameter);
-            if (sz(cur) > sz(best)) swap(cur, best);
-        }
-        best.push_back(u);
-        return best;
-    };
-    vi diam = diameter(0, -1, diameter);
-    diam = diameter(diam[0], -1, diameter);
-    cout << sz(diam) - 1 << nL;
-
+    
     return 0;
 }

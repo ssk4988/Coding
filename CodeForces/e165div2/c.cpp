@@ -13,6 +13,7 @@ using vpi = vector<pi>;
 using vpl = vector<pl>;
 using vpd = vector<pd>;
 using vvi = vector<vi>;
+using vvl = vector<vl>;
 
 #define f first
 #define s second
@@ -29,31 +30,27 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n;
-    cin >> n;
-    vvi adj(n);
-    rep(i, 0, n - 1)
-    {
-        int a, b;
-        cin >> a >> b;
-        a--, b--;
-        adj[a].pb(b);
-        adj[b].pb(a);
-    }
-    auto diameter = [&](int u, int p, auto &&diameter) -> vi
-    {
-        vi best;
-        for (int v : adj[u]){
-            if (v == p) continue;
-            vi cur = diameter(v, u, diameter);
-            if (sz(cur) > sz(best)) swap(cur, best);
+    int nc; cin >> nc;
+    rep(cn, 0, nc){
+        int n, k; cin >> n >> k;
+        vl a(n);
+        rep(i, 0, n) cin >> a[i];
+        const ll inf = 1e15;
+        vvl dp(n+1, vl(k+1, inf));
+        dp[0][0] = 0;
+        rep(i, 0, n){
+            ll mn = inf;
+            rep(j, 1, k+2){
+                if(i+j > n) break;
+                mn = min(mn, a[i+j-1]);
+                rep(l, 0, k+1){
+                    if(j-1+l > k) break;
+                    dp[i+j][j-1+l] = min(dp[i+j][j-1+l], dp[i][l] + mn * j);
+                }
+            }
         }
-        best.push_back(u);
-        return best;
-    };
-    vi diam = diameter(0, -1, diameter);
-    diam = diameter(diam[0], -1, diameter);
-    cout << sz(diam) - 1 << nL;
-
+        cout << *min_element(all(dp[n])) << nL;
+    }
+    
     return 0;
 }
