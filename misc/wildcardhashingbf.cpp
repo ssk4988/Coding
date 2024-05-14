@@ -29,17 +29,35 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    string s1, s2; cin >> s1 >> s2;
-    int n = sz(s1), m = sz(s2);
-    vi freq(26);
-    for(char c : s2){
-        freq[c - 'a']++;
+    int n, q, k;
+    ll b, m;
+    cin >> n >> q >> k >> b >> m;
+    vi s(n);
+    rep(i, 0, n){
+        string v; cin >> v;
+        for(char c : v) s[i] = s[i] * 2 + (c - '0');
     }
-    ll ans = m;
-    rep(i, 1, n){
-        ans += m - freq[s1[i] - 'a'];
-        if(s1[i] == s2.back()) ans++;
+    rep(i, 0, q){
+        string pat; cin >> pat;
+        int usemask = 0;
+        int valmask = 0;
+        for(char c : pat){
+            usemask = usemask * 2 + (c != '*');
+            valmask = valmask * 2 + (c == '1');
+        }
+        vi pos;
+        rep(j, 0, n){
+            if((s[j] & usemask) == valmask) {
+                pos.pb(s[j]);
+            }
+        }
+        sort(all(pos));
+        ll ans = 0;
+        for(int x : pos){
+            ans = (ans * b + x) % m;
+        }
+        cout << ans << "\n";
     }
-    cout << ans << "\n";
+    
     return 0;
 }

@@ -25,14 +25,16 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-unordered_map<char, int> cost;
+
+vpi cost;
+const int MAX_B = 201;
 
 struct AhoCorasick {
 	enum {alpha = 26, first = 'A'}; // change this!
 	struct Node {
 		// (nmatches is optional)
 		int back, next[alpha], start = -1, end = -1, nmatches = 0, score = 0;
-        int dp[300];
+        int dp[MAX_B];
 		Node(int v) { memset(next, v, sizeof(next)); memset(dp, -1, sizeof(dp)); }
 	};
 	vector<Node> N;
@@ -97,12 +99,14 @@ struct AhoCorasick {
 	}
     int solve(int len){
         N[0].dp[0] = 0;
-        rep(j, 0, 295){
+        rep(j, 0, MAX_B){
             rep(i, 0, sz(N)){
                 if(N[i].dp[j] < 0) continue;
-                rep(k, 0, 26){
-                    int i1 = N[i].next[k];
-                    N[i1].dp[j + cost[k + first]] = max(N[i1].dp[j + cost[k + first]], N[i].dp[j] + N[i1].score);
+				for(auto [c, co] : cost){
+					if(j + co > MAX_B) continue;
+                // rep(k, 0, 26){
+                    int i1 = N[i].next[c];
+                    N[i1].dp[j + co] = max(N[i1].dp[j + co], N[i].dp[j] + N[i1].score);
                 }
             }
         }
@@ -123,10 +127,10 @@ int main()
     int nc; cin >> nc;
     rep(cn, 0, nc){
         int n, m, b; cin >> n >> m >> b;
-        
+        cost.clear();
         rep(i, 0, n){
             char h; int c; cin >> h >> c;
-            cost[h] = c;
+			cost.pb({h - 'A', c});
         }
         vector<string> strs(m);
         vi scores(m);
