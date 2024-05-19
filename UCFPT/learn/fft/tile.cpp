@@ -74,32 +74,55 @@ vi ways(int h, int w){
 	return ans;
 }
 
+void printways(int h, int w) {
+	rep(i, 1, h) {
+		rep(j, 1, w) {
+			cout << h * w - i * j - (h - i) * (w - j) << " " << i * w + j * h - 2 * i * j << "\n";
+		}
+	}
+}
+
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    // vi w = ways(9, 6);
-	// int mindex = INT_MAX, maxdex = INT_MIN;
-
+    vi w = ways(9, 6);
+	int mindex = INT_MAX, maxdex = INT_MIN;
+	int arealim = 52;
+	vi cnt(arealim);
+	rep(h, 1, 80){
+		rep(w, 1, 80) {
+			vi wy = ways(h, w);
+			rep(a, 0, min(arealim, sz(wy))){
+				if(wy[a]){
+					cnt[a] += wy[a];
+				}
+			}
+		}
+	}
+	rep(i, 0, arealim){
+		cout << i << " " << cnt[i] << "\n";
+	}
 	// rep(i, 0, sz(w)){
-	// 	// cout << i << " ways: " << w[i] << nL;
 	// 	if(w[i]){
+	// 		cout << i << " ways: " << w[i] << nL;
 	// 		mindex = min(i, mindex);
 	// 		maxdex = max(i, maxdex);
 	// 	}
 	// }
 	// cout << mindex << " to " << maxdex << nL;
-	int maxArea = 500'000;
-	ll tri = 0;
-	int lt = 0, gt = 0;
-    rep(h, 2, 500'001){
-		int b1 = maxArea - h + 2, b2 = (maxArea + h + 2) / (h - 1);
-		if(b1 < b2) lt++;
-		if(b2 < b1) gt++;
-		tri += abs(b1 - b2);
-	}
-	cout << tri << " rectangles" << nL;
-	cout << lt << " " << gt << nL;
+	// printways(4, 2);
+	// int maxArea = 500'000;
+	// ll tri = 0;
+	// int lt = 0, gt = 0;
+    // rep(h, 2, 500'001){
+	// 	int b1 = maxArea - h + 2, b2 = (maxArea + h + 2) / (h - 1);
+	// 	if(b1 < b2) lt++;
+	// 	if(b2 < b1) gt++;
+	// 	tri += abs(b1 - b2);
+	// }
+	// cout << tri << " rectangles" << nL;
+	// cout << lt << " " << gt << nL;
 
     return 0;
 }
