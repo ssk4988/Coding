@@ -58,39 +58,64 @@ int main()
         p[i]--;
         inv[p[i]] = i;
     }
-    int need = 0;
-    set<int> active, merged;
+    vi nxt(n, n);
+    vi st;
+    for (int i = n - 1; i >= 0; i--)
+    {
+        while (sz(st) && p[st.back()] < p[i])
+            st.pop_back();
+        if (sz(st))
+            nxt[i] = st.back();
+        st.push_back(i);
+    }
+    // rep(i, 0, n) cout << nxt[i] << " ";
+    // cout << "\n";
     vvi adj(n);
     UF uf(n);
+    auto eq = [&](int a, int b) -> void {
+        uf.join(a, b);
+        cout << "eq " << a << " " << b << "\n";
+    };
+    auto neq = [&](int a, int b) -> void {
+        adj[a].pb(b);
+        adj[b].pb(a);
+        cout << "neq " << a << " " << b << "\n";
+    };
+    vvi starts(n), ends(n+1);
+    vi start(n), end(n);
+    for (int cur = 0; cur < n; cur++)
+    {
+        int last = cur;
+        while (last + 1 < n && inv[last + 1] < inv[last])
+        {
+            eq(inv[last], inv[last + 1]);
+            last++;
+        }
+        starts[inv[last]].pb(uf.find(inv[cur]));
+        ends[inv[cur]+1].pb(uf.find(inv[cur]));
+        start[uf.find(inv[cur])] = inv[last];
+        end[uf.find(inv[cur])] = inv[cur]+1;
+        cur = last;
+    }
+    bool imp = false;
+    set<int> cur;
     rep(i, 0, n){
-        if(p[i] == need){
-            // cout << "cleared " << need << ": ";
-            need++;
-            while(true){
-                if(active.count(need)){
-                    active.erase(need++);
-                    continue;
-                }
-                if(merged.count(need)){
-                    merged.erase(need++);
-                    continue;
-                }
-                // cout << "stopped clearing before " << need << "\n";
-                break;
+        for(int j : ends[i]) cur.erase(j);
+        for(int j : starts[i]) cur.insert(j);
+        if(sz(cur) > 2) {
+            imp = true;
+            break;
+        }
+        for(int j1 : cur){
+            cout << "at " << i << " has " << j1 << "\n";
+            for(int j2 : cur){
+                if(j1 != j2) neq(j1, j2);
             }
-            continue;
         }
-        while(sz(active) && *active.begin() < p[i]){
-            int x = *active.begin();
-            active.erase(x);
-            if(sz(merged)) uf.join(x, *merged.begin());
-            merged.insert(x);
-        }
-        if(sz(merged)){
-            adj[p[i]].pb(*merged.begin());
-            adj[*merged.begin()].pb(p[i]);
-        }
-        active.insert(p[i]);
+    }
+    if(imp){
+        cout << "IMPOSSIBLE\n";
+        return 0;
     }
     vvi comps(n);
     rep(i, 0, n) comps[uf.find(i)].pb(i);
@@ -103,12 +128,17 @@ int main()
         state[c] = 1;
         val[c] = t;
         for (int u : comps[c])
+        {
             for (int v : adj[u])
+            {
+                if (uf.find(v) == c)
+                    continue;
                 if (dfs(uf.find(v), !t, dfs))
                     return true;
+            }
+        }
         return false;
     };
-    bool imp = false;
     rep(i, 0, n)
     {
         if (sz(comps[i]) && state[i] == 0 && dfs(i, 0, dfs))
@@ -122,7 +152,7 @@ int main()
     {
         rep(i, 0, n)
         {
-            cout << val[uf.find(p[i])] + 1 << " ";
+            cout << val[uf.find(i)] + 1 << " ";
         }
         cout << "\n";
     }
