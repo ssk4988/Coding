@@ -1,0 +1,310 @@
+gggooooooo
+rrrggggggg
+ooorrrrrrr
+
+swap first of 2 and 0
+before o3
+gggooooooo
+rrrggggggg
+ooorrrrrrr
+after o3
+ooogggoooo
+rrrggggggg
+ooorrrrrrr
+before c1
+ooogggoooo
+rrrggggggg
+ooorrrrrrr
+after c1
+ooogggoooo
+oooggggggg
+rrrrrrrrrr
+before o9
+ooogggoooo
+oooggggggg
+rrrrrrrrrr
+after o9
+oogggooooo
+oooggggggg
+rrrrrrrrrr
+before c2
+oogggooooo
+oooggggggg
+rrrrrrrrrr
+after c2
+oooggooooo
+rrrggggggg
+oogrrrrrrr
+oooggooooo
+rrrggggggg
+oogrrrrrrr
+
+before o7
+oooggooooo
+rrrggggggg
+oogrrrrrrr
+after o7
+ggoooooooo
+rrrggggggg
+oogrrrrrrr
+ggoooooooo
+rrrggggggg
+oogrrrrrrr
+
+swap first of 2 and 0
+before o3
+ggoooooooo
+rrrggggggg
+oogrrrrrrr
+after o3
+oooggooooo
+rrrggggggg
+oogrrrrrrr
+before c1
+oooggooooo
+rrrggggggg
+oogrrrrrrr
+after c1
+oogggooooo
+oooggggggg
+rrrrrrrrrr
+before o9
+oogggooooo
+oooggggggg
+rrrrrrrrrr
+after o9
+ogggoooooo
+oooggggggg
+rrrrrrrrrr
+before c2
+ogggoooooo
+oooggggggg
+rrrrrrrrrr
+after c2
+ooogoooooo
+rrrggggggg
+oggrrrrrrr
+ooogoooooo
+rrrggggggg
+oggrrrrrrr
+
+before o7
+ooogoooooo
+rrrggggggg
+oggrrrrrrr
+after o7
+gooooooooo
+rrrggggggg
+oggrrrrrrr
+gooooooooo
+rrrggggggg
+oggrrrrrrr
+
+swap first of 2 and 0
+before o3
+gooooooooo
+rrrggggggg
+oggrrrrrrr
+after o3
+ooogoooooo
+rrrggggggg
+oggrrrrrrr
+before c1
+ooogoooooo
+rrrggggggg
+oggrrrrrrr
+after c1
+ogggoooooo
+oooggggggg
+rrrrrrrrrr
+before o9
+ogggoooooo
+oooggggggg
+rrrrrrrrrr
+after o9
+gggooooooo
+oooggggggg
+rrrrrrrrrr
+before c2
+gggooooooo
+oooggggggg
+rrrrrrrrrr
+after c2
+oooooooooo
+rrrggggggg
+gggrrrrrrr
+oooooooooo
+rrrggggggg
+gggrrrrrrr
+
+oooooooooo
+rrrggggggg
+gggrrrrrrr
+
+swap first of 1 and 2
+before r3
+oooooooooo
+rrrggggggg
+gggrrrrrrr
+after r3
+oooooooooo
+rrrggggggg
+rrrgggrrrr
+before c1
+oooooooooo
+rrrggggggg
+rrrgggrrrr
+after c1
+rrrooooooo
+oooggggggg
+rrrgggrrrr
+before r9
+rrrooooooo
+oooggggggg
+rrrgggrrrr
+after r9
+rrrooooooo
+oooggggggg
+rrgggrrrrr
+before c2
+rrrooooooo
+oooggggggg
+rrgggrrrrr
+after c2
+oooooooooo
+rrgggggggg
+rrrggrrrrr
+oooooooooo
+rrgggggggg
+rrrggrrrrr
+
+before r7
+oooooooooo
+rrgggggggg
+rrrggrrrrr
+after r7
+oooooooooo
+rrgggggggg
+ggrrrrrrrr
+oooooooooo
+rrgggggggg
+ggrrrrrrrr
+
+swap first of 1 and 2
+before r3
+oooooooooo
+rrgggggggg
+ggrrrrrrrr
+after r3
+oooooooooo
+rrgggggggg
+rrrggrrrrr
+before c1
+oooooooooo
+rrgggggggg
+rrrggrrrrr
+after c1
+rrrooooooo
+oooggggggg
+rrgggrrrrr
+before r9
+rrrooooooo
+oooggggggg
+rrgggrrrrr
+after r9
+rrrooooooo
+oooggggggg
+rgggrrrrrr
+before c2
+rrrooooooo
+oooggggggg
+rgggrrrrrr
+after c2
+oooooooooo
+rggggggggg
+rrrgrrrrrr
+oooooooooo
+rggggggggg
+rrrgrrrrrr
+
+before r7
+oooooooooo
+rggggggggg
+rrrgrrrrrr
+after r7
+oooooooooo
+rggggggggg
+grrrrrrrrr
+oooooooooo
+rggggggggg
+grrrrrrrrr
+
+swap first of 1 and 2
+before r3
+oooooooooo
+rggggggggg
+grrrrrrrrr
+after r3
+oooooooooo
+rggggggggg
+rrrgrrrrrr
+before c1
+oooooooooo
+rggggggggg
+rrrgrrrrrr
+after c1
+rrrooooooo
+oooggggggg
+rgggrrrrrr
+before r9
+rrrooooooo
+oooggggggg
+rgggrrrrrr
+after r9
+rrrooooooo
+oooggggggg
+gggrrrrrrr
+before c2
+rrrooooooo
+oooggggggg
+gggrrrrrrr
+after c2
+oooooooooo
+gggggggggg
+rrrrrrrrrr
+oooooooooo
+gggggggggg
+rrrrrrrrrr
+
+28
+o3
+c1
+o9
+c2
+o7
+o3
+c1
+o9
+c2
+o7
+o3
+c1
+o9
+c2
+r3
+c1
+r9
+c2
+r7
+r3
+c1
+r9
+c2
+r7
+r3
+c1
+r9
+c2
+oooooooooo
+gggggggggg
+rrrrrrrrrr

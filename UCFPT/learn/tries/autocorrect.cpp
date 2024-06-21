@@ -65,7 +65,7 @@ int main()
     int n, q; cin >> n >> q;
     Node *root = new Node();
     // root->par = root;
-    auto dfs = [](Node *cur, auto &&dfs)->void{
+    auto dfs = [](Node *cur, auto &&dfs) -> void {
         if(cur->par) cur->e[cur->par] = 1;
         if(cur->aut) cur->e[cur->aut] = 1;
         rep(i, 0, 26){
@@ -82,22 +82,19 @@ int main()
         cin >> qs[i];
         add(root, qs[i], false);
     }
-    // auto cmp = [](Node *a, Node *b)->bool{
-    //     return a->depth > b->depth;
-    // };
     dfs(root, dfs);
     using pn = pair<ll, Node*>;
-    priority_queue<pn, vector<pn>, greater<pn>> pq;
+    queue<Node*> qu;
+    qu.push(root);
     root->dist = 0;
-    pq.push({0, root});
-    while(!pq.empty()){
-        auto [d, t] = pq.top(); pq.pop();
+    while(!qu.empty()){
+        auto t = qu.front(); qu.pop();
         if(t->visited) continue;
         t->visited = true;
         for(auto [nex, c] : t->e){
             if(t->dist + c < nex->dist){
                 nex->dist = t->dist + c;
-                pq.push({nex->dist, nex});
+                qu.push(nex);
             }
         }
     }
@@ -105,19 +102,6 @@ int main()
         Node *v = trav(root, qs[i]);
         cout << v->dist << nL;
     }
-    auto dfs1 = [](Node *cur, string &w, auto &&dfs1)->void{
-        cout << w << " " << cur->dist << nL;
-        rep(i, 0, 26){
-            if(cur->nex[i] != NULL){
-                w.pb(char(i + 'a'));
-                dfs1(cur->nex[i], w, dfs1);
-                w.pop_back();
-            }
-        }
-    };
-    string v = "";
-    // dfs1(root, v, dfs1);
-
-    
+   
     return 0;
 }
