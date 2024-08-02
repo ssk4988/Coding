@@ -1,5 +1,5 @@
 # About
-This is a repository for all of my competitive programming solutions and related files. The majority of solutions are in C++, but there are some Java soltuions and even fewer Python solutions.
+This is a repository for all of my competitive programming solutions and related files, representing over 3 years of work. The majority of solutions are in C++, but there are some Java soltuions and even fewer Python solutions.
 
 ## Sections
 
