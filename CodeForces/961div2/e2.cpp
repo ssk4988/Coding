@@ -26,6 +26,41 @@ using vvl = vector<vl>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
+using a2 = array<bool, 2>;
+using a22 = array<array<bool, 2>, 2>;
+
+struct Node {
+    Node *l = 0, *r = 0;
+    a22 val = a22{a2{0, 0}, a2{0, 0}};
+    int lo, hi;
+    Node(int lo, int hi) : lo(lo), hi(hi) {
+        if(lo + 1 < hi){
+            int mid = lo + (hi - lo) / 2;
+            l = new Node(lo, mid), r = new Node(mid, hi);
+            comb();
+        }
+    }
+    void comb() {
+        rep(i, 0, 2){
+            rep(j, 0, 2){
+                val[i][j] = false;
+                rep(k, 0, 2){
+                    val[i][j] = val[i][j] || (l->val[i][k] && r->val[k][j]);
+                }
+            }
+        }
+    }
+    void upd(int idx, int s1, int s2, bool v) {
+        if(lo + 1 == hi) {
+            val[s1][s2] = v;
+            return;
+        }
+        int mid = lo + (hi - lo) / 2;
+        if(mid <= idx) r->upd(idx, s1, s2, v);
+        else l->upd(idx, s1, s2, v);
+        comb();
+    }
+};
 
 int main()
 {
@@ -71,61 +106,46 @@ int main()
             cur ^= 1;
         }
         rotate(order.begin(), order.begin() + 1, order.end());
-        // rep(i, 0, sz(order)){
-        //     cout << order[i] << " ";
-        // }
-        // cout << "\n";
-        auto sw = [&](int idx, int swapped) -> ll {
-            return swapped ? (idx == 0 ? order.back() : order[idx - 1]) : order[idx];
-        };
-        vector<vvl> dp(sz(order), vvl   (2, vl(2, -1)));
-        auto solve = [&](ll minlim) -> ll {
-            for(int idx = sz(order) - 2; idx >= 0; idx -= 2) {
-                rep(prev, 0, 2){
-                    rep(first, 0, 2){
-                        ll &ans = dp[idx][prev][first];
-                        // if(ans != -1) return ans;
-                        ans = LLONG_MAX;
-                        if(idx == sz(order) - 2) {
-                            if(sw(idx, prev) + (first ? order[0] : order.back()) >= minlim) {
-                                ans = sw(idx, prev) + (first ? order[0] : order.back());
-                            }
-                            continue;
-                        }
-                        // memo check
-                        ans = LLONG_MAX;
-                        if(sw(idx, prev) + order[idx + 1] >= minlim) {
-                            ans = min(ans, max(sw(idx, prev) + order[idx + 1], dp[idx + 2][0][first]));
-                        }
-                        if(sw(idx, prev) + order[idx + 2] >= minlim) {
-                            ans = min(ans, max(sw(idx, prev) + order[idx + 2], dp[idx + 2][1][first]));
-                        }
-
-                    }
-                }
-            }
-            ll ans = min(dp[0][0][0], dp[0][1][1]);
-            return ans - minlim;
-        };
-        ll best = LLONG_MAX;
+        Node tree(0, n);
+        map<ll, vector<pair<int, pi>>> mpos;
         vl pos;
         for(int i = 0; i < sz(order); i += 2){
             vl p1 = {order[i], i == 0 ? order.back() : order[i - 1]};
             vl p2 = {order[i + 1], i + 2 == sz(order) ? order[0] : order[i + 2]};
-            for(ll x : p1){
-                for(ll y : p2){
-                    pos.pb(x + y);
-                    // best = min(best, solve(x + y));
+            rep(s1, 0, 2){
+                rep(s2, 0, 2){
+                    mpos[p1[s1] + p2[s2]].push_back({i / 2, {s1, s2}});
                 }
             }
         }
-        sort(all(pos));
-        // pos.erase(unique(all(pos)), pos.end());
-        for(auto y : pos){
-            best = min(best, solve(y));
+        for(auto &[key, val] : mpos){
+            pos.pb(key);
         }
-        // cout << sz(pos) << "\n";
-        cout << best << "\n";
+        auto works = [&]() -> bool {
+            rep(i, 0, 2){
+                if(tree.val[i][i]) return true;
+            }
+            return false;
+        };
+        int r = 0;
+        ll ans = LLONG_MAX;
+        rep(l, 0, sz(pos)){
+            while(r < sz(pos) && !works()) {
+                for(auto [idx, ss] : mpos[pos[r]]) {
+                    auto [s1, s2] = ss;
+                    tree.upd(idx, s1, s2, true);
+                }
+                r++;
+            }
+            if(works()) {
+                ans = min(ans, pos[r - 1] - pos[l]);
+            }
+            for(auto [idx, ss] : mpos[pos[l]]) {
+                auto [s1, s2] = ss;
+                tree.upd(idx, s1, s2, false);
+            }
+        }
+        cout << ans << "\n";
     }
     
     return 0;
