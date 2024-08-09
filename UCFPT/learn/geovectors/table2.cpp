@@ -67,33 +67,50 @@ int main()
         rep(i, 0, n){
             cin >> v[i].x >> v[i].y;
         }
-        ld angle = acosl(-1) * 2 / k;
         ll ans = 0;
+        vector<vi> used(n, vi(n));
+        auto dfs = [&](int c1, int c2, ld cross, ld d, vi &st, int start, auto &&dfs)->bool{
+            if(sz(st) == k + 1){
+                if(c2 == start && v[start] < v[c1]){
+                    // for(auto &p : st) cout << v[p] << " ";
+                    // cout << nL;
+                    ans++;
+                    used[st[0]][st[sz(st) - 2]] = true;
+                    used[st[0]][st[1]] = true;
+                    return true;
+                }
+                // else cout << "bruH\n";
+                return false;
+            }
+            rep(i, 0, n){
+                ld d1 = (v[i] - v[c2]).dist2();
+                if(fabs(d1 - d) > eps)continue;
+                ld angle = asin((v[i] - v[c2]).unit().cross((v[c1] - v[c2]).unit()));
+                ld dif2 = v[c2].cross(v[c1], v[i]);
+                if(fabs(v[c2].cross(v[c1], v[i]) - cross) > eps) continue;
+                // if(fabs(cross - angle) > eps2) continue;
+                st.pb(i);
+                if(dfs(c2, i, cross, d, st, start, dfs)){
+                    st.pop_back(); return true;
+                }
+                st.pop_back();
+            }
+            return false;
+        };
+        int deg = (k - 2) * 180 / k;
+        ld angle = deg / 180.0L * acosl(-1);
+        // vector<vvi>
         rep(i, 0, n){
             rep(j, 0, n){
-                if(i == j) continue;
-                int cur = j, prev = i;
-                int used = 1;
-                while(used < k){
-                    P dif = v[cur] - v[prev];
-                    dif = dif.rotate(angle);
-                    P target = v[cur] + dif;
-                    int fnd = -1;
-                    rep(l, 0, n){
-                        if((target - v[l]).dist() < eps) {
-                            fnd = l;
-                            break;
-                        }
-                    }
-                    if(fnd == -1) break;
-                    prev = cur;
-                    cur = fnd;
-                    used++;
+                if(used[i][j]) continue;
+                if(v[i] < v[j]) {
+                    vector<int> st = {i, j};
+                    ld d = (v[j] - v[i]).dist2();
+                    dfs(i, j, sin(angle) * d, d, st, i, dfs);
                 }
-                ans += used == k;
             }
         }
-        cout << ans/k << nL;
+        cout << ans << nL;
     }
     
     return 0;
