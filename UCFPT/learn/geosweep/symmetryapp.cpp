@@ -66,6 +66,10 @@ struct Point
 };
 using P = Point<ll>;
 
+// bool cmp(const P& x, const P& p)
+// {
+//     return pl{x.x, x.y} < pl{p.x, p.y};
+// }
 
 int main()
 {
@@ -101,12 +105,20 @@ int main()
             if (i == j)
                 continue;
             events.pb({pts[j] - pts[i], {i, j}});
+            events.pb({(pts[j] - pts[i]).perp().perp().perp(), {-1, -1}});
         }
     }
     // cout << ans << "\n";
     sort(all(events));
+    vi order(n);
+    iota(all(order), 0);
+    sort(all(order), [&](int a, int b) {return pts[a].y < pts[b].y; });
+    vi rev(n);
+    rep(i, 0, n){
+        rev[order[i]] = i;
+    }
     int start = 0;
-    vi deg(n);
+    map<P, unordered_map<ll, int>> cnt;
     while (start < sz(events))
     {
         // cout << start << endl;
@@ -114,32 +126,63 @@ int main()
         P scale = events[start].f;
         // cout << scale << endl;
         scale = scale / abs(__gcd(scale.x, scale.y));
-        int mxLine = 0;
-        unordered_map<ll, int> cnt;
-        while (end < sz(events) && (!(events[end].f < scale) && !(scale < events[end].f)))
+        while (end < sz(events) && events[end].f.cross(scale) == 0)
         {
             auto [dir, ps] = events[end];
             auto [i1, i2] = ps;
-            deg[i1]++;
-            deg[i2]++;
-            mxLine = max(mxLine, max(deg[i1], deg[i2]));
+            if(i1 == -1) {
+                end++;
+                continue;
+            }
             P mid = (pts[i1] + pts[i2]) / 2;
-            cnt[mid.dot(scale)] += 2;
+            cnt[scale][scale.dot(mid)] += 2;
+            ans = min(ans, n - cnt[scale][scale.dot(mid)]);
             end++;
         }
-        ans = min(ans, n - (mxLine+1));
-        for(auto [key, val] : cnt){
-            int actual = val;
-            rep(i, 0, n){
-                if(pts[i].dot(scale) == key) actual++;
-            }
-            ans = min(ans, n - actual);
-        }
-        rep(i, start, end){
-            auto [dir, ps] = events[i];
+        start = end;
+    }
+    // cout << "done" << endl;
+    start = 0;
+    while (start < sz(events))
+    {
+        int end = start;
+        P scale = events[start].f;
+        scale = scale / abs(__gcd(scale.x, scale.y));
+        P perp = scale.perp();
+        auto cmp = [&](int idx, ll v) {
+            return perp.dot(pts[order[idx]]) < v;
+        };
+        auto cmp1 = [&](int idx, ll v) {
+            return perp.dot(pts[order[idx]]) > v;
+        };
+        while (end < sz(events) && events[end].f.cross(scale) == 0)
+        {
+            auto [dir, ps] = events[end];
             auto [i1, i2] = ps;
-            deg[i1] = 0;
-            deg[i2] = 0;
+            if(i1 == -1) {end++; continue;}
+            if (rev[i1] < rev[i2]){
+                swap(order[rev[i1]], order[rev[i2]]);
+                swap(rev[i1], rev[i2]);
+            }
+            end++;
+        }
+        for (auto [key, val] : cnt[perp])
+        {
+            int actual = val;
+            int lb = -1;
+            for(int dif = 1 << 10; dif; dif /= 2) {
+                if(lb + dif < sz(order) && cmp(lb + dif, key)) lb += dif;
+            }
+            lb++;
+            int ub = -1;
+            for(int dif = 1 << 10; dif; dif /= 2) {
+                if(ub + dif < sz(order) && (cmp(ub + dif, key) || !cmp1(ub + dif, key))) ub += dif;
+            }
+            ub++;
+            // auto it1 = lower_bound(all(order), key, cmp);
+            // auto it2 = upper_bound(all(order), key, cmp);
+            actual += ub - lb;
+            ans = min(ans, n - actual);
         }
         start = end;
     }
