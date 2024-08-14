@@ -89,7 +89,7 @@ int main()
     cin.exceptions(cin.failbit);
     int n, m, c;
     cin >> n >> m >> c;
-    vector<unordered_map<int, vi>> e(n);
+    vector<vector<pi>> e(n);
     vi dist(n, INT_MAX);
     vi start(c);
     vi freq(n);
@@ -99,8 +99,8 @@ int main()
         cin >> a >> b >> w;
         a--;
         b--;
-        e[a][b].pb(w);
-        e[b][a].pb(w);
+        e[a].emplace_back(b,w);
+        e[b].emplace_back(a,w);
     }
     rep(i, 0, c)
     {
@@ -121,103 +121,54 @@ int main()
         if (visited[i])
             continue;
         visited[i] = true;
-        for (auto &edge : e[i])
+        for (auto [j, w] : e[i])
         {
-            auto [j, v] = edge;
-            for (auto w : v)
+            if (!visited[j] && t + w < dist[j])
             {
-                if (!visited[j] && t + w < dist[j])
-                {
-                    dist[j] = t + w;
-                    q.push({-dist[j], j});
-                }
+                dist[j] = t + w;
+                q.push({-dist[j], j});
             }
         }
     }
-    vector<map<int, pi>> opt(n);
+    vector<vpi> opt(n);
     rep(i, 0, n)
     {
-        vi er;
-        for (auto &edge : e[i])
+        for (auto [j, w] : e[i])
         {
-            int cnt = 0;
-            for (int w : edge.s)
+            
+            if (dist[i] - dist[j] == w)
             {
-                if (dist[i] - dist[edge.f] == w)
-                {
-                    cnt++;
-                }
-            }
-            if(cnt) opt[i][edge.f] = {dist[i] - dist[edge.f], cnt};
-        }
-    }
-    map<pi, unordered_set<int>> times;
-    queue<pi> qbfs;
-    rep(i, 0, c)
-    {
-        qbfs.push({start[i], 0});
-    }
-    int cnt = n + 1 + 1, source = n, sink = n + 1;
-    map<pair<pi, pi>, int> el;
-    while (!qbfs.empty())
-    {
-        auto [a, t] = qbfs.front();
-        qbfs.pop();
-        for (auto &edge : opt[a])
-        {
-            auto [b, p1] = edge;
-            auto [w, num] = p1;
-            auto &es = times[{a, b}];
-            if (es.find(t) == es.end())
-            {
-                es.insert(t);
-                qbfs.push({b, t + w});
-                rep(i, 0, num){
-                    el[{{a, b}, {t, i}}] = cnt++;
-                }
+                opt[i].emplace_back(j, w);
             }
         }
     }
-    Dinic d(cnt);
-    ll mf = freq[0];
-    rep(i, 1, n)
-    {
-        if (freq[i])
-        {
-            d.addEdge(source, i, freq[i]);
+    map<int, unordered_map<int, int>> times;
+    rep(i, 0, n){
+        if(freq[i])times[dist[i]][i] =freq[i];
+    }
+    Dinic d(n + 2);
+    int source = n, sink = n + 1;
+    rep(i, 0, n){
+        for(auto [j, w] : opt[i]) {
+            d.addEdge(i, j, 1);
         }
     }
-    for (auto &m1 : el)
-    {
-        auto [m2, label] = m1;
-        auto [p1, p2] = m2;
-        auto [a, b] = p1;
-        auto [t, num] = p2;
-        int t1 = t + opt[a][b].f;
-        if (t == 0)
-        {
-            d.addEdge(a, label, 1);
-        }
-        if (b == 0)
-        {
-            d.addEdge(label, sink, 1);
-        }
-        else
-        {
-            for (auto &edge : opt[b])
-            {
-                auto [b2, p3] = edge;
-                auto [t2, num1] = p3;
-                rep(i, 0, num1){
-                    d.addEdge(label, el[{{b, b2}, {t1, i}}], 1);
-                }
-            }
-        }
+    d.addEdge(0, sink, 1e9);
+    rep(i, 0, n){
+        d.addEdge(source, i, 0);
     }
-
-    // duplicate roads?
-    mf += d.calc(source, sink);
-    cout << mf << nL;
+    ll ans = 0;
+    for(auto [t, pairs] : times) {
+        for(auto &e : d.adj[source]){
+            if(pairs.count(e.to)) e.c = e.oc = pairs[e.to];
+            else e.c = e.oc = 0;
+        }
+        ll mf = d.calc(source, sink);
+        ll mf1 = d.calc(sink, source);
+        // cout << t << " " << mf << " " << mf1 << "\n";
+        ans += mf;
+    }
+    cout << ans << "\n";
 
     return 0;
 }

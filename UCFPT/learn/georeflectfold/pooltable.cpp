@@ -31,6 +31,7 @@ int main()
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
     int l, w, cx, cy, tx, ty, n;
+    cout << fixed << setprecision(3) 
     while(true){
         cin >> l >> w >> cx >> cy >> tx >> ty >> n;
         if(l == 0 && w == 0 && cx == 0 && cy == 0 && tx == 0 && ty == 0 && n == 0) break;
@@ -80,7 +81,7 @@ int main()
             }
             if(candidates[i][2] == n) best = min(best, sqrtl(dist(candidates[i])));
         }
-        cout << fixed << setprecision(3) << best << nL;
+        cout << best << nL;
     }
     
     return 0;
