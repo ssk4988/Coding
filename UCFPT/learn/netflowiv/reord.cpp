@@ -113,8 +113,6 @@ int main()
 				used[j] = true;
 			}
 		}
-		// for(int j : s) cout << j << " ";
-		// cout << "\n";
 		Dinic d(original);
 		rep(j, 0, n){
 			if(s.count(j)) d.addEdge(2 * j + 1, sink, 1);

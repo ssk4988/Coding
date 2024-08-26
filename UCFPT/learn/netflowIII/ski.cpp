@@ -84,6 +84,9 @@ struct Dinic
 };
 ll inf = 1000000000000LL;
 
+// consider the cells that act as a border, on the inside there is an edge border
+
+
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
