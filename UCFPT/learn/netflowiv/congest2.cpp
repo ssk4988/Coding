@@ -82,55 +82,86 @@ struct Dinic
     }
     bool leftOfMinCut(int a) { return lvl[a] != 0; }
 };
-ll inf = 1000000000000LL;
-
-// consider the cells that act as a border, on the inside there is an edge border
-
 
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int nc; cin >> nc;
-    vvi ds = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
-    rep(cn, 0, nc){
-        //case out adjacent
-        int r, c, rr, cr, rt, ct;
-        cin >> r >> c >> rr >> cr >> rt >> ct;
-        rr--;cr--;rt--;ct--;
-        vvi grid(r, vi(c));
-        rep(i, 0, r){
-            rep(j, 0, c){
-                cin >> grid[i][j];
-            }
-        }
-        int source = r * c + 1;
-        int sink = r * c + 2;
-        Dinic d(r * c + 3);
-        bool impossible = false;
-        rep(i, 0, r){
-            rep(j, 0, c){
-                if(i == rt && j == ct) continue;
-                int v = i * c + j;
-                rep(k, 0, 4){
-                    int i1 = i + ds[k][0], j1 = j + ds[k][1];
-                    if(i1 < 0 || i1 >= r || j1 < 0 || j1 >= c) continue;
-                    if(i == rr && j == cr && i1 == rt && j1 == ct && grid[i][j] >= grid[i1][j1]) impossible = true;
-                    if(i1 == rr && j1 == cr) continue;
-                    if(grid[i1][j1] > grid[i][j]) continue;
-                    int v1 = i1 * c + j1;
-                    ll cost = grid[i][j] - grid[i1][j1] + 1;
-                    if(i1 == rt && j1 == ct) cost = inf;
-                    d.addEdge(v, v1, cost);
-                }
-            }
-        }
-        d.addEdge(source, rr * c + cr, 3 * inf);
-        d.addEdge(rt * c + ct, sink, 3 * inf);
-        ll mf = impossible ? -1 : d.calc(source, sink);
-        if(mf == inf) mf = -1;
-        cout << mf << nL;
+    int n, m, c;
+    cin >> n >> m >> c;
+    vector<vector<pi>> e(n);
+    vi dist(n, INT_MAX);
+    vi start(c);
+    vi freq(n);
+    rep(i, 0, m)
+    {
+        int a, b, w;
+        cin >> a >> b >> w;
+        a--;
+        b--;
+        e[a].emplace_back(b,w);
+        e[b].emplace_back(a,w);
     }
-    
+    rep(i, 0, c)
+    {
+        cin >> start[i];
+        start[i]--;
+        freq[start[i]]++;
+    }
+    dist[0] = 0;
+    priority_queue<pi> q;
+    vector<bool> visited(n);
+    q.push({0, 0});
+    while (!q.empty())
+    {
+        pi p = q.top();
+        q.pop();
+        int i = p.s;
+        int t = -p.f;
+        if (visited[i])
+            continue;
+        visited[i] = true;
+        for (auto [j, w] : e[i])
+        {
+            if (!visited[j] && t + w < dist[j])
+            {
+                dist[j] = t + w;
+                q.push({-dist[j], j});
+            }
+        }
+    }
+    vector<vpi> opt(n);
+    rep(i, 0, n)
+    {
+        for (auto [j, w] : e[i])
+        {
+            
+            if (dist[i] - dist[j] == w)
+            {
+                opt[i].emplace_back(j, w);
+            }
+        }
+    }
+    map<int, unordered_map<int, int>> times;
+    rep(i, 0, n){
+        if(freq[i])times[dist[i]][i] =freq[i];
+    }
+    Dinic d(n + 2);
+    int source = n, sink = n + 1;
+    rep(i, 0, n){
+        for(auto [j, w] : opt[i]) {
+            d.addEdge(i, j, 1);
+        }
+    }
+    d.addEdge(0, sink, 1e9);
+    ll ans = 0;
+    for(auto [t, pairs] : times) {
+        Dinic clone(d);
+        for(auto[node, cnt] : pairs) clone.addEdge(source, node, cnt);
+        ll mf = clone.calc(source, sink);
+        ans += mf;
+    }
+    cout << ans << "\n";
+
     return 0;
 }

@@ -99,33 +99,31 @@ struct Point {
 	T cross(P p) const { return x*p.y - y*p.x; }
 	T cross(P a, P b) const { return (a-*this).cross(b-*this); }
 	T dist2() const { return x*x + y*y; }
-	double dist() const { return sqrt((double)dist2()); }
+	ld dist() const { return sqrtl((ld)dist2()); }
 	// angle to x-axis in interval [-pi, pi]
-	double angle() const { return atan2(y, x); }
+	ld angle() const { return atan2(y, x); }
 	P unit() const { return *this/dist(); } // makes dist()=1
 	P perp() const { return P(-y, x); } // rotates +90 degrees
 	P normal() const { return perp().unit(); }
-	// returns point rotated 'a' radians ccw around the origin
-	P rotate(double a) const {
-		return P(x*cos(a)-y*sin(a),x*sin(a)+y*cos(a)); }
 	friend ostream& operator<<(ostream& os, P p) {
 		return os << "(" << p.x << "," << p.y << ")"; }
 };
 
 
 template<class P>
-vector<P> circleLine(P c, double r, P a, P b) {
+vector<P> circleLine(P c, ld r, P a, P b) {
 	P ab = b - a, p = a + ab * (c-a).dot(ab) / ab.dist2();
-	double s = a.cross(b, c), h2 = r*r - s*s / ab.dist2();
+	ld s = a.cross(b, c), h2 = r*r - s*s / ab.dist2();
 	if (h2 < 0) return {};
 	if (h2 == 0) return {p};
-	P h = ab.unit() * sqrt(h2);
+	P h = ab.unit() * sqrtl(h2);
 	return {p - h, p + h};
 }
 
 
 using P = Point<ld>;
-ld eps = 1e-8;
+ld eps = 1e-9;
+const ld SCALE = 1e9;
 
 int main()
 {
@@ -142,11 +140,12 @@ int main()
     rep(i, 0, m) {
         cin >> ships[i].x >> ships[i].y >> shipe[i].x >> shipe[i].y >> speed[i] >> range[i] >> energy[i];
     }
-    Dinic d(10000);
+    const int MX_N = 100000;
+    Dinic d(MX_N);
     int source = m, sink = m+1;
     int nxt_id = m+2;
     rep(i, 0, m){
-        d.addEdge(source, i, energy[i] * 1e7);
+        d.addEdge(source, i, energy[i] * SCALE);
     }
     rep(i, 0, n){
         vector<pair<ld, int>> events;
@@ -156,8 +155,8 @@ int main()
             P dir = (shipe[j] - ships[j]).unit();
             if(sz(inters) < 2) continue;
             if(dir.dot(inters[0] - ships[j]) > dir.dot(inters[1] - ships[j])) swap(inters[0], inters[1]);
-            ld lo = max(0.L, dir.dot(inters[0] - ships[j]) / speed[j]);
-            ld hi = min((shipe[j] - ships[j]).dist() / speed[j], dir.dot(inters[1] - ships[j]) / speed[j]);
+            ld lo = max(0.L, dir.dot(inters[0] - ships[j])) / speed[j];
+            ld hi = min((shipe[j] - ships[j]).dist(), dir.dot(inters[1] - ships[j])) / speed[j];
             if(lo + eps > hi) continue;
             // cout << i << " " << j << " " << lo << " " << hi << " " << (hi - lo) << "\n";
             events.emplace_back(lo, j);
@@ -175,19 +174,20 @@ int main()
                 // cout << mask << " bruh\n";
                 rep(shipid, 0, m) {
                     if((mask >> shipid) & 1) {
-                        d.addEdge(shipid, nxt_id, 1e9 * 1e7);
+                        d.addEdge(shipid, nxt_id, 1e7 * SCALE);
                         // cout << shipid << " to " << nxt_id << "\n";
                     }
                 }
                 // cout << "edge " << nxt_id << " " << t << endl;
-                d.addEdge(nxt_id++, sink, t * 1e7);
+                d.addEdge(nxt_id++, sink, t * SCALE);
                 prevtime = time;
             // }
             mask ^= 1 << ship;
         }
     }
+    assert(nxt_id < MX_N);
     ll mf = d.calc(source, sink);
-    cout << fixed << setprecision(4) << mf/1e7 << "\n";
+    cout << fixed << setprecision(4) << mf/SCALE << "\n";
     
     return 0;
 }

@@ -82,55 +82,58 @@ struct Dinic
     }
     bool leftOfMinCut(int a) { return lvl[a] != 0; }
 };
-ll inf = 1000000000000LL;
 
-// consider the cells that act as a border, on the inside there is an edge border
-
+void solve() {
+    int n; cin >> n;
+    vi a(n);
+    rep(i, 0, n) cin >> a[i];
+    vvi adj(n, vi(n));
+    vi border(n);
+    Dinic original(2*n+2);
+    int source = 2*n, sink = 2*n+1;
+    rep(i, 0, n){
+        string str; cin >> str;
+        rep(j, 0, n){
+            adj[i][j] = str[j] == 'Y';
+            if(a[i] && !a[j] && adj[i][j]) border[i] = true;
+        }
+        if(a[i]) original.addEdge(source, 2*i, a[i]);
+        original.addEdge(2*i, 2*i+1, 1e9);
+    }
+    rep(i, 0, n){
+        rep(j, 0, n){
+            if(a[i] && a[j] && adj[i][j]) {
+                original.addEdge(2*i, 2*j+1, 1e9);
+            }
+        }
+    }
+    int ans = 0;
+    for(int dif = 1 << 20; dif; dif /= 2) {
+        int cur = ans + dif;
+        Dinic d(original);
+        ll expect = 0;
+        rep(i, 0, n){
+            if(border[i]){
+                expect += cur;
+                d.addEdge(2*i+1, sink, cur);
+            } else if(a[i]){
+                expect += 1;
+                d.addEdge(2*i+1, sink, 1);
+            }
+        }
+        ll mf = d.calc(source, sink);
+        // cout << cur << " " << mf << " " << expect << "\n";
+        if(mf == expect) ans = cur;
+    }
+    cout << ans << "\n";
+}
 
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
     int nc; cin >> nc;
-    vvi ds = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
-    rep(cn, 0, nc){
-        //case out adjacent
-        int r, c, rr, cr, rt, ct;
-        cin >> r >> c >> rr >> cr >> rt >> ct;
-        rr--;cr--;rt--;ct--;
-        vvi grid(r, vi(c));
-        rep(i, 0, r){
-            rep(j, 0, c){
-                cin >> grid[i][j];
-            }
-        }
-        int source = r * c + 1;
-        int sink = r * c + 2;
-        Dinic d(r * c + 3);
-        bool impossible = false;
-        rep(i, 0, r){
-            rep(j, 0, c){
-                if(i == rt && j == ct) continue;
-                int v = i * c + j;
-                rep(k, 0, 4){
-                    int i1 = i + ds[k][0], j1 = j + ds[k][1];
-                    if(i1 < 0 || i1 >= r || j1 < 0 || j1 >= c) continue;
-                    if(i == rr && j == cr && i1 == rt && j1 == ct && grid[i][j] >= grid[i1][j1]) impossible = true;
-                    if(i1 == rr && j1 == cr) continue;
-                    if(grid[i1][j1] > grid[i][j]) continue;
-                    int v1 = i1 * c + j1;
-                    ll cost = grid[i][j] - grid[i1][j1] + 1;
-                    if(i1 == rt && j1 == ct) cost = inf;
-                    d.addEdge(v, v1, cost);
-                }
-            }
-        }
-        d.addEdge(source, rr * c + cr, 3 * inf);
-        d.addEdge(rt * c + ct, sink, 3 * inf);
-        ll mf = impossible ? -1 : d.calc(source, sink);
-        if(mf == inf) mf = -1;
-        cout << mf << nL;
-    }
+    while(nc--) solve();
     
     return 0;
 }
