@@ -83,45 +83,11 @@ struct Dinic
     bool leftOfMinCut(int a) { return lvl[a] != 0; }
 };
 
-int conv(char c) {
-    if('0' <= c && c <= '9') return c - '0';
-    if('a' <= c && c <= 'z') return c - 'a' + 10;
-    return c - 'A' + 36;
-}
-
-
-
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n; cin >> n;
-    vvi reward(n, vi(n)), penalty(n, vi(n));
-    ll ans = 0;
-    rep(i, 0, n){
-        string str; cin >> str;
-        rep(j, 0, n) penalty[i][j] = conv(str[j]);
-    }
-    rep(i, 0, n){
-        string str; cin >> str;
-        rep(j, 0, n) reward[i][j] = conv(str[j]);
-        if(reward[i][j] >= penalty[i][j]) {
-
-        }
-    }
-    Dinic d(n * n + 2);
-    int source = n * n, sink = n * n + 1;
-    auto get_idx = [&](int r, int c) -> int { return r * n + c; };
-    rep(i, 0, n){
-        rep(j, 0, n){
-            if(i + 1 < n) d.addEdge(get_idx(i, j), get_idx(i+1, j), 1e9, 1e9);
-            if(j + 1 < n) d.addEdge(get_idx(i, j), get_idx(i, j+1), 1e9, 1e9);
-            d.addEdge(source, get_idx(i, j), reward[i][j]);
-            d.addEdge(get_idx(i, j), sink, penalty[i][j]);
-        }
-    }
-    ll mf = d.calc(source, sink);
-    ans -= mf;
-    cout << ans << "\n";
+    
+    
     return 0;
 }
