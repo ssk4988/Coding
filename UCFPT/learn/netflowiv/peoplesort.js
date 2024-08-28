@@ -676,14 +676,10 @@ class PermutationServerHandler extends PermutationContext {
         this.ws = new WebSocket(this.#url);
 
         this.ws.onopen = () => {
-            console.log("WebSocket connection opened.");
+            console.log("WebSocket connection opened to " + this.#url);
 
-            let id = localStorage.getItem('id');
-            if (!id) {
-                id = self.crypto.randomUUID();
-                console.log("Created uuid ", id);
-                localStorage.setItem('id', id);
-            }
+            let id = self.crypto.randomUUID();
+            console.log("Created uuid ", id);
 
             const message = JSON.stringify({
                 type: "unauthenticated_id",
@@ -700,10 +696,10 @@ class PermutationServerHandler extends PermutationContext {
         this.ws.onclose = () => {
             console.log("WebSocket connection closed.");
             // Attempt to reconnect
-            // setTimeout(() => {
-            //     console.log('Attempting to reconnect...');
-            //     this.pconnect(); // Reconnect
-            // }, 2000);
+            setTimeout(() => {
+                console.log('Attempting to reconnect...');
+                this.pconnect(); // Reconnect
+            }, 2000);
         };
 
         this.ws.onerror = (error) => {
@@ -734,7 +730,7 @@ class PermutationServerHandler extends PermutationContext {
         }
 
         // Do not spam the server, but allow a little bit of refreshing in case we get rate limited and a request doesn't go through 
-        // if (this.#lastRequested === i && Date.now() - this.#lastRequestedTime < 1000) return;
+        if (this.#lastRequested === i && Date.now() - this.#lastRequestedTime < 1000) return;
 
         const message = JSON.stringify({
             type: "set_index",
@@ -771,6 +767,7 @@ class PermutationServerHandler extends PermutationContext {
         }
     }
 }
+
 
 // function fadeOutAndRemove(element) {
 //     let opacity = 1;  // Initial opacity
@@ -828,7 +825,7 @@ let handlers = [];
 let ctxs = [];
 let prevSwapTimes = [];
 async function sortPerm(L, R, spacing, connections, accuracy) {
-    while(ctxs.length < connections) {
+    while (ctxs.length < connections) {
         ctxs.push(new PermutationServerHandler("wss://" + document.location.host + "/ws"));
         barCentrals.push(new BarCentral(innerDiv, ctxs.at(-1), new TopMenu(menu, outerDiv)));
         handlers.push(barCentrals.at(-1).divHandler);
@@ -841,7 +838,7 @@ async function sortPerm(L, R, spacing, connections, accuracy) {
         }
         let iv = handlers[conIdx].requestBar(i).value;
         handlers[conIdx].clearBar(i);
-        if(iv == undefined) {
+        if (iv == undefined) {
             console.log(i, iv, "skipping");
             continue;
         }
@@ -849,7 +846,7 @@ async function sortPerm(L, R, spacing, connections, accuracy) {
         let targval = i;
         targval += rand - accuracy;
         targval = Math.max(targval, L);
-        targval = Math.min(targval, R-1);
+        targval = Math.min(targval, R - 1);
         // if (seen.has(i) || seen.has(iv)) continue;
         if (iv != targval) {
             handlers[conIdx].requestBar(iv).barDiv.scrollIntoView()
