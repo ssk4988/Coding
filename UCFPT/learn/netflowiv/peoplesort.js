@@ -1,7 +1,6 @@
 const expanded = [`40vh`, `60vh`];
 const shrunk = [`10vh`, `90vh`];
 
-let barCentral;
 
 // Updates two menus concurrecntly, but only displays one of them (hopefully menu operations aren't expensive)
 
@@ -69,7 +68,7 @@ class TopMenu {
     #shrunkDiv;
 
     // all of expandedDiv elements go here 
-    #expandedDiv;   
+    #expandedDiv;
 
     // Probably need a different class for mobile eh? 
 
@@ -127,7 +126,7 @@ class TopMenu {
 
             this.#shrunkDiv.innerHTML = '';
             this.#shrunkDiv.append(statsTable(data));
-            
+
             this.#expandedDiv.removeChild(this.#expandedDiv.lastChild);
             this.#expandedDiv.append(statsTable(data));
         }
@@ -160,7 +159,7 @@ class CachedBar {
     barDiv; // the bar itself
     selectDiv; // if selected, display and render this div
 
-    index; 
+    index;
     value;
 
     lastEventListner = null;
@@ -190,13 +189,13 @@ class CachedBar {
     }
 }
 
-class BarDivDataHandler { 
+class BarDivDataHandler {
     #outerDiv; // the "portrait window"
     #innerDiv; // the actual meat
 
     #arraySize = 0;
 
-    #cache = []; 
+    #cache = [];
 
     #force_refresh() {
         for (let i = 0; i < this.#cache.length; ++i) if (this.#cache[i] !== null) {
@@ -215,14 +214,14 @@ class BarDivDataHandler {
     constructor(innerDiv) {
         this.#innerDiv = innerDiv;
         this.#outerDiv = innerDiv.parentNode;
-         
+
         for (let i = 0; i < 3 * barListener.max + 10; ++i) {
             this.#cache.push(null);
         }
 
         // On slider reset, force a refresh of graphics. Only way I can think of to properly deal with the bug. 
         barListener.addEventListener('input', () => {
-            setTimeout(() => {this.#force_refresh() }, 0); // run this *after* input is done updating  
+            setTimeout(() => { this.#force_refresh() }, 0); // run this *after* input is done updating  
         });
 
         this.#force_refresh();
@@ -239,7 +238,7 @@ class BarDivDataHandler {
 
 
     // for BarRenderer
-    requestBar(index) { 
+    requestBar(index) {
         let cur = this.#cache[index % this.#cache.length];
         if (cur === null) {
             cur = new CachedBar();
@@ -249,13 +248,17 @@ class BarDivDataHandler {
 
         cur.clickableAreaDiv.style.height = `${barHeight()}vh`;
         cur.clickableAreaDiv.style.display = "initial";
-        
+
         cur.clickableAreaDiv.style.top = this.#calcBarPosition(index);
         return cur;
     }
 
+    clearBar(index) {
+        this.#cache[index % this.#cache.length] = null;
+    }
+
     setArraySize(n) {
-        if (this.#arraySize == n) return; 
+        if (this.#arraySize == n) return;
         /// TODO: Perhaps send a new victory message here!
 
         this.#arraySize = n;
@@ -285,7 +288,7 @@ class BarDivDataHandler {
     #extractAndCalculate(str) {
         // Adjusted regular expression to handle floating-point numbers and optional spaces
         const match = str.match(/calc\(\s*([+-]?\d*\.?\d+)px\s*\+\s*([+-]?\d*\.?\d+)vh\s*\)/);
-        
+
         if (!match) return null;  // Handle invalid format
 
         const x = parseFloat(match[1]);  // Extract and convert x to a float
@@ -297,12 +300,12 @@ class BarDivDataHandler {
     }
 
     reset(x) { // request X to be at the center of the page 
-        this.#outerDiv.scrollTop = this.#extractAndCalculate(this.#calcBarPosition(Math.max(x - Math.floor(barsOnScreen() / 2) , 0)));
+        this.#outerDiv.scrollTop = this.#extractAndCalculate(this.#calcBarPosition(Math.max(x - Math.floor(barsOnScreen() / 2), 0)));
     }
 
 }
 
-const refreshMs = 1000 / 30; 
+const refreshMs = 1000 / 30;
 
 const hsl_sat_listener = document.getElementById("HSL-saturation-slider");
 const hsl_light_listener = document.getElementById("HSL-lightness-slider");
@@ -319,11 +322,11 @@ class BarRenderer {
     // so this is why we have this coupling here but have BarCentral to propogate messages properly
     #permutationContext = null;
 
-    #swapDirection = null; 
+    #swapDirection = null;
 
     // Could be cleaner UI w/ broadcasting
-    
-    #selectedIndex; 
+
+    #selectedIndex;
 
     getSelectedIndex() {
         return this.#selectedIndex;
@@ -358,13 +361,13 @@ class BarRenderer {
 
         setInterval(() => {
             let result = this.#innerDivHandler.getSettings();
-            
+
             // ask for a little buffer before 
             permutationContext.sendIndex(Math.max(result["index"] - 5, 0));
         }, refreshMs);
     }
 
-    redrawPermutation(currentIndex, permutation) {     
+    redrawPermutation(currentIndex, permutation) {
         const bar_frac = 0.90;
         // bad, normal, good 
         const min_width = [2, 5, 8];
@@ -373,22 +376,22 @@ class BarRenderer {
 
         const fullLength = result["n"];
         const viewIndex = result["index"];
-	    const windowSize = result["windowSize"];
+        const windowSize = result["windowSize"];
 
         for (let iter = 0; iter < permutation.length; iter++) {
             let index = currentIndex + iter;
             let x = permutation[iter];
 
             if (!(viewIndex <= index && index < viewIndex + windowSize)) continue; // take intersection, immportant for async refreshes
-            
+
             // selectedBar logic is scuffed
             if (x === this.#selectedBar && this.#selectedIndex != index) {
-                this.#selectedIndex = index; 
+                this.#selectedIndex = index;
                 this.#innerDivHandler.reset(this.#selectedIndex);
-            } 
+            }
 
             let mybar = this.#innerDivHandler.requestBar(index, x);
-            
+
             if (mybar.index !== index || mybar.value !== x) {
                 // reset bar info, because it is stale (mainly so that setClick isn't reset 1e9/s)
 
@@ -409,13 +412,13 @@ class BarRenderer {
 
                 });
             }
-            
+
             // TODO: Why does Arrow swapping go through this.... 
             if (x == this.#selectedBar && this.#swapDirection !== null) {
                 // Apply swap
                 if (iter + this.#swapDirection >= 0 && iter + this.#swapDirection < permutation.length) {
                     this.#permutationContext.sendSwap(this.#selectedBar, permutation[iter + this.#swapDirection]);
-                    this.setDirection(null); 
+                    this.setDirection(null);
                 }
             }
 
@@ -430,17 +433,17 @@ class BarRenderer {
             };
 
             clickablePart.style.background = 'transparent';
-            
+
             // to help people gauge fixed points
             if (x === index) {
                 clickablePart.style.background = 'rgba(255, 255, 0, 0.2)'; // yellow
             }
-            
+
             clickablePart.style.zIndex = 0;
-            
+
             // If there's an local inversion, subtly highlight this 
             if (iter + 1 < permutation.length && permutation[iter] > permutation[iter + 1]) {
-                clickablePart.style.border = '1px solid rgba(255, 99, 71, 0.5)' ; // red
+                clickablePart.style.border = '1px solid rgba(255, 99, 71, 0.5)'; // red
             } else {
                 clickablePart.style.border = '';
             }
@@ -448,8 +451,8 @@ class BarRenderer {
             // If our selected value is on the screen, make it easy and clear for them to see
             if (this.#selectedBar === index) {
                 clickablePart.style.background = 'rgba(0, 255, 0, 1)'; // solid green
-            } 
-            
+            }
+
             // reset selection
             mybar.barDiv.style.border = '1px solid black'; // selection flair
             mybar.barDiv.style.background = defbg;
@@ -464,12 +467,12 @@ class BarRenderer {
                 if (this.#selectedBar > x) { // we are smaller 
                     fill = `rgba(0, 255, 0, 1)`;
 
-                    mybar.barDiv.style.width =  `${min_width[0] + barWidthPercentage(Math.min(this.#selectedBar, x) + 1)}%`;
+                    mybar.barDiv.style.width = `${min_width[0] + barWidthPercentage(Math.min(this.#selectedBar, x) + 1)}%`;
                     mybar.selectDiv.style.width = `${barWidthPercentage(this.#selectedBar - x)}%`;
                 } else {  // we are larger
                     fill = `rgba(255, 0, 0, 1)`;
 
-                    mybar.barDiv.style.width =  `${min_width[2] + barWidthPercentage(Math.min(this.#selectedBar, x) + 1)}%`;
+                    mybar.barDiv.style.width = `${min_width[2] + barWidthPercentage(Math.min(this.#selectedBar, x) + 1)}%`;
                     mybar.selectDiv.style.width = `${barWidthPercentage(x - this.#selectedBar)}%`;
                 }
 
@@ -485,28 +488,28 @@ class BarRenderer {
                 `;
 
                 mybar.selectDiv.style.border = '1px solid black'; // selection flair
-                
+
             } else {
                 // just normal
 
-                mybar.barDiv.style.width =  `${min_width[1] + barWidthPercentage(x + 1)}%`;
+                mybar.barDiv.style.width = `${min_width[1] + barWidthPercentage(x + 1)}%`;
                 mybar.selectDiv.style.width = "0%";
 
                 if (this.#selectedBar === x) {
                     clickablePart.style.zIndex = 10; // above others
                     mybar.barDiv.style.border = '3px solid white'; // selection flair
-                } 
+                }
             }
 
         }
 
-   }
+    }
 }
 class ExtraSwapFunctionalities {
     constructor(main, renderer) {
         // Attaches event listeners to the main div node, so they get deleted etc. 
 
-        main.addEventListener('keydown', function(event) {
+        main.addEventListener('keydown', function (event) {
             switch (event.key) {
                 case 'Escape':
                     renderer.deselect();
@@ -536,9 +539,9 @@ class ExtraSwapFunctionalities {
                     break;
             }
         });
-        
+
         // Handle keyup events
-        main.addEventListener('keyup', function(event) {
+        main.addEventListener('keyup', function (event) {
             switch (event.key) {
                 case 'w':
                 case 's':
@@ -551,7 +554,7 @@ class ExtraSwapFunctionalities {
         });
 
         // Timeout is ugly, but I really don't want to make BarRenderer more coupled just yet 
-       	
+
         if (window.isMobile()
             // || true
         ) {
@@ -576,11 +579,11 @@ class ExtraSwapFunctionalities {
                         mobileDiv.style.display = "none";
                     }
                 }
-                ,100
+                , 100
             )
         }
-        
-        
+
+
     }
 }
 
@@ -588,23 +591,23 @@ class ExtraSwapFunctionalities {
 
 class BarCentral {
     #renderer = null;
-    #divHandler = null;
+    divHandler = null;
     #permutationContext = null;
     #extraSwapFunctions = null;
     #menu = null;
 
     constructor(innerDiv, permutationContext, statsHandler) {
-        this.#divHandler = new BarDivDataHandler(innerDiv);
+        this.divHandler = new BarDivDataHandler(innerDiv);
         this.#permutationContext = permutationContext;
         this.#permutationContext.receiver = this;
-        this.#renderer = new BarRenderer(this.#divHandler, this.#permutationContext);
+        this.#renderer = new BarRenderer(this.divHandler, this.#permutationContext);
         this.#menu = statsHandler;
-        this.#extraSwapFunctions = new ExtraSwapFunctionalities(innerDiv.parentNode, this.#renderer);        
+        this.#extraSwapFunctions = new ExtraSwapFunctionalities(innerDiv.parentNode, this.#renderer);
     }
-    
+
     sendAux(data) {
         if ('length' in data) {
-            this.#divHandler.setArraySize(data['length']);
+            this.divHandler.setArraySize(data['length']);
         }
         this.#menu.update(data);
     }
@@ -612,14 +615,14 @@ class BarCentral {
     handleNewPermutationWindow(index, array) {
         this.#renderer.redrawPermutation(index, array);
     }
-} 
+}
 
 class PermutationContext {
-    
+
     // Should be a protected variable... but... js...
     receiver // barCentral
 
-    constructor() {}
+    constructor() { }
 
     setReceiver(receiver) {
         this.receiver = receiver;
@@ -647,9 +650,9 @@ function base64ToUint32Array(encoded) {
     const uint32Array = [];
     for (let i = 0; i < byteArray.length; i += 4) {
         const uint32 = (byteArray[i] << 24) |
-                       (byteArray[i + 1] << 16) |
-                       (byteArray[i + 2] << 8) |
-                       byteArray[i + 3];
+            (byteArray[i + 1] << 16) |
+            (byteArray[i + 2] << 8) |
+            byteArray[i + 3];
         uint32Array.push(uint32);
     }
 
@@ -665,11 +668,11 @@ class PermutationServerHandler extends PermutationContext {
 
     constructor(url) {
         super();
-        this.#url = url;   
-	this.#connect();
+        this.#url = url;
+        this.pconnect();
     }
 
-    #connect() {
+    pconnect() {
         this.ws = new WebSocket(this.#url);
 
         this.ws.onopen = () => {
@@ -681,7 +684,7 @@ class PermutationServerHandler extends PermutationContext {
                 console.log("Created uuid ", id);
                 localStorage.setItem('id', id);
             }
-            
+
             const message = JSON.stringify({
                 type: "unauthenticated_id",
                 id: id
@@ -697,10 +700,10 @@ class PermutationServerHandler extends PermutationContext {
         this.ws.onclose = () => {
             console.log("WebSocket connection closed.");
             // Attempt to reconnect
-            setTimeout(() => {
-                console.log('Attempting to reconnect...');
-                this.#connect(); // Reconnect
-            }, 2000);
+            // setTimeout(() => {
+            //     console.log('Attempting to reconnect...');
+            //     this.pconnect(); // Reconnect
+            // }, 2000);
         };
 
         this.ws.onerror = (error) => {
@@ -718,9 +721,9 @@ class PermutationServerHandler extends PermutationContext {
             v: v
         });
 
-	console.log("SWAPPING", u, v);
+        console.log("SWAPPING", u, v);
         this.ws.send(message);
-        return true; 
+        return true;
     }
 
     sendIndex(i) {
@@ -736,9 +739,9 @@ class PermutationServerHandler extends PermutationContext {
         const message = JSON.stringify({
             type: "set_index",
             index: i
-        })    ;
+        });
         this.ws.send(message);
-        this.#lastRequested = i;   
+        this.#lastRequested = i;
     }
 
     handleMessage(message) {
@@ -754,7 +757,7 @@ class PermutationServerHandler extends PermutationContext {
                     Work_remaining      uint64 `json:"work_remaining"`
                     Total_swaps_so_far  uint64 `json:"total_swaps_so_far"`
                     Work_done           int64  `json:"work_done"`
-	                Swaps_performed     uint64 `json:"swaps_performed"`
+                    Swaps_performed     uint64 `json:"swaps_performed"`
                 */
 
                 this.#currentSize = message["n"]
@@ -787,33 +790,32 @@ class PermutationServerHandler extends PermutationContext {
 // }
 
 const innerDiv = document.getElementById('scroll-content');
-    const outerDiv = document.getElementById('scroll-container');
+const outerDiv = document.getElementById('scroll-container');
 
-    // assign gradient
-    let gradstr = "";
-    let len = 60;
-    for (let i = 0; i <= len; i+=1) {
-        gradstr += `hsl(${i/len * 300}, 25%, 75%) ${i/len * 100}%`;
-        if (i != len) gradstr += ',';
-    }
+// assign gradient
+let gradstr = "";
+let len = 60;
+for (let i = 0; i <= len; i += 1) {
+    gradstr += `hsl(${i / len * 300}, 25%, 75%) ${i / len * 100}%`;
+    if (i != len) gradstr += ',';
+}
 
-    innerDiv.style.background = `linear-gradient(to bottom, ${gradstr})`;
-    
-    // const ctx = new PermutationMockStatic(500);
-    // const ctx = new PermutationMockDoubler();
-     const ctx = new PermutationServerHandler("wss://" + document.location.host + "/ws");
-    // const ctx = new PermutationServerHandler("ws://" + document.location.host + "/ws");
+innerDiv.style.background = `linear-gradient(to bottom, ${gradstr})`;
 
-    const menu = document.getElementById('menu-container');
+// const ctx = new PermutationMockStatic(500);
+// const ctx = new PermutationMockDoubler();
+// const ctx = new PermutationServerHandler("ws://" + document.location.host + "/ws");
 
-    barCentral = new BarCentral(innerDiv, ctx, new TopMenu(menu, outerDiv));
-    // const element = document.getElementById('fade-out-after-5-seconds');
-    // fadeOutAndRemove(element);
+const menu = document.getElementById('menu-container');
 
-// barCentral.#divHandler.requestBar(4094)
+
+// const element = document.getElementById('fade-out-after-5-seconds');
+// fadeOutAndRemove(element);
+
+// barCentral.divHandler.requestBar(4094)
 
 // function getVal(idx) {
-//     return barCentral.#divHandler.requestBar(idx).value;
+//     return barCentral.divHandler.requestBar(idx).value;
 // }
 
 function sleep(ms) {
@@ -821,26 +823,46 @@ function sleep(ms) {
 }
 
 
-async function sortPerm(handler, L, R) {
-    let seen = new Set();
-    for(let i = L; i < R; i++) {
-        let iv = handler.requestBar(i).value;
-        if (seen.has(i) || seen.has(iv)) continue;
-        if(iv != i) {
-            // handler.requestBar(iv).barDiv.scrollIntoView()
-            handler.requestBar(Math.max(0, i - 5)).barDiv.scrollIntoView()
-            seen.add(i);
-            seen.add(iv);
-            ctx.sendSwap(i, iv);
-            await sleep(1100);
+let barCentrals = [];
+let handlers = [];
+let ctxs = [];
+let prevSwapTimes = [];
+async function sortPerm(L, R, spacing, connections, accuracy) {
+    while(ctxs.length < connections) {
+        ctxs.push(new PermutationServerHandler("wss://" + document.location.host + "/ws"));
+        barCentrals.push(new BarCentral(innerDiv, ctxs.at(-1), new TopMenu(menu, outerDiv)));
+        handlers.push(barCentrals.at(-1).divHandler);
+        prevSwapTimes.push(Date.now() - 2 * spacing);
+    }
+    let conIdx = 0;
+    for (let i = L; i < R; i++) {
+        while (prevSwapTimes[conIdx] + spacing > Date.now()) {
+            await sleep(prevSwapTimes[conIdx] + spacing - Date.now());
         }
-        // let minidx = i+1;
-        // for(let j = i + 1; j < R; j++) {
-        //     if (handler.requestBar(j) < handler.requestBar(minidx)) minidx = j;
-        // }
-        // let jv = handler.requestBar(minidx).value;
-        // if(iv > jv) {
-        //     ctx.sendSwap(iv, jv);
-        // }
+        let iv = handlers[conIdx].requestBar(i).value;
+        handlers[conIdx].clearBar(i);
+        if(iv == undefined) {
+            console.log(i, iv, "skipping");
+            continue;
+        }
+        let rand = Math.floor(Math.random() * (2 * accuracy + 1));
+        let targval = i;
+        targval += rand - accuracy;
+        targval = Math.max(targval, L);
+        targval = Math.min(targval, R-1);
+        // if (seen.has(i) || seen.has(iv)) continue;
+        if (iv != targval) {
+            handlers[conIdx].requestBar(iv).barDiv.scrollIntoView()
+            handlers[conIdx].requestBar(Math.max(0, targval - 5)).barDiv.scrollIntoView();
+            handlers[conIdx].clearBar(Math.max(0, targval - 5));
+            handlers[conIdx].clearBar(iv);
+            // seen.add(i);
+            // seen.add(iv);
+            ctxs[conIdx].sendSwap(targval, iv);
+            prevSwapTimes[conIdx] = Date.now();
+            conIdx = (conIdx + 1) % connections;
+        }
     }
 }
+
+// sortPerm(, 0, 50, 1100, 1)
