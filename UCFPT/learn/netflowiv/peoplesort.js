@@ -1,620 +1,27 @@
-const expanded = [`40vh`, `60vh`];
-const shrunk = [`10vh`, `90vh`];
 
+let globalPerm = [];
 
-// Updates two menus concurrecntly, but only displays one of them (hopefully menu operations aren't expensive)
-
-
-const refreshTime = 500;
-
-function statsTable(data) {
-    // Clear existing content
-
-    // Create a table element
-    const table = document.createElement('table');
-    table.className = 'styled-table'; // Add class for styling
-
-    // Create a table header
-    const thead = document.createElement('thead');
-    const headerRow = document.createElement('tr');
-
-    // Define headers based on your data
-    const headers = ['Current Length', 'Swaps/second', 'Users Online', 'Work Remaining', 'Total Swaps', 'Your work done', 'Your swaps performed'];
-
-    // Append headers to the table
-    headers.forEach(header => {
-        const th = document.createElement('th');
-        th.textContent = header;
-        headerRow.appendChild(th);
-    });
-
-    thead.appendChild(headerRow);
-    table.appendChild(thead);
-
-    // Create a table body
-    const tbody = document.createElement('tbody');
-    const row = document.createElement('tr');
-
-    // Populate the row with data
-    const values = [
-        data["length"],
-        data["swap_statistic"],
-        data["num_connected_users"],
-        data["work_remaining"],
-        data["total_swaps_so_far"],
-        data["work_done"],
-        data["swaps_performed"]
-    ];
-
-    values.forEach(value => {
-        const td = document.createElement('td');
-        td.textContent = value;
-        row.appendChild(td);
-    });
-
-    tbody.appendChild(row);
-    table.appendChild(tbody);
-
-    // Append the table to the div
-    return table;
-}
-
-
-class TopMenu {
-    #menuOpen = false;
-
-    // This is rushed
-    // All of shrunkDiv elements go here 
-    #shrunkDiv;
-
-    // all of expandedDiv elements go here 
-    #expandedDiv;
-
-    // Probably need a different class for mobile eh? 
-
-    constructor(menuDiv, enemyDiv) {
-        // Initially false 
-        menuDiv.style.height = shrunk[0];
-        enemyDiv.style.height = shrunk[1];
-
-        this.#shrunkDiv = document.getElementById("shrunkMenu");
-        this.#expandedDiv = document.getElementById("expandedMenu");
-
-        this.#shrunkDiv.style.display = "block";
-        this.#expandedDiv.style.display = "none";
-
-        const button = document.getElementById('dropdown');
-
-        button.addEventListener('click', () => {
-            if (this.#menuOpen) {
-                // -> shrunk
-                this.#shrunkDiv.style.display = "block";
-                this.#expandedDiv.style.display = "none";
-                menuDiv.style.height = shrunk[0];
-                enemyDiv.style.height = shrunk[1];
-                button.style.transform = 'rotate(0deg)';
-            } else {
-                // -> expanded
-                this.#expandedDiv.style.display = "block";
-                this.#shrunkDiv.style.display = "none";
-                menuDiv.style.height = expanded[0];
-                enemyDiv.style.height = expanded[1];
-                button.style.transform = 'rotate(180deg)';
-            }
-            this.#menuOpen = !this.#menuOpen;
-        });
-
-        // TODO: Make this stats table good and not bad 
-        this.#expandedDiv.append(statsTable({}));// dummy table last
-
-
-        // Set controls div to invisible if on mobile
-        if (window.isMobile()) document.getElementById("controls-div").style.display = "none";
+/*
+    N                   int    `json:"n"`
+    Index               int    `json:"index"`
+    Window_size         int    `json:"window_size"`
+    Window              string `json:"window"`
+    Swap_statistic      int    `json:"swap_statistic"`
+    Num_connected_users int    `json:"num_connected_users"`
+    Work_remaining      uint64 `json:"work_remaining"`
+    Total_swaps_so_far  uint64 `json:"total_swaps_so_far"`
+    Work_done           int64  `json:"work_done"`
+    Swaps_performed     uint64 `json:"swaps_performed"`
+*/
+function handleNewPermutationWindow(message) {
+    // console.log("globalperm, receive window starting at " + message["index"] + " and length " + message["window_size"]);
+    let conv = base64ToUint32Array(message["window"]);
+    while (globalPerm.length < message["n"]) globalPerm.push(-1);
+    let start = message["index"];
+    for (let i = 0; i < message["window_size"]; i++) {
+        globalPerm[i + start] = conv[i];
     }
-
-    // refer to PermutationServerHandler
-
-    // Might be annoying bug where because we're trying to constantly refresh we can't actually click on stuff...
-    // Stats, settings, credits?
-
-
-    #lastRequest = Date.now() - refreshTime;
-
-    update(data) {
-        if (Date.now() - this.#lastRequest >= refreshTime) {
-            this.#lastRequest = Date.now();
-
-            this.#shrunkDiv.innerHTML = '';
-            this.#shrunkDiv.append(statsTable(data));
-
-            this.#expandedDiv.removeChild(this.#expandedDiv.lastChild);
-            this.#expandedDiv.append(statsTable(data));
-        }
-    }
-}
-
-const barSpacing = 1; // in "px"
-
-// Because the scrolling functionality is so integrated and core w/ the window tracking logic, this class 
-// simply handles the tracking of deltas, whereas the renderer actually does graphics
-
-// The only rendering thing this manages is the full height of the innerDiv.
-// This also handles the sliding window cache with their own divs & stuff. 
-// ^ the above promise was broken but too lazy to refactor CachedBar to its own class
-
-// Shuffles DOM elements around, recreating the effect of React-Window 
-
-const barListener = document.getElementById("bars-per-screen-slider");
-
-function barsOnScreen() {
-    return barListener.value;
-}
-
-function barHeight() {
-    return 100 / barsOnScreen(); // in "vh"
-}
-
-class CachedBar {
-    clickableAreaDiv;
-    barDiv; // the bar itself
-    selectDiv; // if selected, display and render this div
-
-    index;
-    value;
-
-    lastEventListner = null;
-
-    constructor() {
-        this.clickableAreaDiv = document.createElement('div');
-        this.clickableAreaDiv.className = 'barClick';
-
-        this.barDiv = document.createElement('div');
-        this.selectDiv = document.createElement('div');
-        this.barDiv.className = "bar";
-        this.selectDiv.className = "barExtra";
-
-        this.clickableAreaDiv.style.background = 'transparent';
-
-        // invariants (do not put dynamic transforms here)
-        this.clickableAreaDiv.style.margin = `${barSpacing}px 0`;
-
-        this.clickableAreaDiv.appendChild(this.barDiv);
-        this.clickableAreaDiv.appendChild(this.selectDiv);
-    }
-
-    setClick(f) {
-        this.clickableAreaDiv.removeEventListener('click', this.lastEventListner);
-        this.clickableAreaDiv.addEventListener('click', f);
-        this.lastEventListner = f;
-    }
-}
-
-class BarDivDataHandler {
-    #outerDiv; // the "portrait window"
-    #innerDiv; // the actual meat
-
-    #arraySize = 0;
-
-    #cache = [];
-
-    #force_refresh() {
-        for (let i = 0; i < this.#cache.length; ++i) if (this.#cache[i] !== null) {
-            this.#cache[i].index = null;
-            this.#cache[i].value = null;
-            this.#cache[i].clickableAreaDiv.style.display = "none";
-        }
-
-        this.#innerDiv.style.height = this.#calcBarPosition(this.#arraySize);
-
-        // console.log(this.#innerDiv.style.height, this.#extractAndCalculate(this.#innerDiv.style.height), this.#outerDiv.scrollTop);
-        // Force scroll to reset as well in case of out of bounds 
-        this.#outerDiv.scrollTop = Math.min(this.#extractAndCalculate(this.#innerDiv.style.height), this.#outerDiv.scrollTop);
-    }
-
-    constructor(innerDiv) {
-        this.#innerDiv = innerDiv;
-        this.#outerDiv = innerDiv.parentNode;
-
-        for (let i = 0; i < 3 * barListener.max + 10; ++i) {
-            this.#cache.push(null);
-        }
-
-        // On slider reset, force a refresh of graphics. Only way I can think of to properly deal with the bug. 
-        barListener.addEventListener('input', () => {
-            setTimeout(() => { this.#force_refresh() }, 0); // run this *after* input is done updating  
-        });
-
-        this.#force_refresh();
-    }
-
-    #getAbsolutePosition() { // returns an integer between [0, lastUpdatedSize)
-        const rect = this.#innerDiv.getBoundingClientRect();
-        const height = Math.max(rect.height, 1);
-        const top = this.#outerDiv.scrollTop;
-        const frac = top / height;
-
-        return Math.floor(Math.max(0, Math.min(this.#arraySize - 1, frac * this.#arraySize)));
-    }
-
-
-    // for BarRenderer
-    requestBar(index) {
-        let cur = this.#cache[index % this.#cache.length];
-        if (cur === null) {
-            cur = new CachedBar();
-            this.#cache[index % this.#cache.length] = cur;
-            this.#innerDiv.appendChild(cur.clickableAreaDiv);
-        }
-
-        cur.clickableAreaDiv.style.height = `${barHeight()}vh`;
-        cur.clickableAreaDiv.style.display = "initial";
-
-        cur.clickableAreaDiv.style.top = this.#calcBarPosition(index);
-        return cur;
-    }
-
-    clearBar(index) {
-        this.#cache[index % this.#cache.length] = null;
-    }
-
-    setArraySize(n) {
-        if (this.#arraySize == n) return;
-        /// TODO: Perhaps send a new victory message here!
-
-        this.#arraySize = n;
-
-        this.#force_refresh();
-    }
-
-    getInnerDiv() {
-        return this.#innerDiv;
-    }
-
-    getSettings() {
-        let idx = this.#getAbsolutePosition();
-        return {
-            "index": idx,
-            "windowSize": Math.min(barsOnScreen(), this.#arraySize - idx),
-            "n": this.#arraySize,
-            "barHeight": barHeight(),
-            "barSpacing": barSpacing,
-        };
-    }
-
-    #calcBarPosition(i) {
-        return `calc(${i * (barSpacing)}px + ${i * barHeight()}vh)`;
-    }
-
-    #extractAndCalculate(str) {
-        // Adjusted regular expression to handle floating-point numbers and optional spaces
-        const match = str.match(/calc\(\s*([+-]?\d*\.?\d+)px\s*\+\s*([+-]?\d*\.?\d+)vh\s*\)/);
-
-        if (!match) return null;  // Handle invalid format
-
-        const x = parseFloat(match[1]);  // Extract and convert x to a float
-        const y = parseFloat(match[2]);  // Extract and convert y to a float
-
-        // Calculate the result: x + (y as percentage of viewport height)
-        const viewportHeight = window.innerHeight;
-        return x + (y / 100) * viewportHeight;
-    }
-
-    reset(x) { // request X to be at the center of the page 
-        this.#outerDiv.scrollTop = this.#extractAndCalculate(this.#calcBarPosition(Math.max(x - Math.floor(barsOnScreen() / 2), 0)));
-    }
-
-}
-
-const refreshMs = 1000 / 30;
-
-const hsl_sat_listener = document.getElementById("HSL-saturation-slider");
-const hsl_light_listener = document.getElementById("HSL-lightness-slider");
-
-
-
-class BarRenderer {
-    #selectedBar = null;
-
-    #innerDivHandler = null;
-
-    // Okay so barRenderer is the only sender to permutationContext
-    // but the backend slowly but surely is adding more aux features
-    // so this is why we have this coupling here but have BarCentral to propogate messages properly
-    #permutationContext = null;
-
-    #swapDirection = null;
-
-    // Could be cleaner UI w/ broadcasting
-
-    #selectedIndex;
-
-    getSelectedIndex() {
-        return this.#selectedIndex;
-    }
-
-    getSelected() {
-        return this.#selectedBar;
-    }
-
-    #select(x, index) {
-        this.#selectedBar = x;
-        this.#selectedIndex = index;
-    }
-
-    deselect() {
-        this.#selectedBar = null;
-        this.#selectedIndex = null;
-        this.setDirection(null);
-    }
-
-    setDirection(dir) {
-        this.#swapDirection = dir;
-    }
-
-    getInnerDivHandler() {
-        return this.#innerDivHandler;
-    }
-
-    constructor(innerDivHandler, permutationContext) {
-        this.#innerDivHandler = innerDivHandler;
-        this.#permutationContext = permutationContext;
-
-        setInterval(() => {
-            let result = this.#innerDivHandler.getSettings();
-
-            // ask for a little buffer before 
-            permutationContext.sendIndex(Math.max(result["index"] - 5, 0));
-        }, refreshMs);
-    }
-
-    redrawPermutation(currentIndex, permutation) {
-        const bar_frac = 0.90;
-        // bad, normal, good 
-        const min_width = [2, 5, 8];
-
-        let result = this.#innerDivHandler.getSettings();
-
-        const fullLength = result["n"];
-        const viewIndex = result["index"];
-        const windowSize = result["windowSize"];
-
-        for (let iter = 0; iter < permutation.length; iter++) {
-            let index = currentIndex + iter;
-            let x = permutation[iter];
-
-            if (!(viewIndex <= index && index < viewIndex + windowSize)) continue; // take intersection, immportant for async refreshes
-
-            // selectedBar logic is scuffed
-            if (x === this.#selectedBar && this.#selectedIndex != index) {
-                this.#selectedIndex = index;
-                this.#innerDivHandler.reset(this.#selectedIndex);
-            }
-
-            let mybar = this.#innerDivHandler.requestBar(index, x);
-
-            if (mybar.index !== index || mybar.value !== x) {
-                // reset bar info, because it is stale (mainly so that setClick isn't reset 1e9/s)
-
-                mybar.index = index;
-                mybar.value = x;
-                mybar.setClick(() => {
-                    const myValue = x;
-                    const myIndex = index;
-                    if (this.#selectedBar === null) {
-                        this.#select(myValue, myIndex);
-                    } else if (this.#selectedBar === myValue) {
-                        this.deselect();
-                    } else {
-                        this.#permutationContext.sendSwap(this.#selectedBar, myValue);
-                        this.deselect();
-                    }
-
-
-                });
-            }
-
-            // TODO: Why does Arrow swapping go through this.... 
-            if (x == this.#selectedBar && this.#swapDirection !== null) {
-                // Apply swap
-                if (iter + this.#swapDirection >= 0 && iter + this.#swapDirection < permutation.length) {
-                    this.#permutationContext.sendSwap(this.#selectedBar, permutation[iter + this.#swapDirection]);
-                    this.setDirection(null);
-                }
-            }
-
-            let clickablePart = mybar.clickableAreaDiv;
-
-            // invariants here 
-
-            let defbg = `hsl(${x / fullLength * 300}, ${hsl_sat_listener.value}%, ${hsl_light_listener.value}%)`;
-
-            let barWidthPercentage = (x) => {
-                return (bar_frac * (x / fullLength)) * 100;
-            };
-
-            clickablePart.style.background = 'transparent';
-
-            // to help people gauge fixed points
-            if (x === index) {
-                clickablePart.style.background = 'rgba(255, 255, 0, 0.2)'; // yellow
-            }
-
-            clickablePart.style.zIndex = 0;
-
-            // If there's an local inversion, subtly highlight this 
-            if (iter + 1 < permutation.length && permutation[iter] > permutation[iter + 1]) {
-                clickablePart.style.border = '1px solid rgba(255, 99, 71, 0.5)'; // red
-            } else {
-                clickablePart.style.border = '';
-            }
-
-            // If our selected value is on the screen, make it easy and clear for them to see
-            if (this.#selectedBar === index) {
-                clickablePart.style.background = 'rgba(0, 255, 0, 1)'; // solid green
-            }
-
-            // reset selection
-            mybar.barDiv.style.border = '1px solid black'; // selection flair
-            mybar.barDiv.style.background = defbg;
-            mybar.selectDiv.style.width = "0%";
-
-            mybar.selectDiv.style.border = '';
-
-            let fill2 = `rgba(0, 0, 0, 0.5)`;
-
-            if (!(this.#selectedBar === null || this.#selectedBar === x)) {
-                let fill;
-                if (this.#selectedBar > x) { // we are smaller 
-                    fill = `rgba(0, 255, 0, 1)`;
-
-                    mybar.barDiv.style.width = `${min_width[0] + barWidthPercentage(Math.min(this.#selectedBar, x) + 1)}%`;
-                    mybar.selectDiv.style.width = `${barWidthPercentage(this.#selectedBar - x)}%`;
-                } else {  // we are larger
-                    fill = `rgba(255, 0, 0, 1)`;
-
-                    mybar.barDiv.style.width = `${min_width[2] + barWidthPercentage(Math.min(this.#selectedBar, x) + 1)}%`;
-                    mybar.selectDiv.style.width = `${barWidthPercentage(x - this.#selectedBar)}%`;
-                }
-
-                mybar.selectDiv.style.background = `
-                    repeating-linear-gradient(
-                        45deg,
-                        transparent,
-                        transparent 10px,
-                        ${fill2} 10px,
-                        ${fill2} 20px
-                    ),                    
-                    ${fill}
-                `;
-
-                mybar.selectDiv.style.border = '1px solid black'; // selection flair
-
-            } else {
-                // just normal
-
-                mybar.barDiv.style.width = `${min_width[1] + barWidthPercentage(x + 1)}%`;
-                mybar.selectDiv.style.width = "0%";
-
-                if (this.#selectedBar === x) {
-                    clickablePart.style.zIndex = 10; // above others
-                    mybar.barDiv.style.border = '3px solid white'; // selection flair
-                }
-            }
-
-        }
-
-    }
-}
-class ExtraSwapFunctionalities {
-    constructor(main, renderer) {
-        // Attaches event listeners to the main div node, so they get deleted etc. 
-
-        main.addEventListener('keydown', function (event) {
-            switch (event.key) {
-                case 'Escape':
-                    renderer.deselect();
-                    break;
-                case 'w':
-                    // console.log("SETTING DIR");
-                    renderer.setDirection(-1);
-                    break;
-                case 's':
-                    renderer.setDirection(1);
-                    break;
-                case 'a':
-                    renderer.setDirection(-5);
-                    break;
-                case 'd':
-                    renderer.setDirection(+5);
-                    break;
-                case ' ':
-                    let x = renderer.getSelectedIndex();
-                    if (x !== null) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        renderer.getInnerDivHandler().reset(x);
-                    }
-                    break;
-                default:
-                    break;
-            }
-        });
-
-        // Handle keyup events
-        main.addEventListener('keyup', function (event) {
-            switch (event.key) {
-                case 'w':
-                case 's':
-                case 'a':
-                case 'd':
-                    renderer.setDirection(null);
-                default:
-                    break;
-            }
-        });
-
-        // Timeout is ugly, but I really don't want to make BarRenderer more coupled just yet 
-
-        if (window.isMobile()
-            // || true
-        ) {
-            let mobileDiv = document.createElement('div');
-            main.prepend(mobileDiv);
-
-            mobileDiv.id = 'deselect-mobile-popup';
-            mobileDiv.style.display = "none";
-
-            mobileDiv.addEventListener('click', () => {
-                renderer.deselect();
-                mobileDiv.style.display = "none";
-            });
-
-            setInterval(
-                () => {
-                    let sel = renderer.getSelected();
-                    if (sel !== null) {
-                        mobileDiv.innerText = `deselect bar ${sel}`;
-                        mobileDiv.style.display = "flex";
-                    } else {
-                        mobileDiv.style.display = "none";
-                    }
-                }
-                , 100
-            )
-        }
-
-
-    }
-}
-
-
-
-class BarCentral {
-    #renderer = null;
-    divHandler = null;
-    #permutationContext = null;
-    #extraSwapFunctions = null;
-    #menu = null;
-
-    constructor(innerDiv, permutationContext, statsHandler) {
-        this.divHandler = new BarDivDataHandler(innerDiv);
-        this.#permutationContext = permutationContext;
-        this.#permutationContext.receiver = this;
-        this.#renderer = new BarRenderer(this.divHandler, this.#permutationContext);
-        this.#menu = statsHandler;
-        this.#extraSwapFunctions = new ExtraSwapFunctionalities(innerDiv.parentNode, this.#renderer);
-    }
-
-    sendAux(data) {
-        if ('length' in data) {
-            this.divHandler.setArraySize(data['length']);
-        }
-        this.#menu.update(data);
-    }
-
-    handleNewPermutationWindow(index, array) {
-        this.#renderer.redrawPermutation(index, array);
-    }
+    // console.log("from handlePerm", globalPerm.slice(0, 100));
 }
 
 class PermutationContext {
@@ -690,7 +97,7 @@ class PermutationServerHandler extends PermutationContext {
 
         this.ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
-            this.handleMessage(message);
+            this.handleMessage(message, this.ws);
         };
 
         this.ws.onclose = () => {
@@ -730,7 +137,7 @@ class PermutationServerHandler extends PermutationContext {
         }
 
         // Do not spam the server, but allow a little bit of refreshing in case we get rate limited and a request doesn't go through 
-        if (this.#lastRequested === i && Date.now() - this.#lastRequestedTime < 1000) return;
+        // if (this.#lastRequested === i && Date.now() - this.#lastRequestedTime < 1000) return;
 
         const message = JSON.stringify({
             type: "set_index",
@@ -740,8 +147,31 @@ class PermutationServerHandler extends PermutationContext {
         this.#lastRequested = i;
     }
 
-    handleMessage(message) {
+    handleMessage(message, ws) {
         switch (message.type) {
+            case "verification_request":
+                console.log("Got a request for verification");
+                // Clear any previous Turnstile widget if needed
+                document.getElementById('turnstile-container').innerHTML = '';
+
+                // Render the Turnstile widget
+                turnstile.render('#turnstile-container', {
+                    //REALLY need a way to set config for local/prod
+                    sitekey: '0x4AAAAAAAiMy1aFZQeiyrgZ',
+                    callback: function (token) {
+                        console.log('Verification successful, token:', token);
+                        const message = JSON.stringify({
+                            type: "verification_response",
+                            response: token
+                        });
+                        ws.send(message);
+                        document.getElementById('turnstile-container').innerHTML = '';
+                    },
+                    'error-callback': function () {
+                        console.log('Verification failed');
+                    }
+                });
+                break;
             case "permutation_window":
                 /*
                     N                   int    `json:"n"`
@@ -758,9 +188,13 @@ class PermutationServerHandler extends PermutationContext {
 
                 this.#currentSize = message["n"]
                 message["length"] = this.#currentSize;
+                // console.log(message);
+                // let conv = base64ToUint32Array(message["window"]);
+                // console.log(message["index"], conv);
 
-                this.receiver.sendAux(message);
-                this.receiver.handleNewPermutationWindow(message["index"], base64ToUint32Array(message["window"]));
+                // this.receiver.sendAux(message);
+                handleNewPermutationWindow(message);
+                // this.receiver.handleNewPermutationWindow(message["index"], conv);
                 break;
             default:
                 console.warn("Unknown message type:", message.type);
@@ -769,92 +203,52 @@ class PermutationServerHandler extends PermutationContext {
 }
 
 
-// function fadeOutAndRemove(element) {
-//     let opacity = 1;  // Initial opacity
-
-//     const death = 0.02;
-
-//     const fadeOut = setInterval(() => {
-//         if (opacity <= death) {
-//             clearInterval(fadeOut);
-//             element.style.display = 'none';  // Completely hide the element
-//             element.remove();  // Remove the element from the DOM
-//         } else {
-//             opacity -= death;
-//             element.style.opacity = opacity;
-//         }
-//     }, 100);  // Fade out speed
-// }
-
-const innerDiv = document.getElementById('scroll-content');
-const outerDiv = document.getElementById('scroll-container');
-
-// assign gradient
-let gradstr = "";
-let len = 60;
-for (let i = 0; i <= len; i += 1) {
-    gradstr += `hsl(${i / len * 300}, 25%, 75%) ${i / len * 100}%`;
-    if (i != len) gradstr += ',';
-}
-
-innerDiv.style.background = `linear-gradient(to bottom, ${gradstr})`;
-
-// const ctx = new PermutationMockStatic(500);
-// const ctx = new PermutationMockDoubler();
-// const ctx = new PermutationServerHandler("ws://" + document.location.host + "/ws");
-
-const menu = document.getElementById('menu-container');
 
 
-// const element = document.getElementById('fade-out-after-5-seconds');
-// fadeOutAndRemove(element);
-
-// barCentral.divHandler.requestBar(4094)
-
-// function getVal(idx) {
-//     return barCentral.divHandler.requestBar(idx).value;
-// }
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-
-let barCentrals = [];
-let handlers = [];
 let ctxs = [];
 let prevSwapTimes = [];
-async function sortPerm(L, R, spacing, connections, accuracy) {
+async function createConnections(connections, spacing) {
     while (ctxs.length < connections) {
+        console.log("creating connection " + ctxs.length);
         ctxs.push(new PermutationServerHandler("wss://" + document.location.host + "/ws"));
-        barCentrals.push(new BarCentral(innerDiv, ctxs.at(-1), new TopMenu(menu, outerDiv)));
-        handlers.push(barCentrals.at(-1).divHandler);
         prevSwapTimes.push(Date.now() - 2 * spacing);
+        await sleep(10000);
     }
+    console.log("there are now " + ctxs.length + " connections");
+}
+
+async function sortPerm(L, R, spacing, connections, accuracy) {
+    await createConnections(connections, spacing);
     let conIdx = 0;
+    await sleep(1000);
     for (let i = L; i < R; i++) {
+        if(i % 50 == L % 50) {
+            ctxs[conIdx].sendIndex(Math.max(0, i - 5));
+            console.log("refreshing at " + i);
+            await sleep(1000);
+        }
         while (prevSwapTimes[conIdx] + spacing > Date.now()) {
             await sleep(prevSwapTimes[conIdx] + spacing - Date.now());
         }
-        let iv = handlers[conIdx].requestBar(i).value;
-        handlers[conIdx].clearBar(i);
-        if (iv == undefined) {
-            console.log(i, iv, "skipping");
-            continue;
+        let iv = globalPerm[i];
+        while (iv == undefined || iv == -1) {
+            console.log(i, iv, "retrying");
+            console.log("from sortperm", globalPerm.slice(0, 100));
+            ctxs[conIdx].sendIndex(Math.max(0, i - 5));
+            await sleep(1000);
+            iv = globalPerm[i];
         }
         let rand = Math.floor(Math.random() * (2 * accuracy + 1));
         let targval = i;
         targval += rand - accuracy;
         targval = Math.max(targval, L);
         targval = Math.min(targval, R - 1);
-        // if (seen.has(i) || seen.has(iv)) continue;
         if (iv != targval) {
-            handlers[conIdx].requestBar(iv).barDiv.scrollIntoView()
-            handlers[conIdx].requestBar(Math.max(0, targval - 5)).barDiv.scrollIntoView();
-            handlers[conIdx].clearBar(Math.max(0, targval - 5));
-            handlers[conIdx].clearBar(iv);
-            // seen.add(i);
-            // seen.add(iv);
             ctxs[conIdx].sendSwap(targval, iv);
             prevSwapTimes[conIdx] = Date.now();
             conIdx = (conIdx + 1) % connections;
@@ -862,4 +256,5 @@ async function sortPerm(L, R, spacing, connections, accuracy) {
     }
 }
 
-// sortPerm(, 0, 50, 1100, 1)
+// await createConnections(10);
+
