@@ -257,4 +257,4 @@ async function sortPerm(L, R, spacing, connections, accuracy) {
 }
 
 // await createConnections(10);
-
+// await sortPerm(0, 3000, 1100, 10, 0);
