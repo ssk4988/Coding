@@ -72,11 +72,18 @@ class PermutationServerHandler extends PermutationContext {
     #currentSize = 0;
     #lastRequestedTime = Date.now();
     #url;
+    index;
+    turnstile;
 
-    constructor(url) {
+    constructor(url, idx) {
         super();
         this.#url = url;
+        this.index = idx;
         this.pconnect();
+        let turnstileContainer = document.getElementById('turnstile-container');
+        this.turnstile = document.createElement("div");
+        this.turnstile.id = "turnstile-" + this.index;
+        turnstileContainer.appendChild(this.turnstile)
     }
 
     pconnect() {
@@ -152,10 +159,11 @@ class PermutationServerHandler extends PermutationContext {
             case "verification_request":
                 console.log("Got a request for verification");
                 // Clear any previous Turnstile widget if needed
-                document.getElementById('turnstile-container').innerHTML = '';
+                // document.getElementById('turnstile-container').innerHTML = '';
+                this.turnstile.innerHTML = '';
 
                 // Render the Turnstile widget
-                turnstile.render('#turnstile-container', {
+                turnstile.render("#" + this.turnstile.id, {
                     //REALLY need a way to set config for local/prod
                     sitekey: '0x4AAAAAAAiMy1aFZQeiyrgZ',
                     callback: function (token) {
@@ -165,7 +173,8 @@ class PermutationServerHandler extends PermutationContext {
                             response: token
                         });
                         ws.send(message);
-                        document.getElementById('turnstile-container').innerHTML = '';
+                        // document.getElementById('turnstile-container').innerHTML = '';
+                        // this.turnstile.innerHTML = '';
                     },
                     'error-callback': function () {
                         console.log('Verification failed');
@@ -215,9 +224,9 @@ let prevSwapTimes = [];
 async function createConnections(connections, spacing) {
     while (ctxs.length < connections) {
         console.log("creating connection " + ctxs.length);
-        ctxs.push(new PermutationServerHandler("wss://" + document.location.host + "/ws"));
+        ctxs.push(new PermutationServerHandler("wss://" + document.location.host + "/ws", ctxs.length));
         prevSwapTimes.push(Date.now() - 2 * spacing);
-        await sleep(10000);
+        // await sleep(10000);
     }
     console.log("there are now " + ctxs.length + " connections");
 }
