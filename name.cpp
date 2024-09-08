@@ -9,13 +9,13 @@ using vi = vector<int>;
 using vl = vector<ll>;
 using vd = vector<ld>;
 using vii = vector<pii>;
-using vll = vector<pll>;;
+using vll = vector<pll>;
 using vvi = vector<vi>;
 
 #define f first
 #define s second
 #define pb push_back
-#define all(x) x.begin(), x.end()
+#define all(x) begin(x), end(x)
 #define sz(x) (int)(x).size()
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 
