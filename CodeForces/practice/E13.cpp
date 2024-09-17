@@ -35,19 +35,22 @@ int main()
     vi block(n + 1);
     vi jumps(n + 1);
     vi nex(n + 1);
-    nex[n] = n;
-    block[n] = n;
-    int k = (int)sqrt(n);
+    nex[n] = n+10;
+    block[n] = n+10;
+    int k = (int)sqrt(n) + 5;
     rep(i, 0, n)
     {
         block[i] = i / k;
         cin >> a[i];
-        a[i] = min(a[i], n - i);
+        a[i] = min(a[i] + i, n);
     }
+    auto calc = [&](int i) {
+        nex[i] = block[a[i]] != block[i] ? i : nex[a[i]];
+        jumps[i] = nex[i] == i ? 0 : 1 + jumps[a[i]];
+    };
     for (int i = n - 1; i >= 0; i--)
     {
-        jumps[i] = 1 + (block[i + a[i]] == block[i] ? jumps[i + a[i]] : 0);
-        nex[i] = block[i + a[i]] != block[i] ? i + a[i] : nex[i + a[i]];
+        calc(i);
     }
     rep(j, 0, q){
         int t, l, r;
@@ -55,20 +58,24 @@ int main()
         l--;
         if(t == 0){
             cin >> r;
-            a[l] = min(r, n - l);
-            for(int i = l; i >= block[l] * k; i--){
-                jumps[i] = 1 + (block[i + a[i]] == block[i] ? jumps[i + a[i]] : 0);
-                nex[i] = block[i + a[i]] != block[i] ? i + a[i] : nex[i + a[i]];
+            a[l] = min(n, r + l);
+            int b = block[l];
+            for(int i = min(n, (b + 1) * k)-1; i >= b * k; i--) {
+                calc(i);
             }
         }
         else{
-            int ans = 0, pre = -1;
-            while(l < n){
+            int ans = 1;
+            while(a[l] < n){
+                if(nex[l] == l) {
+                    l = a[l];
+                    ans++;
+                    continue;
+                }
                 ans += jumps[l];
-                pre = l;
                 l = nex[l];
             }
-            cout << (pre + 1) << " " << ans << nL;
+            cout << (l + 1) << " " << ans << nL;
         }
     }
 

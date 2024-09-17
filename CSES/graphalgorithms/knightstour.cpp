@@ -48,25 +48,31 @@ int main()
         }
     }
     vvi order(8, vi(8, -1));
-    int curi = c, curj = r;
     int movenum = 1;
-    while (curi != -1)
-    {
-        bool foundnext = false;
+    auto dfs = [&](int curi, int curj, auto &&dfs) -> bool {
+        vvi moves;
         order[curi][curj] = movenum++;
-        int besti = -1, bestj = -1;
+        if(movenum == 65) return true;
         rep(k, 0, 8)
         {
             int i1 = curi + ds[k][0], j1 = curj + ds[k][1];
             if (i1 < 0 || i1 >= 8 || j1 < 0 || j1 >= 8 || order[i1][j1] != -1)
                 continue;
             deg[i1][j1]--;
-            if(besti == -1 || deg[i1][j1] <= deg[besti][bestj]) {
-                besti = i1, bestj = j1;
-            }
+            moves.push_back({deg[i1][j1], i1, j1});
         }
-        curi = besti, curj = bestj;
-    }
+        sort(all(moves));
+        for(auto v : moves) {
+            if(dfs(v[1], v[2], dfs)) return true;
+        }
+        for(auto v : moves) {
+            deg[v[1]][v[2]]++;
+        }
+        order[curi][curj] = -1;
+        movenum--;
+        return false;
+    };
+    bool works = dfs(c, r, dfs);
     rep(i, 0, 8){
         rep(j, 0, 8){
             cout << order[i][j] << " ";
