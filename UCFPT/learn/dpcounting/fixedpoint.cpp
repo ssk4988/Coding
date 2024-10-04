@@ -48,7 +48,7 @@ int main()
         ans = 0;
         // fixed point
         ans = add(ans, go(pref+1, fixedpoints+1, balls, boxes, go));
-        // use ball, don't use box
+        // use current ball, don't use current box
         ans = add(ans, mult(boxes, go(pref+1, fixedpoints, balls+1, boxes-1, go)));
         for (auto useball : {0, 1}) {
             for(auto usebox : {0, 1}) {
