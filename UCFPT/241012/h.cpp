@@ -14,6 +14,8 @@ using vvi = vector<vi>;
 #define f first
 #define s second
 
+
+// OVERFLOW???
 const int MOD = 10000000;
 
 int ABSIZE;
@@ -37,12 +39,47 @@ struct DFA {
                     } else t[i][j] = {0, frq[j]};
                 }
             } else if(i == sz(rule.f)) {
-                
+                rep(j, 0, ABSIZE) {
+                    if(rule.s[0] == j) {
+                        t[i][j] = {i+1, frq[j]};
+                    } else t[i][j] = {i, frq[j]};
+                }
+            } else {
+                rep(j, 0, ABSIZE) {
+                    if(rule.s[i - sz(rule.f)-1] == j) {
+                        t[i][j] = {i+1, frq[j]};
+                    } else if(j == rule.s[0]) {
+                        t[i][j] = {sz(rule.f)+1, frq[j]};
+                    } else t[i][j] = {sz(rule.f), frq[j]};
+                }
             }
-
         }
-    }    
+    }
+    DFA (vector<vii> &t, vector<bool> &a) : t(t), accept(a) {}
 };
+
+DFA operator+(DFA &a, DFA &b) {
+    int n = sz(a.t), m = sz(b.t);
+    vector<vii> t(n * m, vii(ABSIZE, {-1, -1}));
+    vector<bool> accept(sz(t));
+    vvi radj(sz(t));
+    rep(i, 0, n){
+        rep(j, 0, m) {
+            accept[i * m + j] = a.accept[i] && b.accept[j];
+            rep(k, 0, ABSIZE) {
+                auto [i1, c1] = a.t[i][k];
+                auto [j1, c2] = b.t[j][k];
+                t[i * m + j][k] = {i1 * m + j1, (c1 * c2)%MOD};
+                radj[i1 * m + j1].push_back(i * m + j);
+            }
+        }
+    }
+    // find reachable from both
+    // from accepts
+    {
+        
+    }
+}
 
 int main() {
     cin.tie(0)->sync_with_stdio(0);
