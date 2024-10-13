@@ -25,7 +25,7 @@ struct DFA {
     vector<vector<pii>> t; // nextstate, count on transition
     vector<bool> accept;
     DFA(pair<vi, vi> rule) {
-        int n = sz(rule.f) + sz(rule.s) + 1;
+        int n = sz(rule.f) + sz(rule.s);
         t.assign(n, vii(ABSIZE, {-1, -1}));
         accept.resize(n);
         rep(i, 0, n) {
@@ -38,22 +38,21 @@ struct DFA {
                         t[i][j] = {1, frq[j]};
                     } else t[i][j] = {0, frq[j]};
                 }
-            } else if(i == sz(rule.f)) {
-                rep(j, 0, ABSIZE) {
-                    if(rule.s[0] == j) {
-                        t[i][j] = {i+1, frq[j]};
-                    } else t[i][j] = {i, frq[j]};
-                }
             } else {
                 rep(j, 0, ABSIZE) {
-                    if(rule.s[i - sz(rule.f)-1] == j) {
-                        t[i][j] = {i+1, frq[j]};
+                    if(rule.s[i - sz(rule.f)] == j) {
+                        t[i][j] = {(i+1)%sz(t), frq[j]};
                     } else if(j == rule.s[0]) {
-                        t[i][j] = {sz(rule.f)+1, frq[j]};
+                        t[i][j] = {(sz(rule.f)+1)%sz(t), frq[j]};
                     } else t[i][j] = {sz(rule.f), frq[j]};
                 }
             }
         }
+        // rep(i, 0, n) {
+        //     rep(j, 0, ABSIZE) {
+        //         cerr << i << " " << j << " " << t[i][j].f << " " << t[i][j].s << endl;
+        //     }
+        // }
     }
     DFA (vector<vii> &t, vector<bool> &a) : t(t), accept(a) {}
 };
@@ -69,16 +68,58 @@ DFA operator+(DFA &a, DFA &b) {
             rep(k, 0, ABSIZE) {
                 auto [i1, c1] = a.t[i][k];
                 auto [j1, c2] = b.t[j][k];
-                t[i * m + j][k] = {i1 * m + j1, (c1 * c2)%MOD};
+                if(i1 == -1 || j1 == -1) continue;
+                t[i * m + j][k] = {i1 * m + j1, c1};
+                // cerr << sz(t) << " " << i1*m+j1 << endl;
                 radj[i1 * m + j1].push_back(i * m + j);
             }
         }
     }
     // find reachable from both
     // from accepts
+    vector<bool> fromaccept(sz(t), 1);
     {
-        
+        queue<int> q;
+        rep(i, 0, sz(t)) if(accept[i]) q.push(i);
+        while(sz(q)) {
+            int i = q.front(); q.pop();
+            if(fromaccept[i]) continue;
+            fromaccept[i] = true;
+            for(int j : radj[i]) q.push(j);
+        }
     }
+    vector<bool> fromstart(sz(t));
+    // from start
+    {
+        queue<int> q;
+        q.push(0);
+        while(sz(q)) {
+            int i = q.front(); q.pop();
+            if(fromstart[i]) continue;
+            fromstart[i] = true;
+            for(auto [nxt, cnt] : t[i]) if(nxt != -1) q.push(nxt);
+        }
+    }
+    int seen = 0;
+    vi idx(sz(t), -1);
+    rep(i, 0, sz(t)) {
+        if(fromstart[i] && fromaccept[i]) {
+            idx[i] = seen++;
+        }
+    }
+    vector<vii> t1;
+    vector<bool> accept1;
+    rep(i, 0, sz(t)) {
+        if(idx[i] == -1) continue;
+        t1.push_back(t[i]);
+        rep(j, 0, ABSIZE) {
+            if(t1.back()[j].first != -1) {
+                t1.back()[j].first = idx[t1.back()[j].first];
+            }
+        }
+        accept1.push_back(accept[i]);
+    }
+    return DFA(t1, accept1);
 }
 
 int main() {
@@ -120,51 +161,43 @@ int main() {
         st.clear();
     }
     int n = sz(rules);
+    // ABSIZE = sigma;
     ABSIZE = sz(ids) + 1;
+    // frq.assign(ABSIZE, 1);
     frq.assign(sz(ids), 1);
     frq.push_back(0);
     for(char c : alpha) {
         if(!ids.count(c)) frq.back()++;
     }
-    // rep(i, 0, n) {
-    //     addWord(rules[i].first, i*2);
-    //     addWord(rules[i].second, i*2+1);
-    // }
-    // vector dp(sz(trie), vector(K, vi(1 << n)));
-    // dp[0][0][0] = 1;
-    // rep(len, 0, k) {
-    //     rep(t, 0, sz(trie)) {
-    //         rep(mask, 0, 1 << n) {
-    //             rep(c, 0, sz(frq)) {
-    //                 int t1 = calc(t, c);
-    //                 int mask1 = (mask | getMask1(t1)) & (~getMask2(t1));
-    //                 (dp[t1][len+1][mask1] += frq[c] * dp[t][len][mask]) %= MOD;
-    //             }
-    //         }
-    //     }
-    // }
-    // int ans = 0;
-    // rep(t, 0, sz(trie)) {
-    //     (ans += dp[t][k][0]) %= MOD;
-    // }
-    // // cout << "DFA:\n";
-    // // rep(t, 0, sz(trie)) {
-    // //     rep(c, 0, sz(frq)) {
-    // //         cout << t << " " << c << " " << frq[c] << " " << calc(t, c) << endl;
-    // //     }
-    // // }
-    // // cout << "masks:\n";
-    // // rep(t, 0, sz(trie)){
-    // //     cout << t << " " << getMask1(t) << " " << getMask2(t) << endl;
-    // // }
-    // // rep(len, 0, k+1) { 
-    // //     rep(t, 0, sz(trie)) {
-    // //         rep(mask, 0, 1 << n){
-    // //             // cout << "len " << len << " node " << t << " mask " << mask << " = " << dp[t][len][mask] << endl;
-    // //         }
-    // //     }
-    // // }
-    // cout << ans << "\n";
+    vector<DFA> dfas;
+    rep(i, 0, n) {
+        dfas.push_back(rules[i]);
+    }
+    while(sz(dfas) >= 2) {
+        auto d1 = dfas.back();
+        dfas.pop_back();
+        auto d2 = dfas.back();
+        dfas.pop_back();
+        dfas.push_back(d1 + d2);
+    }
+    auto &d = dfas[0];
+    vi dp(sz(d.t));
+    dp[0] = 1;
+    rep(i, 0, k) {
+        vi dp2(sz(d.t));
+        rep(j, 0, sz(dp)) {
+            if(dp[j] == 0) continue;
+            for(auto [nxt, cnt] : d.t[j]){
+                if(nxt != -1) (dp2[nxt] += cnt * dp[j]) %= MOD;
+            }
+        }
+        swap(dp, dp2);
+    }
+    int ans = 0;
+    rep(i, 0, sz(d.t)){
+        if(d.accept[i]) (ans += dp[i]) %= MOD;
+    }
+    cout << ans << "\n";
     
 
     return 0;
