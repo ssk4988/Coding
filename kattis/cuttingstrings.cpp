@@ -50,62 +50,70 @@ struct SuffixArray {
 };
 
 void solve() {
-    int k; string str; cin >> k >> str;
-    SuffixArray sa(str);
-    int n = sz(str);
-    vi inv(n);
-    rep(i, 0, sz(sa.sa)) {
-        if(sa.sa[i] < n) inv[sa.sa[i]] = i;
-    }
-    int start = 0;
-    string res;
-    for(char c = 'z'; c >= 'a'; c--){
-        if(k == 0) continue;
-        vpi rs;
-        rep(i, start, n) {
-            if(str[i] != c) continue;
-            if(sz(rs) == 0 || rs.back().s != i) {
-                rs.emplace_back(i, i+1);
-            } else rs.back().s++;
-        }
-        vpi use;
-        if (sz(rs) && rs[0].f == start) {
-            use.push_back(rs[0]);
-            rs.erase(begin(rs));
-        }
-        sort(begin(rs), end(rs), [&](pi a, pi b) -> bool { return a.s - a.f > b.s - b.f || (a.s - a.f == b.s - b.f && a < b); });
-        // if(sz(rs)) k--;
-        int pnt = 0;
-        while (pnt < sz(rs) && k > 1) {
-            use.push_back(rs[pnt++]);
-            k--;
-        }
-        rs.erase(begin(rs), begin(rs) + pnt);
-        if(sz(rs) && k == 1) {
-            sort(all(rs), [&](pi a, pi b) -> bool { return a.s - a.f > b.s - b.f || (a.s - a.f == b.s - b.f && inv[a.f] > inv[b.f]); });
-            k--;
-            use.push_back(rs[0]);
-        }
-        sort(all(use));
-        for(auto [tl, tr] : use) {
-            rep(i, tl, tr) res.pb(str[i]);
-        }
-        if (sz(use)) start = use.back().s;
-    }
-    rep(i, start, n) {
-        res.pb(str[i]);
-    }
-    cout << res << "\n";
+	int k; string str; cin >> k >> str;
+	SuffixArray sa(str);
+	int n = sz(str);
+	vi inv(n+1);
+	rep(i, 0, sz(sa.sa)) {
+		inv[sa.sa[i]] = i;
+	}
+	int start = 0;
+	string res;
+	for(char c = 'z'; c >= 'a'; c--){
+		if(k == 0) continue;
+		vpi rs;
+		rep(i, start, n) {
+			if(str[i] != c) continue;
+			if(sz(rs) == 0 || rs.back().s != i) {
+				rs.emplace_back(i, i+1);
+			} else rs.back().s++;
+		}
+		vpi use;
+		if (sz(rs) && rs[0].f == start) {
+			use.push_back(rs[0]);
+			rs.erase(begin(rs));
+		}
+		sort(begin(rs), end(rs), [&](pi a, pi b) -> bool { return a.s - a.f > b.s - b.f || (a.s - a.f == b.s - b.f && a < b); });
+		int pnt = 0;
+		while (pnt < sz(rs) && k > 1) {
+			use.push_back(rs[pnt++]);
+			k--;
+		}
+		rs.erase(begin(rs), begin(rs) + pnt);
+		sort(all(use));
+		if(sz(use)) start = max(start, use.back().s);
+		if(sz(rs) && k == 1) {
+			while(sz(rs) && rs.back().s - rs.back().f != rs[0].s - rs[0].f) rs.pop_back();
+			int best = 0;
+			rep(i, 0, sz(rs)) {
+				if (rs[i].s > start && ((rs[best].s <= start && inv[rs[i].s] > inv[start]) || (rs[best].s > start && inv[rs[i].s] > inv[rs[best].s]))){
+					best = i;
+					start = max(start, rs[i].s);
+				}
+			}
+			k--;
+			use.push_back(rs[best]);
+		}
+		sort(all(use));
+		for(auto [tl, tr] : use) {
+			rep(i, tl, tr) res.pb(str[i]);
+		}
+		if (sz(use)) start = use.back().s;
+	}
+	rep(i, start, n) {
+		res.pb(str[i]);
+	}
+	cout << res << "\n";
 }
 
 int main()
 {
-    cin.tie(0)->sync_with_stdio(0);
-    cin.exceptions(cin.failbit);
-    int nc; cin >> nc;
-    rep(cn, 0, nc){
-        solve();
-    }
-    
-    return 0;
+	cin.tie(0)->sync_with_stdio(0);
+	cin.exceptions(cin.failbit);
+	int nc; cin >> nc;
+	rep(cn, 0, nc){
+		solve();
+	}
+	
+	return 0;
 }

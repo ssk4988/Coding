@@ -2,5 +2,15 @@
 *.exe
 *.in
 *.out
+*.rmeta
+*.d
+*.pdb
+*.bin
+*.lock
+*.o
+*.TAG
+*.cargo-lock
+**/debug
+**/target
 
 venv/

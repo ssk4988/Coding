@@ -26,63 +26,59 @@ using vvi = vector<vi>;
 #define nL "\n"
 
 inline int access(vi &v, int idx) {
+    // if(idx < 0) return v.back();
+    // if(idx >= sz(v)) return 0;
+    // return v[sz(v) - 1 - idx];
     return idx < 0 || idx >= sz(v) ? 0 : v[sz(v) - 1 - idx];
 }
 inline int& accessref(vi &v, int idx) {
     return v[sz(v) - 1 - idx];
 }
-
+vvi dp, adj;
+int n, d; 
+void dfs(int u, int p, int depth) {
+    int heavyc = -1;
+    for(int v : adj[u]){
+        if(v == p) continue;
+        dfs(v, u, depth + 1);
+        dp[v].push_back(0);
+        if(heavyc == -1 || sz(dp[heavyc]) < sz(dp[v])) heavyc = v;
+    }
+    // cout << "got here " << u << endl;
+    if (heavyc != -1) {
+        swap(dp[heavyc], dp[u]);
+        accessref(dp[u], 0) = max(access(dp[u], 1), 1 + access(dp[u], d));
+    }
+    else dp[u].push_back(1);
+    // mx depth to update???
+    int mx_d = 0;
+    for(int v : adj[u]){
+        if(v == p || v == heavyc) continue;
+        rep(i, 1, sz(dp[v])) {
+            accessref(dp[v], i) += access(dp[u], max(0, d - i));
+        }
+        rep(i, 1, sz(dp[v])) {
+            int cur_d = min(i, max(0, d - i));
+            accessref(dp[u], cur_d) = max(accessref(dp[u], cur_d), accessref(dp[v], i));
+            mx_d = max(mx_d, cur_d);
+        }
+    }
+    for(int d = mx_d; d >= 0; d--) accessref(dp[u], d) = max(accessref(dp[u], d), access(dp[u], d+1));
+    return;
+};
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    int n, d; cin >> n >> d;
-    vvi adj(n);
+    cin >> n >> d;
+    adj.resize(n);
     rep(i, 0, n-1){
         int u, v; cin >> u >> v; u--, v--;
         adj[u].pb(v);
         adj[v].pb(u);
     }
-    vvi dp(n);
-    auto dfs = [&](int u, int p, auto &&dfs) -> void {
-        // cout << "dfs " << u << endl;
-        vvi cs;
-        cs.pb({1});
-        for(int v : adj[u]){
-            if(v == p) continue;
-            dfs(v, u, dfs);
-            cs.pb({});
-            swap(cs.back(), dp[v]);
-            cs.back().pb(0);
-        }
-        // cout << "got here " << u << endl;
-        sort(all(cs), [&](vi &a, vi &b) -> bool { return sz(a) > sz(b); });
-        int s2 = sz(cs) < 2 ? 0 : sz(cs[1]);
-        vi sums(s2);
-        rep(i, 0, sz(cs)){
-            rep(j, 0, min(s2, sz(cs[i]))){
-                sums[j] += accessref(cs[i], j);
-            }
-        }
-        // cout << "calcd sums " << u << endl;
-        for(int i = s2-1; i >= 0; i--){
-            int best = 0;
-            int other = max(i, d - i);
-            int sm = other >= sz(sums) ? 0 : sums[other];
-            rep(j, 0, sz(cs)) {
-                if(i >= sz(cs[j])) break;
-                best = max(best, sm + access(cs[j], i) - access(cs[j], other));
-            }
-            accessref(cs[0], i) = max({access(cs[0], i+1), accessref(cs[0], i), best, sums[i] - access(cs[0], i) + access(cs[0], other)});
-        }
-        swap(dp[u], cs[0]);
-        // reverse(all(dp[u]));
-        // cout << u << ": ";
-        // for(int x : dp[u]) cout << x << " ";
-        // cout << endl;
-        // reverse(all(dp[u]));
-    };
-    dfs(0, -1, dfs);
+    dp.resize(n);
+    dfs(0, -1, 0);
     int ans = access(dp[0], 0);
     cout << ans << "\n";
     

@@ -105,90 +105,22 @@ int main()
     {
         rep(j, 0, n)
         {
-            cin >> grid[i][j];
+            cin >> grid[i][j]; grid[i][j]--;
         }
     }
+    vi net(2);
     ll ans = 0;
-    priority_queue<pi, vpi, greater<>> give, take;
-    vector<vpi> add(n), rem(n);
-    // 0 up 1 down
-    int ids = 0;
-    vpi intervals;
-    rep(i, 0, n)
-    {
-        while (grid[0][i] + grid[1][i] > 2)
-        {
-            int remrow = grid[0][i] > 1 ? 0 : 1;
-            grid[remrow][i]--;
-            if (sz(take))
-            {
-                auto [r, c] = take.top();
-                take.pop();
-                if(r != remrow) {
-                    add[c].pb({r < remrow, ids});
-                    rem[i].pb({r < remrow, ids});
-                    intervals.pb({c, i});
-                    ids++;
-                }
-                ans += abs(c - i) + abs(remrow - r);
-            }
-            else
-            {
-                give.push({remrow, i});
-            }
-        }
-        while (grid[0][i] + grid[1][i] < 2)
-        {
-            int addrow = grid[0][i] < 1 ? 0 : 1;
-            grid[addrow][i]++;
-            if (sz(give))
-            {
-                auto [r, c] = give.top();
-                give.pop();
-                if(r != addrow) {
-                    add[c].pb({r < addrow, ids});
-                    rem[i].pb({r < addrow, ids});
-                    intervals.pb({c, i});
-                    ids++;
-                }
-                ans += abs(c - i) + abs(r - addrow);
-            }
-            else
-            {
-                take.push({addrow, i});
-            }
-        }
-    }
-    set<pi> up, down;
-    rep(i, 0, n)
-    {
-        assert(grid[0][i] + grid[1][i] == 2);
-        if(grid[0][i] != 1) {
-            ans++;
-            grid[0][i] = grid[1][i] = 1;
-        }
-    }
     rep(i, 0, n){
-        for(auto [isdown, id] : add[i]) {
-            if(isdown && sz(up)){
-                auto [endp, id1] = *up.begin();
-                up.erase(up.begin());
-                ans -= 2;
-            } else if(!isdown && sz(down)) {
-                auto [endp, id1] = *down.begin();
-                down.erase(down.begin());
-                ans -= 2;
-            } else {
-                (isdown ? down : up).insert({intervals[id].s, id});
-            }
+        rep(j, 0, 2) net[j] += grid[j][i];
+        if(net[0] > 0 && net[1] <= 0 || net[0] <= 0 && net[1] > 0) {
+            int mn = min(abs(net[0]), abs(net[1]));
+            if(net[0] > 0 && net[1] <= 0) {
+                net[0] -= mn, net[1] += mn;
+            } else net[0] += mn, net[1] -= mn;
+            ans += mn;
         }
-        for(auto [isdown, id] : rem[i]) {
-            if((isdown ? down : up).count({i, id})) {
-                (isdown ? down : up).erase({i, id});
-            }
-        }
+        ans += abs(net[0]) + abs(net[1]);
     }
-
     cout << ans << "\n";
 
     return 0;
