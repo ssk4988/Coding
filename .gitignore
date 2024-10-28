@@ -12,5 +12,6 @@
 *.cargo-lock
 **/debug
 **/target
+Makefile
 
 venv/
