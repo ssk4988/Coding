@@ -28,7 +28,10 @@ using vvi = vector<vi>;
 struct UF
 {
     vi e;
-    UF(int n) : e(n, -1) {}
+    vector<set<pi>> ss;
+    UF(int n, vi &r) : e(n, -1), ss(n) {
+        rep(i, 0, n) ss[i].insert({r[i], i});
+    }
     bool sameSet(int a, int b) { return find(a) == find(b); }
     int size(int x) { return -e[find(x)]; }
     int find(int x) { return e[x] < 0 ? x : e[x] = find(e[x]); }
@@ -41,6 +44,8 @@ struct UF
             swap(a, b);
         e[a] += e[b];
         e[b] = a;
+        for(auto [R, i] : ss[b]) ss[a].insert({R, i});
+        ss[b].clear();
         return true;
     }
 };
@@ -51,47 +56,59 @@ int main()
     cin.exceptions(cin.failbit);
     int n;
     cin >> n;
-    vi p(n), inv(n);
+    vi p(n);
+    vi l(n, -1), r(n, -1);
+    int T = 0;
+    int solve = 0;
+    vi seen(n);
     rep(i, 0, n)
     {
         cin >> p[i];
         p[i]--;
-        inv[p[i]] = i;
+        seen[p[i]] = true;
+        l[p[i]] = T++;
+        while(solve < n && seen[solve]){
+            r[solve] = T++;
+            solve++;
+        }
     }
-    int need = 0;
-    set<int> active, merged;
+    // int need = 0;
+    // set<int> active, merged;
     vvi adj(n);
-    UF uf(n);
-    rep(i, 0, n){
-        if(p[i] == need){
-            // cout << "cleared " << need << ": ";
-            need++;
-            while(true){
-                if(active.count(need)){
-                    active.erase(need++);
-                    continue;
-                }
-                if(merged.count(need)){
-                    merged.erase(need++);
-                    continue;
-                }
-                // cout << "stopped clearing before " << need << "\n";
-                break;
+    UF uf(n, r);
+    vector<array<int, 3>> rs;
+    rep(i, 0, n) rs.pb({l[i], r[i], i});
+    sort(all(rs));
+    priority_queue<pi, vpi, greater<>> pq;
+    for(auto [L, R, i] : rs) {
+        while(sz(pq) && pq.top().f < L) {
+            auto [r1, idx1] = pq.top(); pq.pop();
+            int u = uf.find(idx1);
+            auto it = uf.ss[u].upper_bound({r1, idx1});
+            if(it != end(uf.ss[u])){
+                pq.push(*it);
             }
-            continue;
         }
-        while(sz(active) && *active.begin() < p[i]){
-            int x = *active.begin();
-            active.erase(x);
-            if(sz(merged)) uf.join(x, *merged.begin());
-            merged.insert(x);
+        vpi other;
+        while(sz(pq) && pq.top().f < R) {
+            auto [r1, idx] = pq.top(); pq.pop();
+            other.pb({r1, idx});
         }
-        if(sz(merged)){
-            adj[p[i]].pb(*merged.begin());
-            adj[*merged.begin()].pb(p[i]);
+        rep(j, 1, sz(other)){
+            uf.join(other[j-1].s, other[j].s);
         }
-        active.insert(p[i]);
+        if(sz(other)){
+            adj[i].pb(other[0].s);
+            adj[other[0].s].pb(i);
+            int u = uf.find(other[0].s);
+            auto it = uf.ss[u].upper_bound({L, -1});
+            if(it != end(uf.ss[u])){
+                pq.push(*it);
+            }
+        }
+        pq.push({R, i});
     }
+
     vvi comps(n);
     rep(i, 0, n) comps[uf.find(i)].pb(i);
     vi state(n);
@@ -117,7 +134,27 @@ int main()
     if (imp)
     {
         cout << "IMPOSSIBLE\n";
+        // cout << "Bipartite failed" << "\n";
+        return 0;
     }
+    vvi st(2);
+    solve = 0;
+    rep(i, 0, n){
+        int v = p[i];
+        int c = val[uf.find(v)];
+        if(sz(st[c]) && st[c].back() < v){
+            imp = true;
+            break;
+        }
+        st[c].pb(v);
+        while(solve < n && ((sz(st[0]) && st[0].back() == solve) || (sz(st[1]) && st[1].back() == solve))) {
+            if(sz(st[0]) && st[0].back() == solve) st[0].pop_back();
+            else st[1].pop_back();
+            solve++;
+        }
+    }
+    if(solve != n) imp = true;
+    if(imp) cout << "IMPOSSIBLE\n";
     else
     {
         rep(i, 0, n)

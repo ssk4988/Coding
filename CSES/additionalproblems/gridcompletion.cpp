@@ -8,7 +8,6 @@ using pl = pair<ll, ll>;
 using pd = pair<ld, ld>;
 using vi = vector<int>;
 using vl = vector<ll>;
-// using vd = vector<ld>;
 using vpi = vector<pi>;
 using vpl = vector<pl>;
 using vpd = vector<pd>;
@@ -26,83 +25,118 @@ using vvi = vector<vi>;
 #define nL "\n"
 
 const ll MOD = 1e9 + 7;
-inline ll mod(ll k){
-    return k % MOD;
+
+struct comb {
+  int64_t inv = 1, fact = 1, inv_fact = 1;
+};
+vector<comb> t(2);
+void grow(int n) {
+  while (sz(t) <= n) {
+    int64_t i = sz(t),
+            inv = MOD - (MOD / i) * t[MOD % i].inv % MOD;
+    t.push_back({inv, i * t[i - 1].fact % MOD,
+      inv * t[i - 1].inv_fact % MOD});
+  }
 }
+int64_t C(int n, int k) {
+  if (k < 0 || n < k) return 0;
+  grow(n);
+  return t[n].fact * t[k].inv_fact % MOD *
+    t[n - k].inv_fact % MOD;
+}
+
+const int N = 501;
+int dp[N][N][N];
 
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
+    memset(dp, -1, sizeof dp);
     int n; cin >> n;
     vector<string> grid(n);
     rep(i, 0, n){
         cin >> grid[i];
     }
-    // num non-. in string
-    auto sc = [](string &s) -> int {
-        int non = 0;
-        for(char c : s) if(c != '.') non++;
-        return non;
-    };
-    sort(all(grid), [&](string &a, string &b) -> bool {return sc(a) > sc(b); });
-    int rows = 0, filled = 0, onlya = 0, onlyb = 0;
-
-    while(rows < n){
-        if(sc(grid[rows]) != 2) break;
-        filled += 2;
-        rows++;
+    vi ac(n, -1), bc(n, -1);
+    rep(c, 0, n){
+        rep(r, 0, n){
+            if(grid[r][c] == 'A') ac[c] = r;
+            if(grid[r][c] == 'B') bc[c] = r;
+        }
     }
-    int prefilled = 0, added = 0;
+    // 0 - off board, 1 - on board, 2 - matched
+    ll cleared = 0;
+    vi astate(n), bstate(n);
     rep(i, 0, n){
-        bool a = false, b = false;
-        rep(j, 0, n){
-            if(grid[j][i] == 'A') a = true;
-            if(grid[j][i] == 'B') b = true;
-        }
-        if(a && !b) onlya++;
-        if(b && !a) onlyb++;
-        prefilled += a + b;
+        if(ac[i] != -1 && bc[i] != -1){
+            astate[ac[i]] = bstate[bc[i]] = 2;
+        } else if(ac[i] != -1) astate[ac[i]] = 1;
+        else if(bc[i] != -1) bstate[bc[i]] = 1;
+        else cleared++;
     }
-    vector<vector<vl>> dp(n + 1, vector<vl>(n + 1, vl(n + 1))); // [rows completed][cols with no A (exc)][cols with no B (exc)]
-    dp[rows][onlyb][onlya] = 1;
-    rep(i, rows, n){
-        bool a = false, b = false;
-        rep(j, 0, n){
-            if(grid[i][j] == 'A') a = true;
-            if(grid[i][j] == 'B') b = true;
+
+    vi cnt(9);
+    rep(i, 0, n) {
+        cnt[bstate[i] * 3 + astate[i]]++;
+    }
+
+    auto go = [&](int ona, int onb, int offb, auto &&go) -> ll {
+        int &ans = dp[ona][onb][offb];
+        if(ans != -1) return ans;
+        if(ona == 0 && onb == 0 && offb == 0) return ans = 1;
+        assert(onb >= 0 && ona >= 0 && offb >= 0);
+        ll res = 0;
+        if(ona) {
+            if(offb) (res += offb * go(ona-1, onb, offb-1, go)) %= MOD;
+        } else {
+            if(offb) (res += offb * go(ona, onb, offb-1, go)) %= MOD;
+            if(onb) (res += onb * go(ona, onb-1, offb, go)) %= MOD;
         }
-        rep(j, 0, n + 1){
-            rep(k, 0, n + 1){
-                if((prefilled + added + j + k) % 2 != 0) continue;
-                int l = n - (prefilled + added + j + k) / 2;
-                if(dp[i][j][k] == 0) continue;
-                if(b){
-                    if(j) dp[i+1][j-1][k] = mod(dp[i+1][j-1][k] + mod((j-1) * dp[i][j][k]));
-                    if(l) dp[i+1][j][k+1] = mod(dp[i+1][j][k+1] + mod(l * dp[i][j][k]));
-                }
-                else if(a){
-                    if(k) dp[i+1][j][k-1] = mod(dp[i+1][j][k-1] + mod((k-1) * dp[i][j][k]));
-                    if(l) dp[i+1][j+1][k] = mod(dp[i+1][j+1][k] + mod(l * dp[i][j][k]));
-                }
-                else{
-                    if(j && k) dp[i+1][j-1][k-1] = mod(dp[i+1][j-1][k-1] + mod(mod(j * k) * dp[i][j][k]));
-                    if(l && j) dp[i+1][j][k] = mod(dp[i+1][j][k] + mod(mod(l * j) * dp[i][j][k]));
-                    if(l && k) dp[i+1][j][k] = mod(dp[i+1][j][k] + mod(mod(l * k) * dp[i][j][k]));
-                }
+        return ans = res;
+    };
+
+    int ona = 0, onb = 0;
+    int matcheda = 0, matchedb = 0;
+    int offa = 0, offb = 0;
+    rep(a, 0, 3) {
+        rep(b, 0, 3) {
+            if(a == 2) matcheda += cnt[b*3+a];
+            if(a == 1) ona += cnt[b*3+a];
+            if(a == 0) offa += cnt[b*3+a];
+            if(b == 2) matchedb += cnt[b*3+a];
+            if(b == 1) onb += cnt[b*3+a];
+            if(b == 0) offb += cnt[b*3+a];
+        }
+    }
+
+    ll ans = 0;
+    rep(i, 0, 1 + cnt[0]) {
+        rep(j, 0, 1 + cnt[3]) {
+            rep(k, 0, 1 + cnt[1]) {
+                offa -= i;
+                offb -= i;
+                offa -= j;
+                onb -= j;
+                ona -= k;
+                offb -= k;
+                ll ways = (C(cnt[0], i) * C(cnt[3], j)) % MOD * C(cnt[1], k) % MOD;
+                int par = (i + j + k) % 2 == 0 ? 1 : -1;
+                ll w = go(ona, onb, offb, go);
+                (ans += w * ways * par) %= MOD;
+                offa += i;
+                offb += i;
+                offa += j;
+                onb += j;
+                ona += k;
+                offb += k;
             }
         }
-        added += !a + !b;
     }
-    rep(i, 0, n + 1){
-        rep(j, 0, n + 1){
-            rep(k, 0, n + 1){
-                if(dp[i][j][k])cout << "dp[" << i << "][" << j << "][" << k << "]=" << dp[i][j][k] << nL;
-            }
-        }
-    }
-    cout << dp[n][0][0] << nL;
-    rep(i, 0, n) cout << grid[i] << nL;
-    
+    grow(2 * n + 10);
+    (ans += MOD) %= MOD;
+    (ans *= t[cleared].fact) %= MOD;
+    cout << ans << "\n";
+
     return 0;
 }
