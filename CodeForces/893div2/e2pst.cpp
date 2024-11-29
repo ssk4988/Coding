@@ -25,37 +25,43 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
+struct Node;
+vector<Node*> v;
+
+struct Node {
+    int distinct = 0;
+    Node *l = 0, *r = 0;
+    Node(int lo, int hi){
+        if(lo + 1 < hi){
+            int mid = lo + (hi - lo) / 2;
+            l = new Node(lo, mid), r = new Node(mid, hi);
+        }
+    }
+    Node *add(int idx, int lo, int hi) {
+        Node *n = new Node(*this);
+        if(lo + 1 == hi){
+            n->distinct = min(1, n->distinct + 1);
+            return n;
+        }
+        int mid = lo + (hi - lo) / 2;
+        if(idx < mid) n->l = n->l->add(idx, lo, mid);
+        else n->r = n->r->add(idx, mid, hi);
+        n->distinct = n->l->distinct + n->r->distinct;
+        return n;
+    }
+};
+
 const int N = 1e6 + 10;
-const int b = 21;
 vi children[N];
-int add[N];
-vi queries[N];
-int jmp[N][b];
+int p[N], jmp[N], dep[N];
+Node *tree[N];
 
 
-map<int, int> ft;
-int un = -1;
-vi ans;
-void dfs(int cur)
-{
-    // sort(all(queries[cur]));
-    if(ft[add[cur]] == 0) un++;
-    ft[add[cur]]++;
-    for (auto x : queries[cur])
-    {
-        ans[x] = un;
-    }
-    for (auto nex : children[cur])
-    {
-        dfs(nex);
-    }
-    ft[add[cur]]--;
-    if(ft[add[cur]] == 0) un--;
-}
 int used = 0;
 void createNode(int par = 0){
-    jmp[used][0] = par;
-    rep(i, 1, b) jmp[used][i] = jmp[jmp[used][i - 1]][i - 1];
+    p[used] = par;
+    dep[used] = 1 + dep[par];
+    jmp[used] = dep[jmp[par]] * 2 == dep[par] + dep[jmp[jmp[par]]] ? jmp[jmp[par]] : par;
     used++;
 }
 int main()
@@ -65,7 +71,7 @@ int main()
     int q;
     cin >> q;
     createNode();
-    add[0] = -1;
+    tree[0] = new Node(0, N);
     vi updates;
     updates.pb(0);
     int qs = 0;
@@ -79,7 +85,7 @@ int main()
             cin >> x;
             int u = used;
             createNode(updates.back());
-            add[u] = x;
+            tree[u] = tree[updates.back()]->add(x, 0, N);
             children[updates.back()].pb(u);
             updates.pb(u);
         }
@@ -88,8 +94,10 @@ int main()
             int k;
             cin >> k;
             int cur = updates.back();
-            for(int j = 20; j >= 0; j--){
-                if(k & (1 << j)) cur = jmp[cur][j];
+            int tardep = dep[cur] - k;
+            while(dep[cur] > tardep){
+                if(dep[jmp[cur]] >= tardep) cur = jmp[cur];
+                else cur = p[cur];
             }
             updates.pb(cur);
         }
@@ -97,19 +105,9 @@ int main()
             updates.pop_back();
         if (c == '?')
         {
-            // cout << updates.back()->r->sum1 << nL;
-            queries[updates.back()].pb(qs++);
+            cout << tree[updates.back()]->distinct << endl;
         }
     }
-    ans.assign(qs, -1);
-
-    dfs(0);
-    rep(i, 0, qs)
-    {
-        if (ans[i] != -1)
-            cout << ans[i] << nL;
-    }
-    // cout << inited << nL;
 
     return 0;
 }
