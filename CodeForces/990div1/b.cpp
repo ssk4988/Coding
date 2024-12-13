@@ -32,23 +32,36 @@ int main()
             cin >> a[i];
             freq[a[i]]++;
         }
-        vi suff;
-         ord;
+        vii suff;
+        vii ord;
         for(int i = n-1; i >= 0; i--) {
-            if(sz(suff) == 0 || a[i] <= suff.back()) {
-                suff.pb(a[i]);
+            if(sz(suff) == 0 || a[i] <= suff.back().f) {
+                suff.pb({a[i], i});
             }
-            ord.pb(a[i]);
+            ord.pb({a[i], i});
         }
+        reverse(all(suff));
+        sort(all(ord));
+        vi use(n);
         vi res;
-        int p1 = 0, p2 = 0;
-        bool useord = false;
-        while(sz(res) < n) {
-            if(p2 == sz(suff) || (p1 < sz()))
+        int p = 0;
+        for(auto [place, idx] : suff) {
+            while(true){
+                auto [p1, i1] = ord[p];
+                if(use[i1]) p++;
+                else break;
+            }
+            auto [p1, i1] = ord[p];
+            if (p1+1 < place) break;
+            use[idx] = true;
+            res.pb(place);
         }
-        suff.insert(end(suff), all(ord));
-        sort(all(suff));
-        for(int a : suff) cout << a << " ";
+        while(p < sz(ord)) {
+            if(use[ord[p].s]) {p++; continue;}
+            res.pb(ord[p].f+1);
+            p++;
+        }
+        for(int v : res) cout << v << " ";
         cout << "\n";
     }    
     
