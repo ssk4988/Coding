@@ -24,11 +24,27 @@ using vvi = vector<vi>;
 #define sz(x) (int)(x).size()
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
- 
-bool cmp(pi a, pi b){
-    return a.f >= b.f;
-    // if(a.f >= b.f) return true;
-    // return false;
+
+// 1 if blocked
+vvi count_rectangles(vvi grid) {
+    int n = sz(grid), m = sz(grid[0]);
+    vi colspace(m);
+    rep(r, 0, n) {
+        rep(c, 0, m){
+            if(grid[r][c]) colspace[r][c] = 0;
+            else colspace[r][c]++;
+        }
+        vi l(m, -1), r(m, m);
+        rep(c, 0, m) {
+            int i = c-1;
+            for(; i >= 0 && colspace[i] >= colspace[c];) {
+                r[i] = c;
+                i = l[i];
+            }
+            l[c] = i;
+        }
+        
+    }
 }
 
 int main()
@@ -48,51 +64,6 @@ int main()
                 grid[i][j] = 0;
         }
     }
-    vvi ways(n + 1, vi(m + 1));
-    vi cols(m, n); // highest in each col we have seen (lowest row index)
-    for (int i = n - 1; i >= 0; i--)
-    {
-        rep(j, 0, m) if (grid[i][j]) cols[j] = i;
-        vector<pi> st;
-        st.pb({i, -1});
-        // cout << "testing row " << i << endl;
-        rep(j, 0, m)
-        {
-            pi nex = {cols[j], j};
-            while (sz(st) && cmp(st.back(), nex))
-            {
-                // auto [row, col] = st.back();
-                st.pop_back();
-                // int pre = (sz(st) ? st.back().s : -1) + 1;
-                // if (row - i > 0 && j - pre > 0)
-                // {
-                //     ways[row - i][j - pre]++;
-                // }
-            }
-            st.pb(nex);
-            rep(k, 0, sz(st)){
-                auto [row, col] = st[k];
-                int pre = k ? st[k - 1].s : -1;
-                ways[row - i][j - pre]++;
-                if(k){
-                    ways[st[k - 1].f - i][j - pre]--;
-                }
-            }
-        }
-    }
-    for(int i = n; i > 0; i--){
-        for(int j = m; j > 0; j--){
-            if(i + 1 <= n) ways[i][j] += ways[i + 1][j];
-            if(j + 1 <= m) ways[i][j] += ways[i][j + 1];
-            if(i + 1 <= n && j + 1 <= m) ways[i][j] -= ways[i + 1][j + 1];
-        }
-    }
-    rep(i, 1, n + 1){
-        rep(j, 1, m + 1){
-            cout << ways[i][j] << " ";
-        }
-        cout << nL;
-    }
- 
-    return 0;
+    
+
 }
