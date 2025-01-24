@@ -26,25 +26,36 @@ using vvi = vector<vi>;
 #define nL "\n"
 
 // 1 if blocked
-vvi count_rectangles(vvi grid) {
+vvi count_rectangles(vvi &grid) {
     int n = sz(grid), m = sz(grid[0]);
-    vi colspace(m);
+    vvi ans(n+1, vi(m+1));
+    vi col(m); // free space in column
     rep(r, 0, n) {
-        rep(c, 0, m){
-            if(grid[r][c]) colspace[r][c] = 0;
-            else colspace[r][c]++;
-        }
-        vi l(m, -1), r(m, m);
+        rep(c, 0, m)
+            if(grid[r][c]) col[c] = 0;
+            else col[c]++;
+        vi pre(m, -1), nex(m, m);
         rep(c, 0, m) {
             int i = c-1;
-            for(; i >= 0 && colspace[i] >= colspace[c];) {
-                r[i] = c;
-                i = l[i];
+            while(i >= 0 && col[i] >= col[c]) {
+                nex[i] = c;
+                i = pre[i];
             }
-            l[c] = i;
+            pre[c] = i;
         }
-        
+        rep(c, 0, m) {
+            int left = c - pre[c] - 1, right = nex[c] - c - 1;
+            ans[col[c]][left + right + 1]++;
+            ans[col[c]][left]--;
+            ans[col[c]][right]--;
+        }
     }
+    rep(i, 1, n+1)
+        rep(t, 0, 2)
+            for(int j = m-1; j; j--) ans[i][j] += ans[i][j+1];
+    rep(j, 1, m+1)
+        for(int i = n-1; i; i--) ans[i][j] += ans[i+1][j];
+    return ans;
 }
 
 int main()
@@ -65,5 +76,11 @@ int main()
         }
     }
     
-
+    vvi res = count_rectangles(grid);
+    rep(i, 1, n+1) {
+        rep(j, 1, m+1) {
+            cout << res[i][j] << " ";
+        }
+        cout << "\n";
+    }
 }
