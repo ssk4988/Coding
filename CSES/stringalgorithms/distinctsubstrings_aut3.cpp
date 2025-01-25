@@ -26,11 +26,10 @@ using vvi = vector<vi>;
 #define nL "\n"
 
 struct st { int len, pos, term, link=-1; map<char, int> next; 
-    int endpos; ll to, from=1; };
+    // int endpos; ll to, from=1; 
+};
 struct SuffixAutomaton {
 	vector<st> a;
-    vi topnext, toplink;
-    vvi suffadj;
 	SuffixAutomaton(string &str) {
 		a.resize(1);
 		int last = 0;
@@ -44,43 +43,48 @@ struct SuffixAutomaton {
 				int q = a[p].next[c];
 				if (a[p].len + 1 == a[q].len) a[cur].link = q;
 				else {
-					int clone = sz(a);
-					a.push_back({a[p].len+1, a[q].pos, 0, a[q].link, a[q].next});
+					a.push_back(a[q]);
+					a.back().len = a[p].len+1;
 					for(; p >= 0 && a[p].next[c] == q; p = a[p].link)
-						a[p].next[c] = clone;
-					a[q].link = a[cur].link = clone;
+						a[p].next[c] = sz(a)-1;
+					a[q].link = a[cur].link = sz(a)-1;
 				}
 			}
-            a[last].endpos++;
+            // a[last].endpos++;
 		}
 		while(last >= 0) a[last].term = 1, last = a[last].link;
-        suffadj.resize(sz(a));
-        rep(u, 1, sz(a)) suffadj[a[u].link].push_back(u);
-        vi seen(sz(a));
-        auto dfs = [&](int u, auto &&dfs) {
-            if(seen[u]) return;
-            seen[u] = true;
-            for(auto [c, v] : a[u].next)
-                dfs(v, dfs), a[u].from += a[v].from;
-            topnext.push_back(u);
-        };
-        dfs(0, dfs);
-        seen = vi(sz(a));
-        auto dfs1 = [&](int u, auto &&dfs1) {
-            if(seen[u]) return;
-            seen[u] = true;
-            for(int v : suffadj[u]) dfs1(v, dfs1);
-            toplink.push_back(u);
-        };
-        dfs1(0, dfs1);
-        rep(i, 0, sz(a)-1) 
-            a[a[toplink[i]].link].endpos += a[toplink[i]].endpos;
-        reverse(all(topnext)), reverse(all(toplink));
-        a[0].to = 1;
-        for(int u : topnext)
-            for(auto [c, v] : a[u].next)
-                a[v].to += a[u].to;
+        // calcExtra();
 	}
+    // vi topnext, toplink;
+    // vvi suffadj;
+    // void calcExtra() {
+    //     suffadj.resize(sz(a));
+    //     rep(u, 1, sz(a)) suffadj[a[u].link].push_back(u);
+    //     vi seen(sz(a));
+    //     auto dfs = [&](int u, auto &&dfs) {
+    //         if(seen[u]) return;
+    //         seen[u] = true;
+    //         for(auto [c, v] : a[u].next)
+    //             dfs(v, dfs), a[u].from += a[v].from;
+    //         topnext.push_back(u);
+    //     };
+    //     dfs(0, dfs);
+    //     seen = vi(sz(a));
+    //     auto dfs1 = [&](int u, auto &&dfs1) {
+    //         if(seen[u]) return;
+    //         seen[u] = true;
+    //         for(int v : suffadj[u]) dfs1(v, dfs1);
+    //         toplink.push_back(u);
+    //     };
+    //     dfs1(0, dfs1);
+    //     rep(i, 0, sz(a)-1) 
+    //         a[a[toplink[i]].link].endpos += a[toplink[i]].endpos;
+    //     reverse(all(topnext)), reverse(all(toplink));
+    //     a[0].to = 1;
+    //     for(int u : topnext)
+    //         for(auto [c, v] : a[u].next)
+    //             a[v].to += a[u].to;
+    // }
 };
 
 
