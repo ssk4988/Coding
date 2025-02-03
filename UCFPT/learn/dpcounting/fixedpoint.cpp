@@ -25,10 +25,12 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 
-const ll LIM = 1e18 + 1e9;
+const ll LIM = 1e18;
 
 ll mult(ll a, ll b) {
-    return min(a * b, LIM);
+    if(a == 0) return a * b;
+    ll maxb = LIM / a;
+    return b <= maxb ? a * b : LIM;
 }
 ll add(ll a, ll b) { return min(a + b, LIM); }
 
@@ -37,56 +39,112 @@ int main()
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
     int n, m; ll k; cin >> n >> m >> k;
-    vector dp(n+1, vector(n+1, vector(n+1, vector(n+1, -1))));
-    auto go = [&](int pref, int fixedpoints, int balls, int boxes, auto &&go) -> ll {
-        auto &ans = dp[pref][fixedpoints][balls][boxes];
+    // cerr << "n=" << n << ", m=" << m << " k=" << k << endl;
+    vector dp(n+1, vector(n+1, vector(n+1, -1LL)));
+    vl fact(n+1);
+    fact[0] = 1;
+    rep(i, 1, n+1) fact[i] = mult(fact[i-1], i);
+    auto go = [&](int pref, int fixedleft, int match, auto &&go) -> ll {
+        if(match < 0 || fixedleft < 0) return 0;
+        auto &ans = dp[pref][fixedleft][match];
         if(ans != -1) return ans;
-        if (fixedpoints > m) return ans = 0;
-        if (pref == n) {
-            return fixedpoints == m && balls == 0 && boxes == 0;
+        int blocked = n - pref - match;
+        if(match == 0) {
+            ans = fixedleft == 0 ? fact[blocked] : 0;
+            // cerr << "no matches left: blocked-" << blocked << " dp: " << pref << " " << fixedleft << " " << match << " = " << ans << endl;
+            return ans;
+        }
+        if(pref == n) {
+            ans = (fixedleft == 0);
+            // cerr << pref << " " << fixedleft << " " << match << " = " << ans << endl;
+            return ans;
         }
         ans = 0;
         // fixed point
-        ans = add(ans, go(pref+1, fixedpoints+1, balls, boxes, go));
-        // use current ball, don't use current box
-        ans = add(ans, mult(boxes, go(pref+1, fixedpoints, balls+1, boxes-1, go)));
-        for (auto useball : {0, 1}) {
-            for(auto usebox : {0, 1}) {
-                if(useball && boxes == 0) continue;
-                if(usebox && balls == 0) continue;
-                ans = add(ans, mult((usebox ? balls : 1) * (useball ? boxes : 1), go(pref+1, fixedpoints, balls + (usebox ? -1 : 1), boxes + (useball ? -1 : 1), go)));
-            }
-        }
+        ans = add(ans, go(pref+1, fixedleft-1, match-1, go));
+        // use another match
+        ans = add(ans, mult(go(pref+1, fixedleft, match-2, go), match-1));
+        // use a blocked element
+        ans = add(ans, mult(go(pref+1, fixedleft, match-1, go), blocked));
+        // cerr << pref << " " << fixedleft << " " << match << " = " << ans << endl;
         return ans;
     };
-    int fixedpoints = 0;
-    set<int> balls, boxes;
-    ll cnt = go(0, 0, 0, 0, go);
-    vi perm;
-    if(cnt < k) {
+    ll tot = go(0, m, n, go);
+    if(tot < k){
         cout << "-1\n";
+        // cerr << tot << endl;
         return 0;
     }
     vi used(n);
-    rep(pref, 0, n){
-        rep(nxt, 0, n){
-            if(used[nxt]) continue;
-            if(nxt == pref){
-                ll amt = go(pref+1, fixedpoints+1, sz(balls), sz(boxes), go);
-                if (amt > k){
-                    amt -= k;
-                } else {
-                    used[nxt] = true;
-                    perm.push_back(nxt);
-                    break;
-                }
-            }
-            if(nxt < pref && balls.count(nxt)) {
-                ll amt = go(pref+1, fixedpoints, sz(balls)-1, , go);
-            }
+    vi perm;
+    auto eval = [&]() -> pi {
+        int match = n - sz(perm), fixedleft = m;
+        rep(j, 0, sz(perm)) if(perm[j] == j) fixedleft--;
+        rep(j, 0, sz(perm)) if(perm[j] >= sz(perm)) match--;
+        return {match, fixedleft};
+    };
+    rep(i, 0, n) {
+        int use = -1;
+        {
+            auto [match, fixedleft] = eval();
+            // cerr << "state: " << i << " " << fixedleft << " " << match << " k: " << k << endl;
+            // rep(j, 0, sz(perm)) cerr << perm[j] << " ";
+            // cerr << endl;
         }
+        rep(v, 0, n) {
+            if(used[v]) continue;
+            // if(match == 0) {
+            //     ll nxt = fact[n-(i+1)];
+            //     if(nxt >= k) {
+            //         use = v;
+            //         break;
+            //     } else k -= nxt;
+            // }
+            perm.pb(v);
+            used[v] = true;
+            auto [match, fixedleft] = eval();
+            ll nxt = go(i+1, fixedleft, match, go);
+            if(nxt >= k) {
+                use = v;
+                break;
+            }
+            k -= nxt;
+            used[v] = false;
+            perm.pop_back();
+            // if(v == i) {
+            //     ll nxt = go(i+1, fixedleft-1, match-1, go);
+            //     if(nxt >= k) {
+            //         use = v;
+            //         fixedleft--;
+            //         match--;
+            //         break;
+            //     } else k -= nxt;
+            // } else if(v < i) {
+            //     // use blocked
+
+            //     ll nxt = go(i+1, fixedleft, match-1, go);
+            //     if(nxt >= k) {
+            //         match--;
+            //         use = v;
+            //         break;
+            //     } else k -= nxt;
+            // } else {
+            //     // use match
+            //     ll nxt = go(i+1, fixedleft, match-2, go);
+            //     if(nxt >= k) {
+            //         match -= 2;
+            //         use = v;
+            //         break;
+            //     } else k -= nxt;
+            // }
+        }
+        // cerr << "add " << use << endl;
+        assert(use != -1);
     }
-    
+    rep(i,0,n){
+        cout << perm[i]+1 << " ";
+    }
+    cout << "\n";
     
     return 0;
 }
