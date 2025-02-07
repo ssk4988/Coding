@@ -53,18 +53,15 @@ struct Node {
     }
     void merge() {
         sum = l->sum + r->sum;
-        mx = l->mx, mxfreq = l->mxfreq;
-        mn = l->mn, mnfreq = l->mnfreq;
+        mx = max(l->mx, r->mx);
+        mn = min(l->mn, r->mn);
+        mnfreq = mxfreq = 0;
+        for(auto p : {l, r}){
+            if(p->mn == mn) mnfreq += p->mnfreq;
+            if(p->mx == mx) mxfreq += p->mxfreq;
+        }
         mx2 = -inf, mn2 = inf;
-        if(r->mx > mx) {
-            mx2 = max(mx2, mx);
-            mx = r->mx, mxfreq = r->mxfreq;
-        } else if(r->mx == mx) mxfreq += r->mxfreq;
-        if(r->mn < mn) {
-            mn2 = min(mn2, mn);
-            mn = r->mn, mnfreq = r->mnfreq;
-        } else if(r->mn == mn) mnfreq += r->mnfreq;
-        for(auto p : vector{l, r}) {
+        for(auto p : {l, r}) {
             for(auto v : {p->mn, p->mx, p->mn2, p->mx2}) {
                 if(abs(v)==inf) continue;
                 if(v != mx) mx2 = max(mx2, v);
@@ -74,16 +71,9 @@ struct Node {
     }
     void push() {
         if(!l) return;
-        if(lzmx == 0 && lzmn == 0 && lzadd == 0) return;
-        if(lzadd != 0) {
-            l->add(lo, hi, lzadd), r->add(lo, hi, lzadd), lzadd = 0;
-        }
-        if(lzmx != 0) {
-            l->tag(mx-lzmx, lzmx), r->tag(mx-lzmx, lzmx), lzmx = 0;
-        }
-        if(lzmn != 0) {
-            l->tag(mn-lzmn, lzmn), r->tag(mn-lzmn, lzmn), lzmn = 0;
-        }
+        if(lzadd != 0) l->add(lo, hi, lzadd), r->add(lo, hi, lzadd), lzadd = 0;
+        if(lzmx != 0) l->tag(mx-lzmx, lzmx), r->tag(mx-lzmx, lzmx), lzmx = 0;
+        if(lzmn != 0) l->tag(mn-lzmn, lzmn), r->tag(mn-lzmn, lzmn), lzmn = 0;
     }
     ll rangesum(int L, int R) {
         if(R <= lo || hi <= L) return 0;
@@ -93,16 +83,12 @@ struct Node {
     }
     void chmax(int L, int R, ll x) {
         if(R <= lo || hi <= L || mn >= x) return;
-        if(L <= lo && hi <= R && mn2 > x) {
-            return tag(mn, x - mn);
-        }
+        if(L <= lo && hi <= R && mn2 > x) return tag(mn, x - mn);
         push(), l->chmax(L, R, x), r->chmax(L, R, x); merge();
     }
     void chmin(int L, int R, ll x) {
         if(R <= lo || hi <= L || mx <= x) return;
-        if(L <= lo && hi <= R && mx2 < x) {
-            return tag(mx, x - mx);
-        }
+        if(L <= lo && hi <= R && mx2 < x) return tag(mx, x - mx);
         push(), l->chmin(L, R, x), r->chmin(L, R, x); merge();
     }
     void add(int L, int R, ll x) {
