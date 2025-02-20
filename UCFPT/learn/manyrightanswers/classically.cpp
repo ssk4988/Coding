@@ -25,133 +25,118 @@ using vvi = vector<vi>;
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
 const int M = 100;
-template<int B>
-struct XORBasis {
-	bitset<B> basis[B];
-    bitset<M> effect[B];
-    int res[B];
-    XORBasis() { memset(res, -1, sizeof res); }
-	int npivot = 0, nfree = 0;
-	bool check(bitset<B> v, bitset<M> &ans) {
-		rep(i, 0, B)
-			if (v[i] && res[i] != -1){ 
-                v ^= basis[i];
-                ans ^= effect[i];
-            }
-		return v.none();
-	}
-	bool add(bitset<B> v, int idx) {
-        bitset<M> e;
-		rep(i, 0, B)
-			if (v.test(i)) {
-				if (basis[i].none()){ 
-                    e.flip(idx);
-                    effect[i] = e;
-                    res[i] = idx;
-                    return basis[i] = v, ++npivot;
-                }
-                e ^= effect[i];
-				v ^= basis[i];
+using bs = bitset<M>;
+
+struct xorbasis {
+	vector<bs> basis, made;
+	xorbasis() : basis(M), made(M) {}
+	bool add(bs x, bs from) {
+		rep(i, 0, M) {
+			if(basis[i].none()) {
+				if(x[i]) {
+					basis[i] = x;
+					made[i] = from;
+					return true;
+				}
+			} else {
+				if(x[i]) {
+					x ^= basis[i];
+					from ^= made[i];
+				}
 			}
-        return !++nfree;
+		}
+		return false;
 	}
-    void clear(){
-        memset(res, -1, sizeof res);
-        rep(i, 0, B){
-            if(basis[i].any()) basis[i] &= ~basis[i];
-            if(effect[i].any()) effect[i] &= ~effect[i];
-        }
-        npivot = nfree = 0;
-    }
 };
 
-XORBasis<10000> x;
 vi dr{1, 0, -1, 0}, dc{0, 1, 0, -1};
+void toggle(vector<bs> &grid, int i, int j, int n, int m) {
+	grid[i].flip(j);
+	rep(k, 0, 4) {
+		int i1 = i + dr[k], j1 = j + dc[k];
+		if(min(i1, j1) < 0 || i1 >= n || j1 >= m) continue;
+		grid[i1].flip(j1);
+	}
+}
+
+pair<bs, vvi> solve(vector<bs> grid, int n, int m) {
+	vvi tog(n, vi(m));
+	rep(i, 1, n) {
+		rep(j, 0, m) {
+			if(grid[i-1][j]) {
+				tog[i][j] = 1;
+				toggle(grid, i, j, n, m);
+			}
+		}
+	}
+	// cerr << "leftover:\n";
+	// rep(i, 0, n) {
+	// 	rep(j, 0, m) {
+	// 		cerr << grid[i][j];
+	// 	}
+	// 	cerr << "\n";
+	// }
+	// cerr << "toggles: \n";
+	// rep(i, 0, n) {
+	// 	rep(j, 0, m) {
+	// 		cerr << tog[i][j];
+	// 	}
+	// 	cerr << "\n";
+	// }
+	// cerr << "\n";
+	return {grid.back(), tog};
+}
+
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
     int nc; cin >> nc;
     rep(cn, 0, nc){
-        int r, c; cin >> r >> c;
-        x.clear();
-        vvi grid(r, vi(c));
-        vi b(r * c);
-        rep(i, 0, r){
-            string str; cin >> str;
-            rep(j, 0, c){
-                grid[i][j] = str[j] - '0';
-                b[i * c + j] = grid[i][j];
+        int n, m; cin >> n >> m;
+        vector<bs> grid(n);
+        rep(i, 0, n) {
+            string s; cin >> s;
+			rep(j, 0, m) {
+				grid[i][j] = s[j] == '1';
             }
         }
-        auto toggle = [&](vvi &g, int row, int col)-> void {
-            g[row][col] ^= 1;
-            rep(i, 0, 4){
-                int r1 = row + dr[i], c1 = col + dc[i];
-                if(r1 < 0 || r1 >= r || c1 < 0 || c1 >= c) continue;
-                g[r1][c1] ^= 1;
-            }
-        };
-        rep(j, 0, c){
-            vvi o(grid), net(r, vi(c));
-            toggle(o, 0, j); toggle(net, 0, j);
-            rep(i, 1, r){
-                rep(j1, 0, c){
-                    if(o[i-1][j1]){
-                        toggle(o, i, j1), toggle(net, i, j1);
-                    }
-                }
-            }
-            // cout << "for changing " << 0 << " " << j << ":\n";
-            bitset<10000> bs;
-            rep(i, 0, r){
-                rep(j1, 0, c){
-                    // cout << net[i][j1];
-                    if(net[i][j1])bs[i * c + j1].flip();
-                }
-                // cout << "\n";
-            }
-            x.add(bs, j);
-        }
-        bitset<10000> bs;
-        rep(i, 0, r){
-            rep(j, 0, c){
-                if(grid[i][j]) bs[i * c + j].flip();
-            }
-        }
-        bitset<M> ans;
-        bool cando = x.check(bs, ans);
-        if(cando){
-            vvi tog(r, vi(c));
-            rep(j, 0, c){
-                if(ans[j]){
-                    toggle(grid, 0, j);
-                    tog[0][j] ^= 1;
-                }
-            }
-            rep(i, 1, r){
-                rep(j, 0, c){
-                    if(grid[i-1][j]){
-                        toggle(grid, i, j);
-                        tog[i][j] ^= 1;
-                    }
-                }
-            }
-            rep(i, 0, r){
-                rep(j, 0, c){
-                    cout << (tog[i][j] ? 'X' : '_');
-                }
-                cout << "\n";
-            }
-            // cout << "leftover:\n";
-            // rep(i, 0, r){
-            //     rep(j, 0, c){
-            //         cout << (grid[i][j] ? 'X' : '_');
-            //     }
-            //     cout << "\n";
-            // }
-        }
-        else cout << "IMPOSSIBLE\n";
+		auto [cur, _1] = solve(grid, n, m);
+		xorbasis xb;
+		rep(j, 0, m) {
+			toggle(grid, 0, j, n, m);
+			auto [res, _2] = solve(grid, n, m);
+			res ^= cur;
+			toggle(grid, 0, j, n, m);
+			bs from;
+			from.flip(j);
+			xb.add(res, from);
+		}
+		bs res;
+		rep(i, 0, M) {
+			if(xb.basis[i].none()) continue;
+			if(cur[i]) {
+				res ^= xb.made[i];
+				cur ^= xb.basis[i];
+			}
+		}
+		if(cur.any()) {
+			cout << "IMPOSSIBLE\n";
+			continue;
+		}
+		rep(j, 0, m) if(res[j]) toggle(grid, 0, j, n, m);
+		auto [last, tog] = solve(grid, n, m);
+		assert(last.none());
+		rep(j, 0, m) {
+			int i = 0;
+			if(res[j]) tog[i][j] ^= 1;
+		}
+		rep(i, 0, n) {
+			rep(j, 0, m) {
+				cout << "-X"[tog[i][j]];
+			}
+			cout << "\n";
+		}
     }
     
     return 0;
