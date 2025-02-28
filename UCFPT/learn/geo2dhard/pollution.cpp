@@ -101,6 +101,7 @@ int main()
     }
     p = polygonCut(p, P(1, 0), P(0, 0));
     ld ans = circlePoly(P(0, 0), r, p);
+	// bruh had to empty file AC even though it ACs on kattis
     cout << fixed << setprecision(10) << ans << "\n";
     
     return 0;
