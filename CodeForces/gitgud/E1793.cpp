@@ -33,12 +33,28 @@ int main()
     vi a(n);
     rep(i, 0, n) cin >> a[i];
     sort(all(a));
-    int base = n;
-    while(base > 0 && a[base-1] > base) base--;
     vi ans(n+1);
-    ans[1] = base;
-    vii comps;
-            
+    rep(i, 0, n) {
+        int cont = max(i+1, a[i]);
+        int k = n - cont + 1;
+        ans[k]++;
+    }
+    for(int i = n-1; i >= 0; i--) {
+        ans[i] += ans[i+1];
+    }
+    vi dp(n+1);
+    rep(i, 1, n+1) {
+        if(i-a[i-1] >= 0) dp[i] = 1 + dp[i - a[i-1]];
+        if(dp[i]) ans[dp[i] + n-i] = max(ans[dp[i] + n-i], i);
+        dp[i] = max(dp[i], dp[i-1]);
+    }
+    for(int i = n-1; i >= 0; i--) ans[i] = max(ans[i], ans[i+1]);
+    int q; cin >> q;
+    rep(i, 0, q) {
+        int k; cin >> k;
+        cout << ans[k] << "\n";
+    }
+
     
     return 0;
 }

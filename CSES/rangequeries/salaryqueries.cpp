@@ -57,31 +57,28 @@ int main()
     cin.exceptions(cin.failbit);
     int n, q; cin >> n >> q;
     vi a(n);
-	set<int> ss;
+	vi cc;
     rep(i, 0, n){
         cin >> a[i];
-		ss.insert(a[i]);
+		cc.pb(a[i]);
     }
 	vvi qs(q);
 	rep(i, 0, q){
 		char c; int a, b; cin >> c >> a >> b;
 		qs[i].pb(c == '!' ? 0 : 1);
 		qs[i].pb(a);qs[i].pb(b);
-		ss.insert(b);
-		if(c == '?') ss.insert(a);
+		cc.pb(b);
+		if(c == '?') cc.pb(a);
 	}
-	int cnt = 0;
-	unordered_map<int, int> cc;
-	for(int i : ss){
-		cc[i] = cnt++;
-	}
+	sort(all(cc));
+	cc.erase(unique(all(cc)), end(cc));
 	rep(i, 0, n){
-		a[i] = cc[a[i]];
+		a[i] = lower_bound(all(cc), a[i])-begin(cc);
 	}
 	rep(i, 0, q){
-		if(qs[i][0] == 1) qs[i][1] = cc[qs[i][1]];
+		if(qs[i][0] == 1) qs[i][1] = lower_bound(all(cc), qs[i][1])-begin(cc);
 		else qs[i][1]--;
-		qs[i][2] = cc[qs[i][2]];
+		qs[i][2] = lower_bound(all(cc), qs[i][2])-begin(cc);
 	}
     FT ft;
     rep(i, 0, n){

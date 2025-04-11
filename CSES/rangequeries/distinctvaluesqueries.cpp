@@ -50,28 +50,30 @@ struct FT {
 
 int main()
 {
-    // cin.tie(0)->sync_with_stdio(0);
-    // cin.exceptions(cin.failbit);
+    cin.tie(0)->sync_with_stdio(0);
+    cin.exceptions(cin.failbit);
     int n, q; cin >> n >> q;
     vi a(n);
-    unordered_map<int, int> occ;
     rep(i, 0, n){
         cin >> a[i];
-        occ[a[i]] = -1;
     }
+    vi c(a);
+    sort(all(c));
+    c.erase(unique(all(c)), end(c));
+    vi occ(n, -1);
     vi nex(n);
     for(int i = n - 1; i >= 0; i--){
+        a[i] = lower_bound(all(c), a[i])-begin(c);
         nex[i] = occ[a[i]];
         occ[a[i]] = i;
     }
     vector<vpi> queries(n);
     rep(i, 0, q){
-        int a, b; cin >> a >> b;
-        a--,b--;
-        queries[a].pb({b, i});
+        int l, r; cin >> l >> r;
+        l--,r--;
+        queries[l].pb({r, i});
     }
     FT ft(n + 5);
-    occ.clear();
     rep(i, 0, n){
         occ[a[i]] = -1;
     }
