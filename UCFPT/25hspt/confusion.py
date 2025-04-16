@@ -1,0 +1,1 @@
+print("Not even Thestra can compete!" if len(set(w[0] for w in [input(), input()][1].split())) == 1 else "Thestra is disappointed!")
