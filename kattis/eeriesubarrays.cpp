@@ -10,15 +10,20 @@ using ll = long long;
 #define all(x) begin(x), end(x)
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 
+#pragma GCC target("avx2")
+const int K = 200;
+const int N = 2e5+10;
+const int B = (N+K-1) / K;
+int freq[B][2*K+1];
+int pref[B];
+int val[N];
 int main()
 {
 	cin.tie(0)->sync_with_stdio(0);
 	cin.exceptions(cin.failbit);
 	int n; cin >> n;
 	vi a(n);
-	const int K = 500;
-	int blocks = (n+K-1) / K;
-	vvi freq(blocks, vi(2*K+1));
+	int blocks = (n+K-1)/K;
 	vii ord;
 	rep(i, 0, n) {
 		cin >> a[i]; a[i]--;
@@ -26,13 +31,11 @@ int main()
 	}
 	sort(all(ord));
 	reverse(all(ord));
-	vi val(n, -1);
-	vi pref(blocks);
 	auto upd = [&](int i, int x) {
 		int b = i / K;
 		val[i] = x;
 		pref[b] = 0;
-		fill(all(freq[b]), 0);
+		rep(j, 0, 2*K+1) freq[b][j] = 0;
 		rep(j, b*K, min((b+1)*K, n)) {
 			pref[b] += val[j];
 			freq[b][pref[b]+K]++;
