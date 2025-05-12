@@ -23,7 +23,24 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int n, m; cin >> n >> m;
+    vvi grid(n, vi(m));
+    vvi res(n, vi(m));
+    rep(i, 0, n) {
+        string s; cin >> s;
+        rep(j, 0, m) {
+            grid[i][j] = s[j] - 'A';
+            vi bad(4);
+            if(i) bad[res[i-1][j]] = 1;
+            if(j) bad[res[i][j-1]] = 1;
+            bad[grid[i][j]] = 1;
+            rep(k, 0, 4) {
+                if(!bad[k]) res[i][j] = k;
+            }
+            cout << char('A' + res[i][j]);
+        }
+        cout << "\n";
+    }
     
     return 0;
 }

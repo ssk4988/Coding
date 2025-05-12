@@ -23,7 +23,23 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int n; cin >> n;
+    vvi a(n, vi(n));
+    rep(i, 0, n) {
+        rep(j, 0, n) {
+            vi b;
+            rep(k, 0, i) {
+                b.pb(a[k][j]);
+            }
+            rep(k, 0, j) b.pb(a[i][k]);
+            int mex = 0;
+            sort(all(b));
+            for(int v : b) if(v == mex) mex++;
+            a[i][j] = mex;
+            cout << a[i][j] << " ";
+        }
+        cout << "\n";
+    }
     
     return 0;
 }

@@ -23,7 +23,23 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int n; cin >> n;
+    vll pts(n);
+    ll ans = 0;
+    vl best(4, 4e9);
+    rep(i, 0, n) {
+        cin >> pts[i].f >> pts[i].s;
+        rep(mask, 0, 4) {
+            ll cur = pts[i].f * ((mask & 1) ? 1 : -1) + pts[i].s * ((mask & 2) ? 1 : -1);
+            ans = max(ans, cur - best[mask]);
+        }
+        rep(mask, 0, 4) {
+            ll cur = pts[i].f * ((mask & 1) ? 1 : -1) + pts[i].s * ((mask & 2) ? 1 : -1);
+            best[mask] = min(best[mask], cur);
+        }
+        cout << ans << "\n";
+    }
+
     
     return 0;
 }

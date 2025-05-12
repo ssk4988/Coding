@@ -1,0 +1,21 @@
+==1687== Memcheck, a memory error detector
+==1687== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==1687== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==1687== Command: ./e
+==1687== 
+6
+==1687== 
+==1687== HEAP SUMMARY:
+==1687==     in use at exit: 122,880 bytes in 6 blocks
+==1687==   total heap usage: 51 allocs, 45 frees, 199,104 bytes allocated
+==1687== 
+==1687== LEAK SUMMARY:
+==1687==    definitely lost: 0 bytes in 0 blocks
+==1687==    indirectly lost: 0 bytes in 0 blocks
+==1687==      possibly lost: 0 bytes in 0 blocks
+==1687==    still reachable: 122,880 bytes in 6 blocks
+==1687==         suppressed: 0 bytes in 0 blocks
+==1687== Rerun with --leak-check=full to see details of leaked memory
+==1687== 
+==1687== For lists of detected and suppressed errors, rerun with: -s
+==1687== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

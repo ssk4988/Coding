@@ -23,7 +23,22 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int n, k; cin >> n >> k;
+    vi a(n);
+    rep(i, 0, n) cin >> a[i];
+    map<int, int> freq;
+    int distinct = 0;
+    rep(i, 0, n) {
+        freq[a[i]]++;
+        if(freq[a[i]] == 1) distinct++;
+        if(i >= k) {
+            freq[a[i-k]]--;
+            if(freq[a[i-k]] == 0) distinct--;
+        }
+        if(i >= k-1) cout << distinct << " ";
+    }    
+    cout << "\n";
+
     
     return 0;
 }

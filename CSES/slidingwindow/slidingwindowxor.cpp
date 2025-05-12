@@ -23,7 +23,23 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int n, k; cin >> n >> k;
+    ll x, a, b, c; cin >> x >> a >> b >> c;
+    vi v;
+    v.pb(x);
+    rep(i, 0, n-1) {
+        v.pb((a * v.back() + b) % c);
+    }
+    ll ans = 0;
+    vl pref{0};
+    rep(i, 0, n) {
+        pref.pb(pref.back() ^ v[i]);
+    }
+    rep(i, k, n+1) {
+        ll res = pref[i] ^ pref[i-k];
+        ans ^= res;
+    }
+    cout << ans << "\n";
     
     return 0;
 }

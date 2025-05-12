@@ -24,6 +24,23 @@ int main()
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
     
-    
+    int n; cin >> n;
+    vi a(n);
+    rep(b, 0, 10) {
+        cout << "? ";
+        rep(i, 0, n){
+            cout <<( (i >> b)&1);
+        }
+        cout << endl;
+        string s; cin >> s;
+        rep(i, 0, n){
+            if(s[i] == '1') a[i] += 1 << b;
+        }
+    }
+    cout << "! ";
+    rep(i, 0, n) {
+        cout << a[i]+1 << " ";
+    }
+    cout << endl;
     return 0;
 }

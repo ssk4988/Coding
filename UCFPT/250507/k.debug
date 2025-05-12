@@ -1,0 +1,25 @@
+a
+0 
+ab
+0 0 
+abc
+0 0 0 
+abca
+0 0 0 1 
+2
+abcab
+0 0 0 1 2 
+1
+2
+abcaba
+0 0 0 1 2 1 
+abcabab
+0 0 0 1 2 1 2 
+abcababc
+0 0 0 1 2 1 2 3 
+abcababca
+0 0 0 1 2 1 2 3 4 
+7
+1
+7
+1
