@@ -1,0 +1,16 @@
+print("c" * 8)
+print("c" * 8)
+for i in range(3, 31):
+    print("c" * 8)
+    print("c" * 8)
+    print("c" * (7+i-2))
+    print("c" * (7+i))
+    print("c" * 5)
+    print("c" * (7+i-1))
+    print("c" * (7+i+1))
+    print("c" * 5)
+    print("c")
+print("c" * 4)
+# top of stack has index we need
+print("c" * (7+30))
+print("c" * 5)
