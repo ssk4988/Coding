@@ -6,6 +6,10 @@
 *.json
 *.exe
 *.in
+*.in.*
+*.break
+*.ans
+*.debug
 *.out
 *.rmeta
 *.d
