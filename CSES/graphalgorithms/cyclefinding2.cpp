@@ -46,7 +46,7 @@ int main()
     // rep(i, 0, n){
     //     if(leads[i]) cout << i << nL;
     // }
-    rep(t, 0, m){
+    rep(t, 0, n){
         rep(i, 0, n){
             if(dist[i] >= BAD) continue;
             for(pl &p : adj[i]){

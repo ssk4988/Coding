@@ -23,7 +23,12 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int nc; cin >> nc;
+    rep(cn, 0, nc) {
+        int n, m, k; cin >> n >> m >> k;
+        bool works = n-(n+m-1)/m > k;
+        cout << (works ? "YES" : "NO") << "\n";
+    }
     
     return 0;
 }

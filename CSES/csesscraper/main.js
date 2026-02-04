@@ -34,12 +34,12 @@ const usersToID = {
     "Rhygon1": 368114,
     "sidhys127": 373243
 };
-const cookie = '1e09365c45f08bb987acb2c8d8f1b6bb592a51ad';
+const cookie = "1e09365c45f08bb987acb2c8d8f1b6bb592a51ad";
 const headers = {
     'Cookie': `PHPSESSID=${cookie}`
 };
 const IDToUsers = Object.fromEntries(Object.entries(usersToID).map(([k, v]) => [v, k]));
-async function parseProblem(link) {
+async function parseStatPage(link) {
     const statLink = link.replace('task', 'stats');
     const statDocument = new JSDOM(await fetch(statLink, {
         headers
@@ -70,7 +70,7 @@ async function parseProblems() {
         const link = 'https://cses.fi' + problem.children[0].href;
         const name = problem.children[0].innerHTML;
         const problemId = link.split('/').pop();
-        const userList = await parseProblem(link);
+        const userList = await parseStatPage(link);
         if (userList.length > 0) {
             console.log(`${problemId} - ${name}:`);
             for (const user of userList) {

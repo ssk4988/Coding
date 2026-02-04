@@ -35,6 +35,7 @@ const usersToID = {
     "Rhygon1": 368114,
     "sidhys127": 373243
 };
+const cookie = "1e09365c45f08bb987acb2c8d8f1b6bb592a51ad";
 const headers = {
     'Cookie': `PHPSESSID=${cookie}`
 }

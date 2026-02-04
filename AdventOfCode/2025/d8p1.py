@@ -1,0 +1,31 @@
+n = int(input())
+c = [list(map(int, input().split(","))) for i in range(n)]
+
+e = [-1] * n
+def find(u):
+    if e[u] < 0: return u
+    e[u] = find(e[u])
+    return e[u]
+
+def join(u, v):
+    u = find(u)
+    v = find(v)
+    if u == v: return False
+    if e[u] > e[v]: u,v = v,u
+    e[u] += e[v]
+    e[v] = u
+    return True
+
+def dist(a, b):
+    return sum((i-j)**2 for i,j in zip(a, b))
+
+edges = [(dist(c[i], c[j]), i, j) for i in range(n) for j in range(i)]
+edges.sort()
+for d,i,j in edges[:1000]:
+    join(i,j)
+comps = [abs(x) for x in e if x < 0]
+comps.sort(reverse=True)
+ans = 1
+for x in comps[:3]:
+    ans *= x
+print(ans)

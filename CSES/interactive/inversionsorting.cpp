@@ -25,20 +25,57 @@ int main()
     cin.exceptions(cin.failbit);
     int n; cin >> n;
     auto query = [&](int l, int r) -> ll {
-        cout << "? " << l+1 << " " << r+1 << endl;
+        cout << l+1 << " " << r+1 << endl;
         ll inv; cin >> inv;
-        if(inv == 0) exit();
+        if(inv == 0) exit(0);
         return inv;
     };
+    if(n == 1){
+        query(0, 0);
+    }
     // 
     vi ord{0};
     ll inv = query(0, 1);
     rep(i,1,n) {
+        // for(int v : ord) cerr << v << " ";
+        // cerr << endl;
         ll inv2 = query(0, i);
         if(1 < i-1) inv2 = query(1, i-1);
-        ll invend = n-2-i;
-        ll cnt = inv2
+        ll invfront = i-1;
+        ll dif = inv2 - inv - invfront; // delta due to i moving to front
+        // adds below - above
+        // dif = below - (i-below) = 2 * below - i
+        ll below = (dif+i)/2;
+        for(int &v : ord) {
+            if(v >= below) {
+                v++;
+            }
+        }
+        ord.pb(below);
+        swap(ord[0], ord.back());
+        int minidx = 0;
+        rep(j, 0, sz(ord)) {
+            if(ord[j] < ord[minidx]) minidx = j;
+        }
+        if(minidx != 0) {
+            inv2 = query(0, minidx);
+            reverse(begin(ord), begin(ord)+minidx+1);
+        }
+        inv = inv2;
+    }
+    rep(i, 0, n) {
+        int minidx = i;
+        rep(j, i, n) {
+            if(ord[j] < ord[minidx]) minidx = j;
+        }
+        if(minidx > i) query(i, minidx);
+        reverse(begin(ord)+i, begin(ord)+minidx+1);
     }
     
     return 0;
 }
+
+// 5
+// 0 2 3 4 1
+// 2 0 3 4 1
+// 0 2 3 4 1

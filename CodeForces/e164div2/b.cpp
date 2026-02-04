@@ -23,7 +23,28 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int nc; cin >> nc;
+    rep(cn, 0, nc) {
+        int n; cin >> n;
+        vi a(n);
+        rep(i, 0, n) cin >> a[i];
+        if(a[0] != a[n-1]) {
+            cout << "0\n";
+            continue;
+        }
+        int prv = -1;
+        int ans = n;
+        rep(i, 0, n) {
+            if(a[i] != a[0]) {
+                ans = min(ans, i-1-prv);
+                prv = i;
+            }
+        }
+        ans = min(ans, n-1-prv);
+        if(ans >= n) ans = -1;
+        cout << ans << "\n";
+
+    }
     
     return 0;
 }

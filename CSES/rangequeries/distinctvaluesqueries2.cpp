@@ -34,56 +34,22 @@ F id() { return -1; }
 F composition(F newer, F older) { return newer; }
 
 struct Tree {
-	int n, size, log;
-	vector<S> d;
-	vector<F> lz;
-	Tree(size_t m) {
-		n = m; size = bit_ceil(m); log = __lg(size);
-		d = vector(2*size, ego());
-		lz = vector(size, id());
+	typedef S T;
+	static constexpr T unit = pii{-inf, inf};
+	T f(T a, T b) { return op(a, b); } // (any associative fn)
+	vector<T> s; int n;
+	Tree(int n = 0, T def = unit) : s(2*n, def), n(n) {}
+	void update(int pos, T val) {
+		for (s[pos += n] = val; pos /= 2;)
+			s[pos] = f(s[pos * 2], s[pos * 2 + 1]);
 	}
-	void update(int k) { d[k] = op(d[2*k], d[2*k + 1]); }
-	void fid(int k, F f) {
-		d[k] = mapping(f, d[k]);
-		if (k < size) lz[k] = composition(f, lz[k]);
-	}
-	void push(int k) {
-		fid(2 * k, lz[k]);
-		fid(2 * k + 1, lz[k]);
-		lz[k] = id();
-	}
-	#define tip for (int i = 1; i <= log; i++)
-	#define dip for (int i = log; i >= 1; i--)
-	#define check(p) { if (((1<<i)-1) & l) p(l >> i);\
-	                   if (((1<<i)-1) & r) p((r-1) >> i); }
-	void set(int p, S x) {
-		p += size;
-		dip push(p >> i);
-		d[p] = x;
-		tip update(p >> i);
-	}
-	S prod(int l, int r) {
-		l += size; r += size;
-		dip check(push);
-		S sml = ego(); S smr = ego();
-		while (l < r) {
-			if (l & 1) sml = op(sml, d[l++]);
-			if (r & 1) smr = op(d[--r], smr);
-			l /= 2; r /= 2;
+	T query(int b, int e) { // query [b, e)
+		T ra = unit, rb = unit;
+		for (b += n, e += n; b < e; b /= 2, e /= 2) {
+			if (b % 2) ra = f(ra, s[b++]);
+			if (e % 2) rb = f(s[--e], rb);
 		}
-		return op(sml, smr);
-	}
-	void apply(int l, int r, F f) {
-		l += size; r += size;
-		int l2 = l, r2 = r;
-		dip check(push);
-		while (l < r) {
-			if (l & 1) fid(l++, f);
-			if (r & 1) fid(--r, f);
-			l /= 2; r /= 2;
-		}
-		l = l2; r = r2;
-		tip check(update);
+		return f(ra, rb);
 	}
 };
 
@@ -93,10 +59,24 @@ int main()
     cin.exceptions(cin.failbit);
     int n, q; cin >> n >> q;
     vi a(n);
-    map<int, set<int>> loc;
     rep(i, 0, n) {
         cin >> a[i];
+    }
+    vi c(a);
+    vector<array<int, 3>> qs(q);
+    rep(i, 0, q) {
+        rep(j, 0, 3) cin >> qs[i][j];
+        if(qs[i][0] == 1) c.pb(qs[i][2]);
+    }
+    sort(all(c));
+    c.erase(unique(all(c)), end(c));
+    vector<set<int>> loc(sz(c));
+    rep(i, 0, n) {
+        a[i] = lower_bound(all(c), a[i])-begin(c);
         loc[a[i]].insert(i);
+    }
+    rep(i, 0, q) {
+        if(qs[i][0] == 1) qs[i][2] = lower_bound(all(c), qs[i][2])-begin(c);
     }
     Tree tree(n);
     auto upd = [&](int u) -> void {
@@ -110,13 +90,14 @@ int main()
         if(it != end(loc[a[u]])) {
             right = *it;
         }
-        tree.set(u, S{left, right});
+        tree.update(u, S{left, right});
     };
     rep(i, 0, n) upd(i);
     rep(qid, 0, q) {
-        int t; cin >> t;
+        int t = qs[qid][0];
         if(t == 1) {
-            int i, v; cin >> i >> v; i--;
+            int i = qs[qid][1], v = qs[qid][2];
+            i--;
             vi upds;
             upds.pb(i);
             loc[a[i]].erase(i);
@@ -140,8 +121,8 @@ int main()
             loc[a[i]].insert(i);
             for(int idx : upds) upd(idx);
         } else {
-            int l, r; cin >> l >> r; l--;
-            S res = tree.prod(l, r);
+            int l = qs[qid][1], r = qs[qid][2]; l--;
+            S res = tree.query(l, r);
             if(res.f >= l || res.s < r) {
                 cout << "NO\n";
             } else cout << "YES\n";

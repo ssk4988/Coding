@@ -23,7 +23,21 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
-    
+    int nc; cin >> nc;
+    rep(cn, 0, nc) {
+        string x, y; cin >> x >> y;
+        int n = sz(x);
+        if(x < y) swap(x, y);
+        rep(i, 0, n) {
+            if(x[i] < y[i]) continue;
+            swap(x[i], y[i]);
+            bool bad = y > x;
+            if(bad) swap(x[i], y[i]);
+            
+        }
+        cout << x << "\n";
+        cout << y << "\n";
+    }
     
     return 0;
 }

@@ -23,6 +23,15 @@ int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
+    ld a, b; cin >> a >> b;
+    ld lo = 0, hi = 100;
+    rep(_, 0, 50) {
+        ld md = (lo+hi)/2;
+        ld val = exp(-a * md) + exp(-b * md);
+        if(val < 1) hi = md;
+        else lo = md;
+    }
+    cout << fixed << setprecision(10) << lo << "\n";
     
     
     return 0;

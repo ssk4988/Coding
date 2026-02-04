@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 #include <bits/extc++.h>
 using namespace std;
-
+ 
 using ll = long long;
 using ld = long double;
 using pi = pair<int, int>;
@@ -10,11 +10,11 @@ using pd = pair<ld, ld>;
 using vi = vector<int>;
 using vl = vector<ll>;
 using vd = vector<ld>;
-using vpi = vector<pi>;
+using vii = vector<pi>;
 using vpl = vector<pl>;
 using vpd = vector<pd>;
 using vvi = vector<vi>;
-
+ 
 #define f first
 #define s second
 #define mp make_pair
@@ -25,160 +25,85 @@ using vvi = vector<vi>;
 #define sz(x) (int)(x).size()
 #define rep(i, a, b) for (int i = a; i < (b); ++i)
 #define nL "\n"
-
-
-struct MinCostFlow4 {
-	struct Edge {
-		int u, v;
-		ll cap, cost;
-		Edge* rev;
-		Edge(int s, int e, ll cap, ll c):
-			u(s), v(e), cap(cap), cost(c), rev(nullptr) {}
+ 
+struct mcmf {
+	const ll inf = LLONG_MAX >> 2;
+	struct edge {
+		int v;
+		ll cap, flow, cost;
 	};
-	struct Node {
-		int id;
-		ll d;
-		Node(int i, ll dd): id(i), d(dd) {}
-		bool operator<(const Node& o) const { return d > o.d; }
-	};
-	ll INF1 = 1000000000;
-	ll INF2 = 100000000;
-	vector<vector<Edge*>> adj;
-	int s, t, mS, mT;
-	vector<Edge*> previous;
-	vector<ll> w, pi;
-	MinCostFlow4() {}
-	MinCostFlow4(int n) {
-		s = 0;
-		t = n++;
-		mS = n++;
-		mT = n++;
-		adj.resize(n);
+	int n;
+	vector<edge> edges;
+	vvi adj; vii par; vi seen;
+	vector<ll> dist, pi;
+	mcmf(int n): n(n), adj(n), par(n), seen(n), dist(n), pi(n) {}
+	void add_edge(int u, int v, ll cap, ll cost) {
+		int idx = sz(edges);
+		edges.push_back({v, cap, 0, cost});
+		edges.push_back({u, cap, cap, -cost});
+		adj[u].push_back(idx);
+		adj[v].push_back(idx ^ 1);
 	}
-	Edge* add(int a, int b, ll cap, ll c) {
-		Edge* e1 = new Edge(a, b, cap, c);
-		Edge* e2 = new Edge(b, a, 0, -c);
-		e1->rev = e2;
-		e2->rev = e1;
-		adj[a].pb(e1);
-		adj[b].pb(e2);
-		return e1;
-	}
-	pl minCostMaxFlowNegCycles() {
-		Edge* f = add(t, s, INF1, -INF2);
-		ll c = minCostFlow();
-		return {INF1 - f->cap, c + INF2 * (INF1 - f->cap)};
-	}
-	ll minCostFlow() {
-		ll res = 0;
-		vector<ll> val(sz(adj));
-		for (int i = 0; i < sz(adj); i++) {
-			for (Edge* e : adj[i]) {
-				if (e->cap > 0 && e->cost < 0) {
-					res += e->cap * e->cost;
-					val[e->u] -= e->cap, val[e->v] += e->cap;
-					e->rev->cap = e->cap;
-					e->cap = 0;
-				}
+	bool find_path(int s, int t) {
+		fill(all(dist), inf);
+		fill(all(seen), 0);
+		dist[s] = 0;
+		__gnu_pbds::priority_queue<pair<ll, int>> pq;
+		vector<decltype(pq)::point_iterator> its(n);
+		pq.push({0, s});
+		while(!pq.empty()) {
+			auto [d, cur] = pq.top(); pq.pop(); d *= -1;
+			seen[cur] = 1;
+			if(dist[cur] < d) continue;
+			for(int idx: adj[cur]) {
+				auto [nxt, cap, f, wt] = edges[idx];
+				ll nxtD = d + wt + pi[cur] - pi[nxt];
+				if(f >= cap || nxtD >= dist[nxt] || seen[nxt]) continue;
+				dist[nxt] = nxtD;
+				par[nxt] = {cur, idx};
+				if(its[nxt] == pq.end()) its[nxt] = pq.push({-nxtD, nxt});
+				else pq.modify(its[nxt], {-nxtD, nxt});
 			}
 		}
-		for (int i = 0; i < sz(val); i++)
-			if (val[i] > 0) add(mS, i, val[i], 0);
-			else if (val[i] < 0) add(i, mT, -val[i], 0);
-		// add(sink, source, INF1, 0);	// for min cost flow with source and sink
-		s = mS;
-		t = mT;
-		return res + minCostMaxFlow().second;
+		rep(i, 0, n) pi[i] = min(pi[i] + dist[i], inf);
+		return seen[t];
 	}
-	pl minCostMaxFlow() {
+	pair<ll, ll> calc(int s, int t) {
 		ll flow = 0, cost = 0;
-		getPotential();
-		while (findPath()) {
-			flow += w[t];
-			cost += update();
+		while(find_path(s, t)) {
+			ll f = inf;
+			for(int i, u, v = t; tie(u, i) = par[v], v != s; v = u)
+				f = min(f, edges[i].cap - edges[i].flow);
+			flow += f;
+			for(int i, u, v = t; tie(u, i) = par[v], v != s; v = u)
+				edges[i].flow += f, edges[i^1].flow -= f;
 		}
+		rep(i, 0, sz(edges)>>1)
+			cost += edges[i<<1].cost * edges[i<<1].flow;
+ 
 		return {flow, cost};
 	}
-	void getPotential() {
-		pi.assign(adj.size(), INF1);
-		pi[s] = 0;
-		for (int i = 0; i < sz(adj) - 1; i++) {
-			bool upd = false;
-			for (int j = 0; j < sz(adj); j++) {
-				for (Edge* e : adj[j]) {
-					if (e->cap > 0 && pi[e->u] + e->cost < pi[e->v]) {
-						pi[e->v] = pi[e->u] + e->cost;
-						upd = true;
-					}
-				}
-			}
-			if (!upd) break;
-		}
-	}
-	bool findPath() {
-		vector<ll> d(sz(adj), INF1);
-		d[s] = 0;
-		previous.assign(sz(adj), nullptr);
-		w.assign(sz(adj), INF1);
-		priority_queue<Node> pq;
-		pq.emplace(s, 0);
-		while (sz(pq)) {
-			Node node = pq.top();
-			pq.pop();
-			if (node.d == d[node.id]) {
-				for (Edge* e : adj[node.id]) {
-					ll nd = d[node.id] + e->cost + pi[e->u] - pi[e->v];
-					if (e->cap > 0 && nd < d[e->v]) {
-						d[e->v] = nd;
-						previous[e->v] = e;
-						w[e->v] = min(w[node.id], e->cap);
-						pq.emplace(e->v, nd);
-					}
-				}
-			}
-		}
-		for (int i = 0; i < sz(pi); i++) pi[i] += d[i];
-		return d[t] < INF1;
-	}
-	ll update() {
-		int v = t;
-		ll cur = 0;
-		while (previous[v] != nullptr) {
-			previous[v]->cap -= w[t];
-			previous[v]->rev->cap += w[t];
-			cur += w[t] * previous[v]->cost;
-			v = previous[v]->u;
-		}
-		return cur;
-	}
 };
-
+ 
 int main()
 {
     cin.tie(0)->sync_with_stdio(0);
     cin.exceptions(cin.failbit);
     int n, m, k;
     cin >> n >> m >> k;
-    vector<unordered_map<int, vpl>> graph(n);
-    // n = 1
-    // MCMF mcmf(n + 1);
-    MinCostFlow4 m4(n);
-    m4.add(n - 1, m4.t, k, 0);
+	mcmf g(n+1);
+	g.add_edge(n-1, n, k, 0);
     rep(i, 0, m)
     {
         int a, b, r, c;
         cin >> a >> b >> r >> c;
         a--, b--;
-        graph[a][b].pb({c, r});
-        // mcmf.addEdge(a, b, r, c);
-        m4.add(a, b, r, c);
+		g.add_edge(a, b, r, c);
     }
-    // mcmf.addEdge(n - 1, n, k, 0);
-    // pl ans = mcmf.maxflow(0, n);
-    pl ans = m4.minCostMaxFlow();
+    pl ans = g.calc(0, n);
     cout << (ans.f < k ? -1 : ans.s) << nL;
-
-
+ 
+ 
     
     return 0;
 }
