@@ -28,3 +28,9 @@ venv/
 
 node_modules/
 .env
+
+# ignore secret ocpc folder
+ocpc/
+
+# ignore CSES
+CSES/
