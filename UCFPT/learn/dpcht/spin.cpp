@@ -116,11 +116,29 @@ int main()
     int n; cin >> n;
     vector<P> pts(n);
     vector<P> hull;
+    set<P> seen;
+    int blackcnt = 0;
     rep(i, 0, n) {
         cin >> pts[i].x >> pts[i].y;
         int t; cin >> t;
-        if(t) hull.pb(pts[i]);
+        if(t) {
+            hull.pb(pts[i]);
+            blackcnt++;
+            seen.insert(pts[i]);
+        }
     }
+    if (sz(seen) == 1 && blackcnt > 1) {
+        int ans = 0;
+        P one = *seen.begin();
+        for (P p : pts) if (p == one) ans += 1;
+        cout << ans << "\n";
+        return 0;
+    }
+    else if (sz(seen) == 1) {
+        cout << "1\n";
+        return 0;
+    }
+    // assert(sz(seen) > 1 || blackcnt == 1);
     hull = convex_hull(hull);
     // for(auto p : hull) cerr << p.x << " " << p.y << endl;
     if(sz(hull) == 1) {
